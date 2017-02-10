@@ -121,6 +121,7 @@ GER_REPORT.tryPeep().peepSystem();
 ```javascript
 var customFn = function (){};
 customFn  = GER_REPORT.tryPeep().peepCustom(customFn );
+```
 
 
 
