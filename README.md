@@ -39,6 +39,8 @@ GER_REPORT.init({
   	onReported: function(){},     			// 当上报的时候回调。
   	ext: {}                               	// 扩展属性 Object object 上传一些非常规参数
 });
+```
+
 ##### 接口接收参数字段说明
 ```javascript
 	colNum:  		//错误列数
