@@ -6,9 +6,6 @@
 ```shell
 $ npm install ger
 ```
-```shell
-$ bower install https://github.com/gomeplusFED/GER.git
-```
 
 ## Docs
 [EN](./docs/en.md),[CN](./docs/cn.md)
