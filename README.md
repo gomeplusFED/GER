@@ -1,4 +1,4 @@
-#GRE -- gome error report 前端异常捕获与上报
+#GER -- gome error report 前端异常捕获与上报
 
 
 ## Author
@@ -7,7 +7,7 @@
 ## Install
 
 ```shell
-$ npm install gre
+$ npm install ger
 ```
 ```shell
 $ bower install https://github.com/gomeplusFED/GER.git
