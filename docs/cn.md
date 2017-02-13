@@ -4,7 +4,7 @@ var errorReport = new GER({
     url: 'xxxxxxxx'                         //错误上报接口地址
 });
 errorReport.set('delay',1000);
-errorReport.set('repeat',10);
+errorReport.get('delay');
 ```
 
 ##### 配置说明
@@ -16,7 +16,8 @@ errorReport.set('repeat',10);
     except: [/Script error/i],              // 忽略某个错误
     random: 1,                              // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
     repeat: 5,                              // 重复上报次数(对于同一个错误超过多少次不上报)
-    onReported: function(){}                // 当上报的时候回调
+    errorLSSign:'mx-error'                  // error错误数自增 0
+    maxErrorCookieNo:50                     // error错误数自增 最大的错
 }
 ```
 
@@ -40,19 +41,21 @@ GER是重写了 window.onerror 进行上报的，无需编写任何捕获错误�
 #####  手动上报
 ```javascript
 var errorReport = new GER();
-errorReport.report("error msg");
+errorReport.error("error msg");
 
-errorReport.report({
+errorReport.error({
     msg: "xx load error",                 // 错误信息
     target_url: "xxx.js",                 // 错误的来源js
     rowNo: 100,                           // 错误的行数
     colNo: 100,                           // 错误的列数
 });
 
+//errorReport.info,log,warn,errro;
+
 try{
     // something throw error ...
 }catch(error){
-    errorReport.report(e);
+    errorReport.error(e);
 }
 ```
 
@@ -109,5 +112,34 @@ var customFn = function (){};
 customFn  = new GER({
     tryPeep:true,
     peepCustom:[customFn]
+});
+```
+
+### 上报前后的处理
+```
+var myGER = new GER();
+myGER.on('beforeReport',function(err){
+    return false;
+});
+myGER.on('afterReport',function(err){
+    
+});
+myGER.on('error',function(err){
+    return false;
+});
+```
+### 包裹console
+```js
+new GER({
+    url:'xxx',
+    tryPeep:true,
+    peepConsole:{
+        error:{
+            url:'xxx'
+        },
+        log:{
+            url:'xxx'
+       }
+    }
 });
 ```

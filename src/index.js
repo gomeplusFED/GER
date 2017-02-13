@@ -1,2 +1,3 @@
-function GER() {}
-window.GER = GER;
+import core from './lib/core';
+
+export default core;

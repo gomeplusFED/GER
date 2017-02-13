@@ -4,6 +4,7 @@ var commonjs = require("rollup-plugin-commonjs");
 export default {
     entry: 'src/index.js',
     format: 'umd',
+    moduleName:'GER',
     plugins: [
         commonjs(),
         babel({
