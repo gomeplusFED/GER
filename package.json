@@ -9,7 +9,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/mocha/bin/mocha",
     "build":"./node_modules/rollup/bin/rollup -c rollup.config.js",
     "watch":"./node_modules/rollup/bin/rollup -c -w"
   },
