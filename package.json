@@ -1,0 +1,42 @@
+{
+  "name": "ger",
+  "version": "1.0.0",
+  "description": "gome error report js sdk",
+  "main": "dist/ger.js",
+  "directories": {
+    "doc": "docs",
+    "example": "example",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha",
+    "build":"./node_modules/rollup/bin/rollup -c rollup.config.js",
+    "watch":"./node_modules/rollup/bin/rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gomeplusFED/GER.git"
+  },
+  "keywords": [
+    "error",
+    "report"
+  ],
+  "author": "xiaojue,sucon0302,zdongh2016",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gomeplusFED/GER/issues"
+  },
+  "homepage": "https://github.com/gomeplusFED/GER#readme",
+  "devDependencies": {
+    "babel-plugin-transform-class-properties": "^6.18.0",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^5.0.5",
+    "rollup-watch": "^2.5.0"
+  }
+}
