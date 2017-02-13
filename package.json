@@ -12,17 +12,17 @@
     "pretest": "./node_modules/jshint/bin/jshint -c .jshintrc src",
     "test": "./node_modules/mocha/bin/mocha",
     "build": "./node_modules/rollup/bin/rollup -c rollup.config.js",
-    "beautify":"node ./scripts/beatufyjs.js src test",
+    "beautify": "node ./scripts/beatufyjs.js src test",
     "watch": "./node_modules/rollup/bin/rollup -c -w"
   },
-  "config":{
-    "pre-git":{
-      "pre-commit":[
-            "npm run pretest",
-            "npm run beautify",
-            "git addi ."
+  "config": {
+    "pre-git": {
+      "pre-commit": [
+        "npm run pretest",
+        "npm run beautify",
+        "git add ."
       ]
-    } 
+    }
   },
   "repository": {
     "type": "git",
@@ -46,6 +46,7 @@
     "chai": "^3.5.0",
     "jshint": "^2.9.4",
     "mocha": "^3.2.0",
+    "pre-git": "^3.13.0",
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^5.0.5",

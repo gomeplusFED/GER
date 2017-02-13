@@ -1,4 +1,2 @@
-function GER(options){
-
-            console.log(window);
-}
+function GER() {}
+window.GER = GER;
