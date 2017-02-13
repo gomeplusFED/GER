@@ -54,6 +54,6 @@
   },
   "dependencies":{
 
-    "rollup-watchewe": "^2.5.0"
+    "rollup-watch": "^20.5.0"
   }
 }
