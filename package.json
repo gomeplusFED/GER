@@ -1,0 +1,28 @@
+{
+  "name": "ger",
+  "version": "1.0.0",
+  "description": "gome error report js sdk",
+  "main": "dist/ger.js",
+  "directories": {
+    "doc": "docs",
+    "example": "example",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gomeplusFED/GER.git"
+  },
+  "keywords": [
+    "error",
+    "report"
+  ],
+  "author": "xiaojue,sucon0302,zdongh2016",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gomeplusFED/GER/issues"
+  },
+  "homepage": "https://github.com/gomeplusFED/GER#readme"
+}
