@@ -1,16 +1,16 @@
 class events {
 	addHandler () {
-		
-	};
+
+	}
 	on(){
 
-	};
+	}
 	off(){
 
-	};
+	}
 	trigger(){
 
-	};
+	}
 
 }
 

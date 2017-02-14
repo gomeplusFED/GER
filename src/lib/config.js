@@ -1,5 +1,5 @@
 
-export default  class () {
+ class config {
 
 	constructor ( options ){
 		this.config = {
@@ -16,29 +16,30 @@ export default  class () {
 		    peepJquery: false,
 		    peepConsole: true
 		};
-		Object.assign(_config, options);    /// this.config
-	};
+		Object.assign(this.config, options);    /// this.config
+	}
 	peepSystem(){
 
-	};
+	}
 	peepJquery(){
 
-	};
+	}
 	peepConsole(){
 
-	};
+	}
 	peepModule(){
 
-	};
+	}
 	peepCustom(){
-		
-	};
-	set (name, value) {
 
-	};
-	get (name) {
+	}
+	set () {
 
-	};
+	}
+	get () {
+
+	}
 
 }
 
+export default config;
