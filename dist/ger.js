@@ -10,7 +10,23 @@ var classCallCheck = function (instance, Constructor) {
   }
 };
 
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
 
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
 
 
 
@@ -54,19 +70,36 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
-var events = function events() {
-  classCallCheck(this, events);
-};
+var events = function () {
+	function events() {
+		classCallCheck(this, events);
+	}
+
+	createClass(events, [{
+		key: "addHandler",
+		value: function addHandler() {}
+	}, {
+		key: "on",
+		value: function on() {}
+	}, {
+		key: "off",
+		value: function off() {}
+	}, {
+		key: "trigger",
+		value: function trigger() {}
+	}]);
+	return events;
+}();
 
 var GER = function (_events) {
-  inherits(GER, _events);
+	inherits(GER, _events);
 
-  function GER() {
-    classCallCheck(this, GER);
-    return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).apply(this, arguments));
-  }
+	function GER() {
+		classCallCheck(this, GER);
+		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).apply(this, arguments));
+	}
 
-  return GER;
+	return GER;
 }(events);
 
 return GER;
