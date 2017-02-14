@@ -55,7 +55,7 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 var events = function events() {
-    classCallCheck(this, events);
+  classCallCheck(this, events);
 };
 
 var GER = function (_events) {
