@@ -13,7 +13,9 @@
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register",
     "build": "./node_modules/.bin/rollup -c rollup.config.js",
     "beautify": "node ./scripts/beatufyjs.js src test",
-    "watch": "./node_modules/.bin/rollup -c -w"
+    "watch": "./node_modules/.bin/rollup -c -w",
+    "server": "http-server -a 0.0.0.0 -p 8080 -s",
+    "serverwatch": "npm-run-all --parallel server watch"
   },
   "config": {
     "pre-git": {
@@ -44,8 +46,10 @@
     "babel-preset-es2015-rollup": "^3.0.0",
     "babel-preset-stage-0": "^6.16.0",
     "chai": "^3.5.0",
+    "http-server": "^0.9.0",
     "jshint": "^2.9.4",
     "mocha": "^3.2.0",
+    "npm-run-all": "^4.0.1",
     "pre-git": "^3.13.0",
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.7.1",
