@@ -3,51 +3,51 @@
 
 class Report {
 
-	constructor() {
-		this.errorQueue = [];
+    constructor() {
+        this.errorQueue = [];
     }
 
     // 手动上报
-    error () {
-    	/*if ( typeDecide( v, 'String' )) {
+    error() {
+        /*if ( typeDecide( v, 'String' )) {
 
-    	} else if ( typeDecide( v )) {
+        } else if ( typeDecide( v )) {
 
-    	}*/
+        }*/
     }
 
     // 发送
-    send () {
+    send() {
 
     }
 
     // push错误到pool
-    carryError () {
+    carryError() {
 
     }
 
     // 延迟上报
-    delayReport () {
+    delayReport() {
 
     }
 
     // info
-    info () {
+    info() {
 
     }
 
     // log
-    log () {
+    log() {
 
     }
 
     // warn
-    warn () {
+    warn() {
 
     }
 
     // debug
-    debug () {
+    debug() {
 
     }
 }
