@@ -1,6 +1,6 @@
 class events {
 	addHandler () {
-
+		
 	}
 	on(){
 
@@ -11,7 +11,7 @@ class events {
 	trigger(){
 
 	}
-
+	
 }
 
 export default events;

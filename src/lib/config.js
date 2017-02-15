@@ -18,21 +18,6 @@
 		};
 		Object.assign(this.config, options);    /// this.config
 	}
-	peepSystem(){
-
-	}
-	peepJquery(){
-
-	}
-	peepConsole(){
-
-	}
-	peepModule(){
-
-	}
-	peepCustom(){
-
-	}
 	set () {
 
 	}
