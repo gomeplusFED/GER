@@ -1,7 +1,11 @@
-import events from './events';
+
+import Report from './Report';
 import utils from './utils';
-class GER extends events {
-    constructor() {
+
+
+class GER extends Report {
+    constructor(options) {
+        super(options);
         super();
     }
     rewriteError() {
@@ -41,5 +45,7 @@ class GER extends events {
     }
 
 }
+
+
 
 export default GER;
