@@ -1,5 +1,5 @@
 'use strict';
 var error_report = new Ger();
 
-error_report.test();
+error_report.rewriteError();
 sds

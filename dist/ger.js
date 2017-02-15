@@ -71,24 +71,24 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 var events = function () {
-	function events() {
-		classCallCheck(this, events);
-	}
+    function events() {
+        classCallCheck(this, events);
+    }
 
-	createClass(events, [{
-		key: "addHandler",
-		value: function addHandler() {}
-	}, {
-		key: "on",
-		value: function on() {}
-	}, {
-		key: "off",
-		value: function off() {}
-	}, {
-		key: "trigger",
-		value: function trigger() {}
-	}]);
-	return events;
+    createClass(events, [{
+        key: "addHandler",
+        value: function addHandler() {}
+    }, {
+        key: "on",
+        value: function on() {}
+    }, {
+        key: "off",
+        value: function off() {}
+    }, {
+        key: "trigger",
+        value: function trigger() {}
+    }]);
+    return events;
 }();
 
 var GER = function (_events) {
@@ -100,10 +100,14 @@ var GER = function (_events) {
 	}
 
 	createClass(GER, [{
-		key: 'test',
-		value: function test() {
+		key: 'rewriteError',
+		value: function rewriteError() {
 			window.onerror = function (msg, url, line, col, error) {
-				var newMsg = msg;
+				var reportMsg = msg;
+				if (error.stack && error) {
+					console.log(reportMsg);
+				}
+				//console.log(newMsg);
 				console.log(arguments);
 			};
 		}

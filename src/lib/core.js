@@ -4,11 +4,15 @@ class GER extends events {
 	constructor(){
 		super();
 	}
-	test(){
+	rewriteError(){
 		window.onerror= function(msg, url, line, col, error){
-			var newMsg = msg;
-			console.log(arguments)
-		}
+			var reportMsg = msg;
+			if(error.stack&&error){
+				console.log(reportMsg);
+			}
+			//console.log(newMsg);
+			console.log(arguments);
+		};
 	}
 }
 
