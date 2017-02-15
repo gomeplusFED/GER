@@ -91,28 +91,59 @@ var events = function () {
     return events;
 }();
 
+var utils = {
+    typeDecide: function typeDecide(o, type) {
+        return Object.prototype.toString.call(o) === "[object " + (type || "Object") + "]";
+    }
+};
+
 var GER = function (_events) {
-	inherits(GER, _events);
+    inherits(GER, _events);
 
-	function GER() {
-		classCallCheck(this, GER);
-		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
-	}
+    function GER() {
+        classCallCheck(this, GER);
+        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
+    }
 
-	createClass(GER, [{
-		key: 'rewriteError',
-		value: function rewriteError() {
-			window.onerror = function (msg, url, line, col, error) {
-				var reportMsg = msg;
-				if (error.stack && error) {
-					console.log(reportMsg);
-				}
-				//console.log(newMsg);
-				console.log(arguments);
-			};
-		}
-	}]);
-	return GER;
+    createClass(GER, [{
+        key: 'rewriteError',
+        value: function rewriteError() {
+            var me = this;
+            window.onerror = function (msg, url, line, col, error) {
+
+                var reportMsg = msg;
+                if (error.stack && error) {
+                    reportMsg = me.handleErrorStack(error);
+                }
+                if (utils.typeDecide(reportMsg, "Event")) {
+                    reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
+                }
+                /*me.carryError({
+                	msg: reportMsg,
+                rolNum: line,
+                colNum: col,
+                targetUrl: url
+                });
+                me.send();
+                me.trigger('afterReport');
+                */
+            };
+        }
+        // 处理onerror返回的error.stack
+
+    }, {
+        key: 'handleErrorStack',
+        value: function handleErrorStack(error) {
+            var stackMsg = error.stack;
+            var errorMsg = error.toString();
+            if (stackMsg.indexOf(errorMsg) === -1) {
+                stackMsg += '@';
+                stackMsg += errorMsg;
+            }
+            return stackMsg;
+        }
+    }]);
+    return GER;
 }(events);
 
 window.Ger = GER;
