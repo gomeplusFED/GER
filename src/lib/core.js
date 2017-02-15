@@ -1,8 +1,9 @@
-import events from './events';
+import Report from './Report';
 
-class GER extends events {
-    constructor() {
-        super();
+
+class GER extends Report {
+    constructor(options) {
+        super(options);
     }
     rewriteError() {
         window.onerror = function ( msg, url, line, col, error ) {
@@ -15,5 +16,7 @@ class GER extends events {
         };
     }
 }
+
+
 
 export default GER;
