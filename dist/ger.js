@@ -113,8 +113,6 @@ var Config = function () {
  * @date 20170215
  */
 //import delay from './delay';
-var mergeTimeout = null;
-var delayTimes = 1000;
 var Report = function (_Config) {
   inherits(Report, _Config);
 
@@ -124,6 +122,7 @@ var Report = function (_Config) {
     var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
 
     _this.errorQueue = [];
+    _this.mergeTimeout = null;
     return _this;
   }
   // 手动上报
@@ -132,6 +131,7 @@ var Report = function (_Config) {
   createClass(Report, [{
     key: "error",
     value: function error(msg) {
+      var that = this;
       if (!msg) {
         console.log('error方法内 msg 参数为空');
         return;
@@ -144,56 +144,67 @@ var Report = function (_Config) {
         errorMsg = msg;
         errorMsg.level = 5;
       }
-      this.carryError(errorMsg);
+      that.carryError(errorMsg);
+      that.send();
     }
 
     // 发送
 
   }, {
     key: "send",
-    value: function send(mergeReport, isNowReport) {
+    value: function send(isNowReport) {
       var that = this;
       var fn = function fn() {
         var parames = '';
-        if (mergeReport) {
+        if (that.config.mergeReport) {
           // 合并上报
           console.log('合并上报');
           for (var i = 0; i < that.errorQueue.length; i++) {
             var obj = that.errorQueue[i];
-            for (var name in obj) {
-              parames += name + '=' + obj[name] + '&';
+            if (obj) {
+              for (var name in obj) {
+                if (obj.hasOwnProperty(name)) {
+                  parames += name + '=' + obj[name] + '&';
+                }
+              }
             }
-            if (i != that.errorQueue.length - 1) {
-              parames += '###';
-            }
+            parames += '###';
+            /*if( i != that.errorQueue.length-1 ){
+            	parames += '###';
+            }*/
           }
+          /*that.errorQueue.forEach( function (){
+          		});*/
         } else {
           // 不合并上报
           console.log('不合并上报');
-          var obj = that.errorQueue[0];
-          for (var _name in obj) {
-            parames += _name + '=' + obj[_name] + '&';
+          if (that.errorQueue.length) {
+            var _obj = that.errorQueue[0];
+            for (var _name in _obj) {
+              if (_obj.hasOwnProperty(_name)) {
+                parames += _name + '=' + _obj[_name] + '&';
+              }
+            }
           }
         }
-        console.log(that.config.url);
         that.config.url += '?' + parames;
         var oImg = new Image();
         oImg.src = that.config.url;
       };
-      if (!isNowReport) {
+      if (isNowReport) {
         // 延迟上报
-        mergeTimeout = setTimeout(fn, delayTimes);
+        that.mergeTimeout = setTimeout(fn, that.config.delay);
       } else {
         // 现在上报
         fn();
       }
     }
-
     // push错误到pool
 
   }, {
     key: "carryError",
     value: function carryError(error) {
+      //let that = this;
       if (!error) {
         console.log('carryError方法内 error 参数为空');
         return;
@@ -239,6 +250,7 @@ var Report = function (_Config) {
   }, {
     key: "handleMsg",
     value: function handleMsg(msg, type, level) {
+      //let that = this;
       if (!msg) {
         console.log(type + '方法内 msg 参数为空');
         return;
@@ -263,20 +275,48 @@ var GER = function (_Report) {
 
     function GER(options) {
         classCallCheck(this, GER);
-        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+
+        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+
+        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
     }
 
     createClass(GER, [{
         key: 'rewriteError',
         value: function rewriteError() {
+            var me = this;
             window.onerror = function (msg, url, line, col, error) {
+
                 var reportMsg = msg;
                 if (error.stack && error) {
-                    console.log(reportMsg);
+                    reportMsg = me.handleErrorStack(error);
                 }
-                //console.log(newMsg);
-                console.log(arguments);
+                if (utils.typeDecide(reportMsg, "Event")) {
+                    reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
+                }
+                /*me.carryError({
+                	msg: reportMsg,
+                rolNum: line,
+                colNum: col,
+                targetUrl: url
+                });
+                me.send();
+                me.trigger('afterReport');
+                */
             };
+        }
+        // 处理onerror返回的error.stack
+
+    }, {
+        key: 'handleErrorStack',
+        value: function handleErrorStack(error) {
+            var stackMsg = error.stack;
+            var errorMsg = error.toString();
+            if (stackMsg.indexOf(errorMsg) === -1) {
+                stackMsg += '@';
+                stackMsg += errorMsg;
+            }
+            return stackMsg;
         }
     }]);
     return GER;
