@@ -8,25 +8,28 @@ import utils from "./utils";
 
 class Report {
 
-	constructor() {
-		this.errorQueue = [];
+    constructor() {
+        this.errorQueue = [];
     }
 
     // 手动上报
+
     error ( msg ) {
     	if ( utils.typeDecide( msg, 'String' )) {
     		console.log(1);
     	} else if ( utils.typeDecide( msg )) {
     		console.log(1);
     	}
+
     }
 
     // 发送
-    send () {
+    send() {
 
     }
 
     // push错误到pool
+
     carryError ( error ) {
     	if( !error ) {
     		console.log('carryError方法内 error 参数为空');
@@ -34,14 +37,16 @@ class Report {
     	}
     	// 拿到onerror的参数 放数组中
     	this.errorQueue.push( error );
+
     }
 
     // 延迟上报
-    delayReport () {
+    delayReport() {
 
     }
 
     // info
+
     info ( msg ) {
     	this.handleMsg ( msg, 'info', 1 );
     }

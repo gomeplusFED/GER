@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
-	(global.GER = factory());
+	(factory());
 }(this, (function () { 'use strict';
 
 var classCallCheck = function (instance, Constructor) {
@@ -71,24 +71,24 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 var events = function () {
-	function events() {
-		classCallCheck(this, events);
-	}
+    function events() {
+        classCallCheck(this, events);
+    }
 
-	createClass(events, [{
-		key: "addHandler",
-		value: function addHandler() {}
-	}, {
-		key: "on",
-		value: function on() {}
-	}, {
-		key: "off",
-		value: function off() {}
-	}, {
-		key: "trigger",
-		value: function trigger() {}
-	}]);
-	return events;
+    createClass(events, [{
+        key: "addHandler",
+        value: function addHandler() {}
+    }, {
+        key: "on",
+        value: function on() {}
+    }, {
+        key: "off",
+        value: function off() {}
+    }, {
+        key: "trigger",
+        value: function trigger() {}
+    }]);
+    return events;
 }();
 
 var GER = function (_events) {
@@ -96,12 +96,25 @@ var GER = function (_events) {
 
 	function GER() {
 		classCallCheck(this, GER);
-		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).apply(this, arguments));
+		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
 	}
 
+	createClass(GER, [{
+		key: 'rewriteError',
+		value: function rewriteError() {
+			window.onerror = function (msg, url, line, col, error) {
+				var reportMsg = msg;
+				if (error.stack && error) {
+					console.log(reportMsg);
+				}
+				//console.log(newMsg);
+				console.log(arguments);
+			};
+		}
+	}]);
 	return GER;
 }(events);
 
-return GER;
+window.Ger = GER;
 
 })));
