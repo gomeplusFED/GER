@@ -1,14 +1,13 @@
 class events {
-	addHandler () {
-		
-	}
-	on(){
+    addHandler() {
 
-	}
-	off(){
+    }
+    on() {
+    }
+    off() {
 
-	}
-	trigger(){
+    }
+    trigger() {
 
 	}
 	

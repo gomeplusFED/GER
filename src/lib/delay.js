@@ -1,8 +1,8 @@
 class delay {
-	
-	delayReport(){
 
-	}
+    delayReport() {
+
+    }
 
 }
 

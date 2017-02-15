@@ -1,4 +1,5 @@
 
+
  class config {
 
 	constructor ( options ){
