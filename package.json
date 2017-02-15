@@ -13,7 +13,7 @@
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register",
     "build": "./node_modules/.bin/rollup -c rollup.config.js",
     "beautify": "node ./scripts/beatufyjs.js src test",
-    "watch": "./node_modules/rollup/bin/rollup -c -w"
+    "watch": "./node_modules/.bin/rollup -c -w"
   },
   "config": {
     "pre-git": {

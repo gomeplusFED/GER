@@ -2,9 +2,7 @@ class events {
     addHandler() {
 
     }
-    on() {
-
-    }
+    on() {}
     off() {
 
     }

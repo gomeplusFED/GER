@@ -1,8 +1,3 @@
-/**
- * @author 
- * @fileoverview
- * @date 20170215
- */
 class config {
 
     constructor( options ) {
@@ -21,21 +16,6 @@ class config {
             peepConsole: true
         };
         Object.assign( this.config, options ); /// this.config
-    }
-    peepSystem() {
-
-    }
-    peepJquery() {
-
-    }
-    peepConsole() {
-
-    }
-    peepModule() {
-
-    }
-    peepCustom() {
-
     }
     set() {
 

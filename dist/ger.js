@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
-	(global.GER = factory());
+	(factory());
 }(this, (function () { 'use strict';
 
 var classCallCheck = function (instance, Constructor) {
@@ -96,12 +96,21 @@ var GER = function (_events) {
 
 	function GER() {
 		classCallCheck(this, GER);
-		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).apply(this, arguments));
+		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
 	}
 
+	createClass(GER, [{
+		key: 'test',
+		value: function test() {
+			window.onerror = function (msg, url, line, col, error) {
+				var newMsg = msg;
+				console.log(arguments);
+			};
+		}
+	}]);
 	return GER;
 }(events);
 
-return GER;
+window.Ger = GER;
 
 })));
