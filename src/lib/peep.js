@@ -5,10 +5,11 @@
  */
 //import LocalStorage from './localStorage';
 
+import Config from "./Config";
 
-class Peep/* extends LocalStorage*/ {
+class Peep extends Config {
     constructor(options) {
-        //super(options);
+        super(options);
         console.log(options);
         let that = this;
         window.onload = function (){

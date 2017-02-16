@@ -3,11 +3,15 @@
  * @fileoverview localStorage
  * @date 2017/02/16
  */
-class LocalStorageClass {
+
+import Config from "./config";
+
+class LocalStorageClass extends Config {
 	constructor( options ) {
+		super( options );
 		console.log(options);
 		this.options = {
-			expires : 60*24*3600
+			expires : 60*24*3600,
 			//domain : this.config.errorLSSign
 		};
 
@@ -26,7 +30,7 @@ class LocalStorageClass {
 	}
 
 	//得到元素值 获取元素值 若不存在则返回 null
-	getItem( key ){       
+	getItem( key ){
 		let i = this.findItem(key);
 		if(!i){
 			let array = document.cookie.split(';');           
@@ -49,15 +53,15 @@ class LocalStorageClass {
 	//重新设置元素
 	setItem(key,value){
 		//let i = this.findItem(key);
-		document.cookie=key+'='+value;
+		document.cookie = key + '=' + value;
 	}
 
 	//清除cookie 参数一个或多一
 	clear(){
-		for(let cl =0 ;cl<arguments.length;cl++){
+		for(let i =0 ; i < arguments.length; i ++){
 			let date = new Date();
 			date.setTime(date.getTime() - 100);
-			document.cookie =arguments[cl] +"=a; expires=" + date.toGMTString();
+			document.cookie = arguments[i] + "=a; expires=" + date.toGMTString();
 		}
 	}
 	

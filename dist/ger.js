@@ -101,126 +101,33 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
- * @author suman
- * @fileoverview localStorage
- * @date 2017/02/16
- */
-/*class localStorage {
-	constructor () {
-		let localStorage = new localStorageClass();
-		localStorage.init();
-	}
-    setLocalStorage() {
-    	
-    }
-
-}
-*/
-var LocalStorageClass = function () {
-	function LocalStorageClass(options) {
-		classCallCheck(this, LocalStorageClass);
-
-		console.log(options);
-		this.options = {
-			expires: 60 * 24 * 3600
-			//domain : this.config.errorLSSign
-		};
-
-		var date = new Date();
-		date.setTime(date.getTime() + 60 * 24 * 3600);
-		this.setItem('expires', date.toGMTString());
-	}
-	//内部函数 参数说明(key) 检查key是否存在
-
-
-	createClass(LocalStorageClass, [{
-		key: 'findItem',
-		value: function findItem(key) {
-			var bool = document.cookie.indexOf(key);
-			if (bool < 0) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		//得到元素值 获取元素值 若不存在则返回 null
-
-	}, {
-		key: 'getItem',
-		value: function getItem(key) {
-			var i = this.findItem(key);
-			if (!i) {
-				var array = document.cookie.split(';');
-				for (var j = 0; j < array.length; j++) {
-					var arraySplit = array[j];
-					if (arraySplit.indexOf(key) > -1) {
-						var getValue = array[j].split('=');
-						//将 getValue[0] trim删除两端空格
-						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-						if (getValue[0] == key) {
-							return getValue[1];
-						} else {
-							return 'null';
-						}
-					}
-				}
-			}
-		}
-
-		//重新设置元素
-
-	}, {
-		key: 'setItem',
-		value: function setItem(key, value) {
-			//let i = this.findItem(key);
-			document.cookie = key + '=' + value;
-		}
-
-		//清除cookie 参数一个或多一
-
-	}, {
-		key: 'clear',
-		value: function clear() {
-			for (var cl = 0; cl < arguments.length; cl++) {
-				var date = new Date();
-				date.setTime(date.getTime() - 100);
-				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
-			}
-		}
-	}, {
-		key: 'localStorageHandle',
-		value: function localStorageHandle(cb) {
-			var callback = cb || function () {};
-			this.localStorage = localStorage !== undefined ? localStorage : this;
-			callback.call(this, this.localStorage);
-		}
-	}]);
-	return LocalStorageClass;
-}();
-
-/**
  * @author  zdongh2016
  * @fileoverview  Peep
  * @date 2017/02/16
  */
-var Peep /* extends LocalStorage*/ = function () {
+//import LocalStorage from './localStorage';
+
+var Peep = function (_Config) {
+    inherits(Peep, _Config);
+
     function Peep(options) {
         classCallCheck(this, Peep);
 
-        //super(options);
+        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
+
         console.log(options);
-        var that = this;
+        var that = _this;
         window.onload = function () {
             that.peep();
         };
 
         //判断加载完成   
         // window.onload之后再次设置定时器判断
+        return _this;
     }
 
     createClass(Peep, [{
-        key: 'peep',
+        key: "peep",
         value: function peep() {
             if (this.config.tryPeep) {
                 this.config.peepSystem && this.peepSystem();
@@ -234,13 +141,13 @@ var Peep /* extends LocalStorage*/ = function () {
         // 劫持原生js
 
     }, {
-        key: 'peepSystem',
+        key: "peepSystem",
         value: function peepSystem() {}
 
         // 劫持jquery
 
     }, {
-        key: 'peepJquery',
+        key: "peepJquery",
         value: function peepJquery() {}
         /*
         // 保存之前的$.ajax
@@ -268,23 +175,23 @@ var Peep /* extends LocalStorage*/ = function () {
         // 劫持console
 
     }, {
-        key: 'peepConsole',
+        key: "peepConsole",
         value: function peepConsole() {}
 
         // 劫持seajs
 
     }, {
-        key: 'peepModule',
+        key: "peepModule",
         value: function peepModule() {}
 
         // 劫持自定义方法
 
     }, {
-        key: 'peepCustom',
+        key: "peepCustom",
         value: function peepCustom() {}
     }]);
     return Peep;
-}();
+}(Config);
 
 /**
  * @author  zdongh2016
