@@ -92,27 +92,27 @@ var events = function () {
 }();
 
 var GER = function (_events) {
-	inherits(GER, _events);
+    inherits(GER, _events);
 
-	function GER() {
-		classCallCheck(this, GER);
-		return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
-	}
+    function GER() {
+        classCallCheck(this, GER);
+        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
+    }
 
-	createClass(GER, [{
-		key: 'rewriteError',
-		value: function rewriteError() {
-			window.onerror = function (msg, url, line, col, error) {
-				var reportMsg = msg;
-				if (error.stack && error) {
-					console.log(reportMsg);
-				}
-				//console.log(newMsg);
-				console.log(arguments);
-			};
-		}
-	}]);
-	return GER;
+    createClass(GER, [{
+        key: 'rewriteError',
+        value: function rewriteError() {
+            window.onerror = function (msg, url, line, col, error) {
+                var reportMsg = msg;
+                if (error.stack && error) {
+                    console.log(reportMsg);
+                }
+                //console.log(newMsg);
+                console.log(arguments);
+            };
+        }
+    }]);
+    return GER;
 }(events);
 
 window.Ger = GER;
