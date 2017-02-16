@@ -22,6 +22,7 @@ class Events {
                 this.handlers[event][i]();
             }.bind(this));
         }
+        return this.handlers[event] !== undefined;
     }
 
 }

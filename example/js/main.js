@@ -5,14 +5,10 @@ var error_report = new Ger({
 	random : 1
 });
 
-try{
-	aaa
-}catch(e){
-	error_report.log('logslogs');
-}
 //error_report.info('111111111');
 
 //error_report.on();
-error_report.on('afterReport',function(){
-	console.log(111111);
-});
+/*error_report.on('error',function(){
+	console.log(234546576879)
+});*/
+assada

@@ -10,10 +10,13 @@ import utils from './utils';
 class GER extends Report {
     constructor( options ) {
         super( options );
+        this.rewriteError();
     }
     rewriteError() {
         window.onerror = ( msg, url, line, col, error ) => {
-
+            if( this.trigger('error') ){
+                return false;
+            }
             var reportMsg = msg;
             if ( error.stack && error ) {
                 reportMsg = this.handleErrorStack( error );
@@ -30,9 +33,7 @@ class GER extends Report {
                 targetUrl: url
             } );
             this.send();
-            //me.trigger('afterReport');
-
-
+            return true;
         };
     }
     // 处理onerror返回的error.stack

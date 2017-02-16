@@ -122,6 +122,7 @@ var Events = function () {
                     this.handlers[event][i]();
                 }.bind(this));
             }
+            return this.handlers[event] !== undefined;
         }
     }]);
     return Events;
@@ -192,7 +193,7 @@ var Report = function (_Config) {
         _this.url = _this.config.url;
         _this.srcs = [];
 
-        ['info', 'log', 'warn', 'debug', 'error'].forEach(function (type, index) {
+        ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
             var _this2 = this;
 
             this[type] = function (msg) {
@@ -211,50 +212,54 @@ var Report = function (_Config) {
             //this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
             return this.repeatList[repeatName] <= this.config.repeat;
         }
+    }, {
+        key: "report",
+        value: function report(cb) {
+            var parames = '';
+            var queue = this.errorQueue;
+
+            if (this.config.mergeReport) {
+                // 合并上报
+                console.log('合并上报');
+                parames = queue.map(function (obj) {
+                    return utils.serializeObj(obj);
+                }).join('|');
+            } else {
+                // 不合并上报
+                console.log('不合并上报');
+                if (queue.length) {
+                    var _obj = queue[0];
+                    parames = utils.serializeObj(_obj);
+                }
+            }
+            this.url += '?' + parames;
+            var oImg = new Image();
+            oImg.onload = function () {
+                queue = [];
+                if (cb) {
+                    cb.call(this);
+                }
+                this.trigger('afterReport');
+            }.bind(this);
+            oImg.src = this.url;
+            this.srcs.push(oImg.src);
+            console.log(this.srcs);
+        }
         // 发送
 
     }, {
         key: "send",
         value: function send(isNowReport, cb) {
-            var _this3 = this;
-
-            var report = function report() {
-                var parames = '';
-                var queue = _this3.errorQueue;
-
-                if (_this3.config.mergeReport) {
-                    // 合并上报
-                    console.log('合并上报');
-                    parames = queue.map(function (obj) {
-                        return utils.serializeObj(obj);
-                    }).join('|');
-                } else {
-                    // 不合并上报
-                    console.log('不合并上报');
-                    if (queue.length) {
-                        var obj = queue[0];
-                        parames = utils.serializeObj(obj);
-                    }
-                }
-                _this3.url += '?' + parames;
-                var oImg = new Image();
-                oImg.onload = function () {
-                    queue = [];
-                    if (cb) {
-                        cb.call(_this3);
-                    }
-                };
-                oImg.src = _this3.url;
-                _this3.srcs.push(oImg.src);
-                console.log(_this3.srcs);
-            };
+            this.trigger('beforeReport');
 
             if (isNowReport) {
                 // 延迟上报
-                this.mergeTimeout = setTimeout(report, this.config.delay);
+                this.mergeTimeout = setTimeout(function () {
+                    this.report(cb);
+                }.bind(this), this.config.delay);
             } else {
                 // 现在上报
-                report();
+                this.report(cb);
             }
         }
         // push错误到pool
@@ -297,6 +302,18 @@ var Report = function (_Config) {
     return Report;
 }(Config);
 
+var obj = {
+    'a': "1",
+    'b': "2"
+};
+var str = '{';
+str += Object.keys(obj).map(function (k) {
+    var ksep = '"';
+    var vsep = typeof obj[k] === 'number' ? '' : ksep;
+    return ksep + k + ksep + ':' + vsep + obj[k] + vsep;
+}).join(',') + '}';
+console.log(str);
+
 /**
  * @author  zdongh2016
  * @fileoverview GER
@@ -307,7 +324,11 @@ var GER = function (_Report) {
 
     function GER(options) {
         classCallCheck(this, GER);
-        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+
+        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+
+        _this.rewriteError();
+        return _this;
     }
 
     createClass(GER, [{
@@ -316,7 +337,9 @@ var GER = function (_Report) {
             var _this2 = this;
 
             window.onerror = function (msg, url, line, col, error) {
-
+                if (_this2.trigger('error')) {
+                    return false;
+                }
                 var reportMsg = msg;
                 if (error.stack && error) {
                     reportMsg = _this2.handleErrorStack(error);
@@ -331,8 +354,7 @@ var GER = function (_Report) {
                     targetUrl: url
                 });
                 _this2.send();
-                //me.trigger('afterReport');
-
+                return true;
             };
         }
         // 处理onerror返回的error.stack
