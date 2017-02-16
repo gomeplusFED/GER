@@ -26,14 +26,14 @@ errorReport.get('delay');
     colNum:         //错误列数
     rowNum:         //错误行数
     msg:            //错误信息
-    target_url      //错误文件地址
-    user_agent      //useragent
-    server_ip       //服务器ip
-    server_port     //服务器端口
-    current_url     //错误页面url
+    targetUrl      //错误文件地址
+    userAgent      //useragent
+    serverIp       //服务器ip
+    serverPort     //服务器端口
+    currentUrl     //错误页面url
     timestamp       //错误发生时间戳
-    project_type    //错误发生终端 （手机/pc）
-    referer_url     //引用
+    projectType    //错误发生终端 （手机/pc）
+    refererUrl     //引用
     ext             // 扩展属性 Object object 上传一些非常规参数
 ```
 GER是重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码
@@ -45,7 +45,7 @@ errorReport.error("error msg");
 
 errorReport.error({
     msg: "xx load error",                 // 错误信息
-    target_url: "xxx.js",                 // 错误的来源js
+    targetUrl: "xxx.js",                 // 错误的来源js
     rowNo: 100,                           // 错误的行数
     colNo: 100,                           // 错误的列数
 });
@@ -65,7 +65,7 @@ errorReport.delayReport("error msg");
 
 errorReport.delayReport({
     msg: "xx load error",                // 错误信息
-    target_url: "xxx.js",                // 错误的来源js
+    targetUrl: "xxx.js",                // 错误的来源js
     rowNo: 100,                          // 错误的行数
     colNo: 100,                          // 错误的列数
 });
