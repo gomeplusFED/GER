@@ -1,6 +1,13 @@
-class Config {
+/**
+ * @author  zdongh2016
+ * @fileoverview config
+ * @date 2017/02/16
+ */
+import Events from './events';
+class Config extends Events{
 
     constructor( options ) {
+        super();
         this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）

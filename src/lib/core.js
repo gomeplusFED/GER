@@ -1,4 +1,8 @@
-
+/**
+ * @author  zdongh2016
+ * @fileoverview GER
+ * @date 2017/02/15
+ */
 import Report from './Report';
 import utils from './utils';
 

@@ -83,11 +83,57 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
-var Config = function () {
+/**
+ * @author  zdongh2016
+ * @fileoverview
+ * @date 2017/02/16
+ */
+var Events = function () {
+    function Events() {
+        classCallCheck(this, Events);
+
+        this.handlers = {};
+    }
+
+    createClass(Events, [{
+        key: "on",
+        value: function on(type, handler) {
+            if (typeof type === "string" && typeof handler === "function") {
+                this.handlers[type] = typeof this.handlers[type] === "undefined" ? [] : this.handlers[type];
+                this.handlers[type].push(handler);
+            }
+        }
+    }, {
+        key: "off",
+        value: function off() {}
+    }, {
+        key: "trigger",
+        value: function trigger(event) {
+            if (this.handlers[event] instanceof Array) {
+                var handlers = this.handlers[event];
+                handlers.forEach(function (v, i) {
+                    handlers[i]();
+                });
+            }
+        }
+    }]);
+    return Events;
+}();
+
+/**
+ * @author  zdongh2016
+ * @fileoverview config
+ * @date 2017/02/16
+ */
+var Config = function (_Events) {
+    inherits(Config, _Events);
+
     function Config(options) {
         classCallCheck(this, Config);
 
-        this.config = {
+        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this));
+
+        _this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
             url: "ewewe", // 指定错误上报地址
@@ -101,7 +147,8 @@ var Config = function () {
             peepJquery: false,
             peepConsole: true
         };
-        Object.assign(this.config, options); /// this.config
+        Object.assign(_this.config, options); /// this.config
+        return _this;
     }
 
     createClass(Config, [{
@@ -116,7 +163,7 @@ var Config = function () {
         }
     }]);
     return Config;
-}();
+}(Events);
 
 /**
  * @author suman
@@ -220,6 +267,11 @@ var Report = function (_Config) {
     return Report;
 }(Config);
 
+/**
+ * @author  zdongh2016
+ * @fileoverview GER
+ * @date 2017/02/15
+ */
 var GER = function (_Report) {
     inherits(GER, _Report);
 
