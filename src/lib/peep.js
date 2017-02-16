@@ -3,15 +3,18 @@
  * @fileoverview  Peep
  * @date 2017/02/16
  */
-import LocalStorageClass from './localstorage';
+
+//import LocalStorage from './localStorage';
 
 
-class Peep extends LocalStorageClass {
-    constructor() {
-        super();
+class Peep/* extends LocalStorage*/ {
+    constructor(options) {
+        //super(options);
+        console.log(options);
+        let that = this;
         window.onload = function (){
-            this.peep();
-        }.bind(this);
+            that.peep();
+        };
 
         //判断加载完成   
         // window.onload之后再次设置定时器判断
