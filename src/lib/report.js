@@ -17,7 +17,7 @@ class Report extends Config {
         this.url = this.config.url;
         this.srcs = [];
 
-        ['info', 'log', 'warn', 'debug', 'error'].forEach(function(type, index){
+        ['log', 'debug', 'info', 'warn', 'error'].forEach(function(type, index){
             this[type] = (msg)=>{
                 this.handleMsg ( msg, type, index );
             };  
@@ -32,45 +32,49 @@ class Report extends Config {
     	//this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
     	return this.repeatList[repeatName] <= this.config.repeat;
     }
+    report( cb ){
+        let parames = '';
+        let queue = this.errorQueue;
+
+        if( this.config.mergeReport ) {
+            // 合并上报
+            console.log('合并上报');
+            parames = queue.map(obj =>{
+               return utils.serializeObj(obj);
+            }).join('|');
+        } else {
+            // 不合并上报
+            console.log('不合并上报');
+            if ( queue.length ) {
+                let obj = queue[0];
+                parames = utils.serializeObj(obj);
+            }
+        }
+        this.url += '?' + parames;
+        let oImg = new Image();
+        oImg.onload = () => {
+            queue = [];
+            if ( cb ) {
+                cb.call( this );
+            }
+            this.trigger('afterReport');
+        }.bind(this);
+        oImg.src = this.url;
+        this.srcs.push(oImg.src);
+        console.log(this.srcs);
+    }
     // 发送
     send(isNowReport,cb) {
-		let report = () => {
-            let parames = '';
-            let queue = this.errorQueue;
-
-			if( this.config.mergeReport ) {
-    			// 合并上报
-    			console.log('合并上报');
-                parames = queue.map(obj =>{
-                   return utils.serializeObj(obj);
-                }).join('|');
-			} else {
-    			// 不合并上报
-    			console.log('不合并上报');
-				if ( queue.length ) {
-					let obj = queue[0];
-					parames = utils.serializeObj(obj);
-				}
-			}
-			this.url += '?' + parames;
-			let oImg = new Image();
-            oImg.onload = () => {
-                queue = [];
-                if ( cb ) {
-                    cb.call( this );
-                }
-            };
-            oImg.src = this.url;
-            this.srcs.push(oImg.src);
-            console.log(this.srcs);
-		};
+        this.trigger('beforeReport');
 
 		if( isNowReport ){
 			// 延迟上报
-			this.mergeTimeout = setTimeout( report, this.config.delay );
+			this.mergeTimeout = setTimeout( function(){
+                this.report(cb);   
+            }.bind(this), this.config.delay );
 		} else {
 			// 现在上报
-			report();
+			this.report(cb);
 		}
     }
     // push错误到pool
