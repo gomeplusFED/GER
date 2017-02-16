@@ -103,23 +103,24 @@ var Events = function () {
 
     createClass(Events, [{
         key: "on",
-        value: function on(type, handler) {
-            if (typeof type === "string" && typeof handler === "function") {
-                this.handlers[type] = typeof this.handlers[type] === "undefined" ? [] : this.handlers[type];
-                this.handlers[type].push(handler);
+        value: function on(event, handler) {
+            if (typeof event === "string" && typeof handler === "function") {
+                this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
+                this.handlers[event].push(handler);
             }
         }
     }, {
         key: "off",
-        value: function off() {}
+        value: function off(event) {
+            this.handlers[event] !== undefined && delete this.handlers[event];
+        }
     }, {
         key: "trigger",
         value: function trigger(event) {
             if (this.handlers[event] instanceof Array) {
-                var handlers = this.handlers[event];
-                handlers.forEach(function (v, i) {
-                    handlers[i]();
-                });
+                this.handlers[event].forEach(function (v, i) {
+                    this.handlers[event][i]();
+                }.bind(this));
             }
         }
     }]);

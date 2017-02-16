@@ -4,24 +4,23 @@
  * @date 2017/02/16
  */
 class Events {
-    constructor() {
-        this.handlers = {};
+	constructor(){
+		this.handlers = {};
+	}
+    on(event, handler){
+    	if( typeof event === "string" && typeof handler === "function" ){
+	    	this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
+	        this.handlers[event].push(handler);
+    	}
     }
-    on( type, handler ) {
-        if ( typeof type === "string" && typeof handler === "function" ) {
-            this.handlers[ type ] = typeof this.handlers[ type ] === "undefined" ? [] : this.handlers[ type ];
-            this.handlers[ type ].push( handler );
-        }
-    }
-    off() {
-
+    off( event ) {
+        this.handlers[event] !== undefined && delete  this.handlers[event];
     }
     trigger( event ) {
-        if ( this.handlers[ event ] instanceof Array ) {
-            var handlers = this.handlers[ event ];
-            handlers.forEach( ( v, i ) => {
-                handlers[ i ]();
-            } );
+        if(this.handlers[event] instanceof Array){
+            this.handlers[event].forEach(function(v,i){
+                this.handlers[event][i]();
+            }.bind(this));
         }
     }
 
