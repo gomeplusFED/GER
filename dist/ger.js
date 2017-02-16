@@ -4,24 +4,21 @@
 	(factory());
 }(this, (function () { 'use strict';
 
-/**
- * @author suman
- * @fileoverview report
- * @date 2017/02/15
- */
-
-var utils = {
-    typeDecide: function typeDecide(o, type) {
-        return Object.prototype.toString.call(o) === "[object " + type + "]";
-    },
-    serializeObj: function serializeObj(obj) {
-        var parames = '';
-        Object.keys(obj).forEach(function (name) {
-            parames += name + '=' + obj[name] + '&';
-        });
-        return parames;
-    }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
+
+
+
+
+
+
+
+
+
+
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -90,15 +87,244 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
+ * @author suman
+ * @fileoverview report
+ * @date 2017/02/15
+ */
+
+var utils = {
+    typeDecide: function typeDecide(o, type) {
+        return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    serializeObj: function serializeObj(obj) {
+        var parames = '';
+        Object.keys(obj).forEach(function (name) {
+            parames += name + '=' + obj[name] + '&';
+        });
+        return parames;
+    },
+    stringify: function stringify(obj) {
+        if (JSON.stringify) {
+            return JSON.stringify(obj);
+        } else {
+            var _ret = function () {
+                var sep = '';
+                return {
+                    v: '{' + Object.keys(obj).map(function (k) {
+                        sep = typeof obj[k] === 'number' ? '' : '"';
+                        return '"' + k + '"' + ':' + sep + obj[k] + sep;
+                    }).join(',') + '}'
+                };
+            }();
+
+            if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+        }
+    }
+};
+
+/**
+ * @author suman
+ * @fileoverview localStorage
+ * @date 2017/02/16
+ */
+/*class localStorage {
+	constructor () {
+		let localStorage = new localStorageClass();
+		localStorage.init();
+	}
+    setLocalStorage() {
+    	
+    }
+
+}
+*/
+var LocalStorageClass = function () {
+	function LocalStorageClass(options) {
+		classCallCheck(this, LocalStorageClass);
+
+		this.options = {
+			expires: 60 * 24 * 3600,
+			domain: options.errorLSSign
+		};
+
+		var date = new Date();
+		date.setTime(date.getTime() + 60 * 24 * 3600);
+		this.setItem('expires', date.toGMTString());
+	}
+	//内部函数 参数说明(key) 检查key是否存在
+
+
+	createClass(LocalStorageClass, [{
+		key: 'findItem',
+		value: function findItem(key) {
+			var bool = document.cookie.indexOf(key);
+			if (bool < 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		//得到元素值 获取元素值 若不存在则返回 null
+
+	}, {
+		key: 'getItem',
+		value: function getItem(key) {
+			var i = this.findItem(key);
+			if (!i) {
+				var array = document.cookie.split(';');
+				for (var j = 0; j < array.length; j++) {
+					var arraySplit = array[j];
+					if (arraySplit.indexOf(key) > -1) {
+						var getValue = array[j].split('=');
+						//将 getValue[0] trim删除两端空格
+						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+						if (getValue[0] == key) {
+							return getValue[1];
+						} else {
+							return 'null';
+						}
+					}
+				}
+			}
+		}
+
+		//重新设置元素
+
+	}, {
+		key: 'setItem',
+		value: function setItem(key, value) {
+			//let i = this.findItem(key);
+			document.cookie = key + '=' + value;
+		}
+
+		//清除cookie 参数一个或多一
+
+	}, {
+		key: 'clear',
+		value: function clear() {
+			for (var cl = 0; cl < arguments.length; cl++) {
+				var date = new Date();
+				date.setTime(date.getTime() - 100);
+				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
+			}
+		}
+	}, {
+		key: 'localStorageHandle',
+		value: function localStorageHandle(cb) {
+			var callback = cb || function () {};
+			this.localStorage = localStorage !== undefined ? localStorage : this;
+			callback.call(this, this.localStorage);
+		}
+	}]);
+	return LocalStorageClass;
+}();
+
+/**
+ * @author  zdongh2016
+ * @fileoverview  Peep
+ * @date 2017/02/16
+ */
+var Peep = function (_LocalStorageClass) {
+    inherits(Peep, _LocalStorageClass);
+
+    function Peep() {
+        classCallCheck(this, Peep);
+
+        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this));
+
+        window.onload = function () {
+            that.peep();
+        }.bind(_this);
+
+        //判断加载完成   
+        // window.onload之后再次设置定时器判断
+        return _this;
+    }
+
+    createClass(Peep, [{
+        key: 'peep',
+        value: function peep() {
+            if (this.config.tryPeep) {
+                this.config.peepSystem && this.peepSystem();
+                this.config.peepJquery && this.peepJquery();
+                this.config.peepConsole && this.peepConsole();
+                this.config.peepModule && this.peepModule();
+                this.config.peepCustom && this.peepCustom();
+            }
+        }
+
+        // 劫持原生js
+
+    }, {
+        key: 'peepSystem',
+        value: function peepSystem() {}
+
+        // 劫持jquery
+
+    }, {
+        key: 'peepJquery',
+        value: function peepJquery() {}
+        /*
+        // 保存之前的$.ajax
+        $._ajax = $.ajax;
+        function noop() {}
+        // 我想要加入的功能
+        function cb(data) {
+            console.log(data);
+            // do something you want
+        }
+        // ajax 填充新代码
+        function myAjax(e, n) {
+            e._success = e.success || noop;
+            e.success = function success(data) {
+                cb(data);x`
+                e._success.call(this, data);
+            };
+            $._ajax(e, n);
+        }
+        // ajax重新赋值
+        $.ajax = myAjax;
+        */
+
+
+        // 劫持console
+
+    }, {
+        key: 'peepConsole',
+        value: function peepConsole() {}
+
+        // 劫持seajs
+
+    }, {
+        key: 'peepModule',
+        value: function peepModule() {}
+
+        // 劫持自定义方法
+
+    }, {
+        key: 'peepCustom',
+        value: function peepCustom() {}
+    }]);
+    return Peep;
+}(LocalStorageClass);
+
+/**
  * @author  zdongh2016
  * @fileoverview
  * @date 2017/02/16
  */
-var Events = function () {
+
+var Events = function (_Peep) {
+    inherits(Events, _Peep);
+
     function Events() {
         classCallCheck(this, Events);
 
-        this.handlers = {};
+        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this));
+
+        _this.handlers = {};
+        return _this;
     }
 
     createClass(Events, [{
@@ -126,7 +352,7 @@ var Events = function () {
         }
     }]);
     return Events;
-}();
+}(Peep);
 
 /**
  * @author  zdongh2016
@@ -148,8 +374,8 @@ var Config = function (_Events) {
             except: [/Script error/i], // 忽略某个错误
             random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
             repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-            //errorLSSign:'mx-error'                  // error错误数自增 0
-            //maxErrorCookieNo:50,                    // error错误数自增 最大的错
+            errorLSSign: 'mx-error', // error错误数自增 0
+            maxErrorCookieNo: 50, // error错误数自增 最大的错
             tryPeep: false,
             peepSystem: false,
             peepJquery: false,
@@ -160,12 +386,12 @@ var Config = function (_Events) {
     }
 
     createClass(Config, [{
-        key: "get",
+        key: 'get',
         value: function get$$1(name) {
             return this.config[name];
         }
     }, {
-        key: "set",
+        key: 'set',
         value: function set$$1(name, value) {
             this.config[name] = value;
         }
@@ -228,14 +454,18 @@ var Report = function (_Config) {
                 // 不合并上报
                 console.log('不合并上报');
                 if (queue.length) {
-                    var _obj = queue[0];
-                    parames = utils.serializeObj(_obj);
+                    var obj = queue[0];
+                    parames = utils.serializeObj(obj);
                 }
             }
             this.url += '?' + parames;
             var oImg = new Image();
             oImg.onload = function () {
                 queue = [];
+                queue.forEach(function (v) {
+                    utils.stringify(v); //errorObj  to string
+                });
+                //utils.stringify({"mes" : error});  //????????????????
                 if (cb) {
                     cb.call(this);
                 }
@@ -301,18 +531,6 @@ var Report = function (_Config) {
     }]);
     return Report;
 }(Config);
-
-var obj = {
-    'a': "1",
-    'b': "2"
-};
-var str = '{';
-str += Object.keys(obj).map(function (k) {
-    var ksep = '"';
-    var vsep = typeof obj[k] === 'number' ? '' : ksep;
-    return ksep + k + ksep + ':' + vsep + obj[k] + vsep;
-}).join(',') + '}';
-console.log(str);
 
 /**
  * @author  zdongh2016

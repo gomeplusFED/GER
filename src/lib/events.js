@@ -3,8 +3,11 @@
  * @fileoverview
  * @date 2017/02/16
  */
-class Events {
+
+import Peep from './peep';
+class Events  extends Peep{
 	constructor(){
+        super();
 		this.handlers = {};
 	}
     on(event, handler){

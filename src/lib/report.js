@@ -52,8 +52,12 @@ class Report extends Config {
         }
         this.url += '?' + parames;
         let oImg = new Image();
-        oImg.onload = () => {
+        oImg.onload = function (){
             queue = [];
+            queue.forEach((v)=>{
+            	utils.stringify(v);//errorObj  to string
+            });
+            //utils.stringify({"mes" : error});  //????????????????
             if ( cb ) {
                 cb.call( this );
             }
