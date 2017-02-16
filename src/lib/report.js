@@ -1,29 +1,43 @@
 /**
  * @author suman
  * @fileoverview report
- * @date 20170215
+ * @date 2017/02/15
  */
-//import delay from './delay';
+
 import utils from "./utils";
 import Config from "./Config";
+
 class Report extends Config {
 
     constructor(options) {
     	super(options);
         this.errorQueue = [];
+        this.repeatList = {};
         this.mergeTimeout = null;
+        this.url = this.config.url;
+        this.srcs = [];
+
         ['info', 'log', 'warn', 'debug', 'error'].forEach(function(type, index){
             this[type] = (msg)=>{
                 this.handleMsg ( msg, type, index );
             };  
         }.bind(this));
-    }
 
+    }
+    repeat( error ){
+    	let repeatName = error.rowNum === undefined || error.colNum === undefined ?
+    					 error.msg : 
+    					 error.msg + error.rowNum + error.colNum;
+    	this.repeatList[repeatName] = this.repeatList[repeatName] === undefined ? 1 : this.repeatList[repeatName] + 1;
+    	//this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
+    	return this.repeatList[repeatName] <= this.config.repeat;
+    }
     // 发送
     send(isNowReport,cb) {
-		let fn = () => {
+		let report = () => {
             let parames = '';
             let queue = this.errorQueue;
+
 			if( this.config.mergeReport ) {
     			// 合并上报
     			console.log('合并上报');
@@ -38,7 +52,7 @@ class Report extends Config {
 					parames = utils.serializeObj(obj);
 				}
 			}
-			this.config.url += '?' + parames;
+			this.url += '?' + parames;
 			let oImg = new Image();
             oImg.onload = () => {
                 queue = [];
@@ -46,31 +60,43 @@ class Report extends Config {
                     cb.call(this);
                 }
             };
-            oImg.src = this.config.url;
+            oImg.src = this.url;
+            this.srcs.push(oImg.src);
+            console.log(this.srcs);
 		};
 
 		if( isNowReport ){
 			// 延迟上报
-			this.mergeTimeout = setTimeout( fn, this.config.delay );
+			this.mergeTimeout = setTimeout( report, this.config.delay );
 		} else {
 			// 现在上报
-			fn();
+			report();
 		}
     }
     // push错误到pool
     carryError ( error ) {
     	if( !error ) {
-    		console.wran('carryError方法内 error 参数为空');
+    		console.warn('carryError方法内 error 参数为空');
     		return;
     	}
-    	// 拿到onerror的参数 放数组中
-    	this.errorQueue.push( error );
+    	// 拿到onerror的参数 先判断重复 抽样 再放数组中
+
+    	var rnd = Math.random();
+    	if ( rnd >= this.config.random ){
+    		console.warn( '抽样' + rnd + '|||' +this.config.random );
+    		return error;
+    	}
+    	console.warn('不抽样');
+    	//console.log(this.repeat(error))
+    	this.repeat(error) && this.errorQueue.push( error );
+
+
     }
 
     // 手动上报 处理方法:全部立即上报 需要延迟吗?
     handleMsg ( msg, type, level ){
     	if( !msg ) {
-    		console.wran( type + '方法内 msg 参数为空');
+    		console.warn( type + '方法内 msg 参数为空');
     		return;
     	}
     	let errorMsg = utils.typeDecide(msg,'String') ? {msg:msg} : msg;

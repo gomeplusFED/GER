@@ -4,9 +4,22 @@
 	(factory());
 }(this, (function () { 'use strict';
 
+/**
+ * @author suman
+ * @fileoverview report
+ * @date 2017/02/15
+ */
+
 var utils = {
     typeDecide: function typeDecide(o, type) {
         return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    serializeObj: function serializeObj(obj) {
+        var parames = '';
+        Object.keys(obj).forEach(function (name) {
+            parames += name + '=' + obj[name] + '&';
+        });
+        return parames;
     }
 };
 
@@ -110,9 +123,9 @@ var Config = function () {
 /**
  * @author suman
  * @fileoverview report
- * @date 20170215
+ * @date 2017/02/15
  */
-//import delay from './delay';
+
 var Report = function (_Config) {
     inherits(Report, _Config);
 
@@ -121,122 +134,31 @@ var Report = function (_Config) {
 
         var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
 
-    _this.errorQueue = [];
-    _this.mergeTimeout = null;
-    return _this;
-  }
-  // 手动上报
-
-
-  createClass(Report, [{
-    key: "error",
-    value: function error(msg) {
-      var that = this;
-      if (!msg) {
-        console.log('error方法内 msg 参数为空');
-        return;
-      }
-      var errorMsg = {};
-      if (utils.typeDecide(msg, 'String')) {
-        errorMsg.msg = msg;
-        errorMsg.level = 5;
-      } else if (utils.typeDecide(msg)) {
-        errorMsg = msg;
-        errorMsg.level = 5;
-      }
-      that.carryError(errorMsg);
-      that.send();
-    }
-
-    // 发送
-
-  }, {
-    key: "send",
-    value: function send(isNowReport) {
-      var that = this;
-      var reports = function reports() {
-        var parames = '';
-        if (that.config.mergeReport) {
-          // 合并上报
-          console.log('合并上报');
-          for (var i = 0; i < that.errorQueue.length; i++) {
-            var obj = that.errorQueue[i];
-            if (obj) {
-              for (var name in obj) {
-                if (obj.hasOwnProperty(name)) {
-                  parames += name + '=' + obj[name] + '&';
-                }
-              }
-            }
-            parames += '###';
-          }
-        } else {
-          // 不合并上报
-          console.log('不合并上报');
-          if (that.errorQueue.length) {
-            var _obj = that.errorQueue[0];
-            for (var _name in _obj) {
-              if (_obj.hasOwnProperty(_name)) {
-                parames += _name + '=' + _obj[_name] + '&';
-              }
-            }
-          }
-        }
-        that.config.url += '?' + parames;
-        var oImg = new Image();
-        oImg.src = that.config.url;
-      };
-      if (isNowReport) {
-        // 延迟上报
-        that.mergeTimeout = setTimeout(reports, that.config.delay);
-      } else {
-        // 现在上报
-        reports();
-      }
-    }
-    // push错误到pool
-
-  }, {
-    key: "carryError",
-    value: function carryError(error) {
-      //let that = this;
-      if (!error) {
-        console.log('carryError方法内 error 参数为空');
-        return;
-      }
-      // 拿到onerror的参数 放数组中
-      this.errorQueue.push(error);
-    }
-
-    // info
         _this.errorQueue = [];
+        _this.repeatList = {};
         _this.mergeTimeout = null;
-        /*['info','log','wran','debug','error'].forEach((type,index)=>{
-            this[type] = (msg)=>{
-                this.handleMsg ( msg, type, index );
-            };
-        }.bind(this));*/
-        ['info', 'log', 'wran', 'debug', 'error'].forEach(function (type, index) {
+        _this.url = _this.config.url;
+        _this.srcs = [];
+
+        ['info', 'log', 'warn', 'debug', 'error'].forEach(function (type, index) {
             var _this2 = this;
 
             this[type] = function (msg) {
-                //console.log(this,12343354)
                 _this2.handleMsg(msg, type, index);
             };
         }.bind(_this));
+
         return _this;
     }
 
     createClass(Report, [{
-        key: "serializeObj",
-        value: function serializeObj(obj) {
-            var parames = '';
-            Object.keys(obj).forEach(function (name) {
-                parames += name + '=' + obj[name] + '&';
-            });
-            return parames;
+        key: "repeat",
+        value: function repeat(error) {
+            var repeatName = error.rowNum === undefined || error.colNum === undefined ? error.msg : error.msg + error.rowNum + error.colNum;
+            this.repeatList[repeatName] = this.repeatList[repeatName] === undefined ? 1 : this.repeatList[repeatName] + 1;
+            //this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
+            return this.repeatList[repeatName] <= this.config.repeat;
         }
-
         // 发送
 
     }, {
@@ -244,26 +166,25 @@ var Report = function (_Config) {
         value: function send(isNowReport, cb) {
             var _this3 = this;
 
-            var fn = function fn() {
+            var report = function report() {
                 var parames = '';
                 var queue = _this3.errorQueue;
+
                 if (_this3.config.mergeReport) {
                     // 合并上报
                     console.log('合并上报');
                     parames = queue.map(function (obj) {
-                        return _this3.serializeObj(obj);
+                        return utils.serializeObj(obj);
                     }).join('|');
-                    /*that.errorQueue.forEach( function (){
-                    		});*/
                 } else {
                     // 不合并上报
                     console.log('不合并上报');
                     if (queue.length) {
                         var obj = queue[0];
-                        parames = _this3.serializeObj(obj);
+                        parames = utils.serializeObj(obj);
                     }
                 }
-                _this3.config.url += '?' + parames;
+                _this3.url += '?' + parames;
                 var oImg = new Image();
                 oImg.onload = function () {
                     queue = [];
@@ -271,15 +192,17 @@ var Report = function (_Config) {
                         cb.call(_this3);
                     }
                 };
-                oImg.src = _this3.config.url;
+                oImg.src = _this3.url;
+                _this3.srcs.push(oImg.src);
+                console.log(_this3.srcs);
             };
 
             if (isNowReport) {
                 // 延迟上报
-                this.mergeTimeout = setTimeout(fn, this.config.delay);
+                this.mergeTimeout = setTimeout(report, this.config.delay);
             } else {
                 // 现在上报
-                fn();
+                report();
             }
         }
         // push错误到pool
@@ -287,13 +210,20 @@ var Report = function (_Config) {
     }, {
         key: "carryError",
         value: function carryError(error) {
-            //let that = this;
             if (!error) {
-                console.wran('carryError方法内 error 参数为空');
+                console.warn('carryError方法内 error 参数为空');
                 return;
             }
-            // 拿到onerror的参数 放数组中
-            this.errorQueue.push(error);
+            // 拿到onerror的参数 先判断重复 抽样 再放数组中
+
+            var rnd = Math.random();
+            if (rnd >= this.config.random) {
+                console.warn('抽样' + rnd + '|||' + this.config.random);
+                return error;
+            }
+            console.warn('不抽样');
+            //console.log(this.repeat(error))
+            this.repeat(error) && this.errorQueue.push(error);
         }
 
         // 手动上报 处理方法:全部立即上报 需要延迟吗?
@@ -301,9 +231,8 @@ var Report = function (_Config) {
     }, {
         key: "handleMsg",
         value: function handleMsg(msg, type, level) {
-            //let that = this;
             if (!msg) {
-                console.wran(type + '方法内 msg 参数为空');
+                console.warn(type + '方法内 msg 参数为空');
                 return;
             }
             var errorMsg = utils.typeDecide(msg, 'String') ? { msg: msg } : msg;
