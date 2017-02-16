@@ -8,27 +8,26 @@ class GER extends Report {
         super(options);
     }
     rewriteError() {
-    	let me = this;
-        window.onerror = function ( msg, url, line, col, error ) {
+        window.onerror = ( msg, url, line, col, error ) => {
         	
             var reportMsg = msg;
             if ( error.stack && error ) {
-                reportMsg = me.handleErrorStack(error);
+                reportMsg = this.handleErrorStack(error);
             }
             if (utils.typeDecide(reportMsg, "Event")) {
 	            reportMsg += reportMsg.type ?
 	                ("--" + reportMsg.type + "--" + (reportMsg.target ?
 	                    (reportMsg.target.tagName + "::" + reportMsg.target.src) : "")) : "";
 	        }
-	        /*me.carryError({
+	        this.carryError({
 	        	msg: reportMsg,
 				rolNum: line,
 				colNum: col,
 				targetUrl: url
 	        });
-			me.send();
-			me.trigger('afterReport');
-	        */
+			this.send();
+			//me.trigger('afterReport');
+	        
             
         };
     }

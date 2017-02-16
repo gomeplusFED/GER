@@ -6,7 +6,7 @@
 
 var utils = {
     typeDecide: function typeDecide(o, type) {
-        return Object.prototype.toString.call(o) === "[object " + (type || "Object") + "]";
+        return Object.prototype.toString.call(o) === "[object " + type + "]";
     }
 };
 
@@ -114,12 +114,12 @@ var Config = function () {
  */
 //import delay from './delay';
 var Report = function (_Config) {
-  inherits(Report, _Config);
+    inherits(Report, _Config);
 
-  function Report(options) {
-    classCallCheck(this, Report);
+    function Report(options) {
+        classCallCheck(this, Report);
 
-    var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
+        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
 
     _this.errorQueue = [];
     _this.mergeTimeout = null;
@@ -209,60 +209,111 @@ var Report = function (_Config) {
     }
 
     // info
+        _this.errorQueue = [];
+        _this.mergeTimeout = null;
+        /*['info','log','wran','debug','error'].forEach((type,index)=>{
+            this[type] = (msg)=>{
+                this.handleMsg ( msg, type, index );
+            };
+        }.bind(this));*/
+        ['info', 'log', 'wran', 'debug', 'error'].forEach(function (type, index) {
+            var _this2 = this;
 
-  }, {
-    key: "info",
-    value: function info(msg) {
-      this.handleMsg(msg, 'info', 1);
+            this[type] = function (msg) {
+                //console.log(this,12343354)
+                _this2.handleMsg(msg, type, index);
+            };
+        }.bind(_this));
+        return _this;
     }
 
-    // log
+    createClass(Report, [{
+        key: "serializeObj",
+        value: function serializeObj(obj) {
+            var parames = '';
+            Object.keys(obj).forEach(function (name) {
+                parames += name + '=' + obj[name] + '&';
+            });
+            return parames;
+        }
 
-  }, {
-    key: "log",
-    value: function log(msg) {
-      this.handleMsg(msg, 'log', 2);
-    }
+        // 发送
 
-    // warn
+    }, {
+        key: "send",
+        value: function send(isNowReport, cb) {
+            var _this3 = this;
 
-  }, {
-    key: "warn",
-    value: function warn(msg) {
-      this.handleMsg(msg, 'warn', 3);
-    }
+            var fn = function fn() {
+                var parames = '';
+                var queue = _this3.errorQueue;
+                if (_this3.config.mergeReport) {
+                    // 合并上报
+                    console.log('合并上报');
+                    parames = queue.map(function (obj) {
+                        return _this3.serializeObj(obj);
+                    }).join('|');
+                    /*that.errorQueue.forEach( function (){
+                    		});*/
+                } else {
+                    // 不合并上报
+                    console.log('不合并上报');
+                    if (queue.length) {
+                        var obj = queue[0];
+                        parames = _this3.serializeObj(obj);
+                    }
+                }
+                _this3.config.url += '?' + parames;
+                var oImg = new Image();
+                oImg.onload = function () {
+                    queue = [];
+                    if (cb) {
+                        cb.call(_this3);
+                    }
+                };
+                oImg.src = _this3.config.url;
+            };
 
-    // debug
+            if (isNowReport) {
+                // 延迟上报
+                this.mergeTimeout = setTimeout(fn, this.config.delay);
+            } else {
+                // 现在上报
+                fn();
+            }
+        }
+        // push错误到pool
 
-  }, {
-    key: "debug",
-    value: function debug(msg) {
-      this.handleMsg(msg, 'debug', 4);
-    }
+    }, {
+        key: "carryError",
+        value: function carryError(error) {
+            //let that = this;
+            if (!error) {
+                console.wran('carryError方法内 error 参数为空');
+                return;
+            }
+            // 拿到onerror的参数 放数组中
+            this.errorQueue.push(error);
+        }
 
-    // 手动上报 处理方法:全部立即上报 需要延迟吗?
+        // 手动上报 处理方法:全部立即上报 需要延迟吗?
 
-  }, {
-    key: "handleMsg",
-    value: function handleMsg(msg, type, level) {
-      //let that = this;
-      if (!msg) {
-        console.log(type + '方法内 msg 参数为空');
-        return;
-      }
-      var errorMsg = {};
-      if (utils.typeDecide(msg, 'String')) {
-        errorMsg.msg = msg;
-        errorMsg.level = level;
-      } else if (utils.typeDecide(msg)) {
-        errorMsg = msg;
-        errorMsg.level = level;
-      }
-      this.carryError(errorMsg);
-      this.send();
-    }
-  }]);
-  return Report;
+    }, {
+        key: "handleMsg",
+        value: function handleMsg(msg, type, level) {
+            //let that = this;
+            if (!msg) {
+                console.wran(type + '方法内 msg 参数为空');
+                return;
+            }
+            var errorMsg = utils.typeDecide(msg, 'String') ? { msg: msg } : msg;
+            errorMsg.level = level;
+            this.carryError(errorMsg);
+            this.send();
+            return errorMsg;
+        }
+    }]);
+    return Report;
 }(Config);
 
 var GER = function (_Report) {
@@ -276,25 +327,26 @@ var GER = function (_Report) {
     createClass(GER, [{
         key: 'rewriteError',
         value: function rewriteError() {
-            var me = this;
+            var _this2 = this;
+
             window.onerror = function (msg, url, line, col, error) {
 
                 var reportMsg = msg;
                 if (error.stack && error) {
-                    reportMsg = me.handleErrorStack(error);
+                    reportMsg = _this2.handleErrorStack(error);
                 }
                 if (utils.typeDecide(reportMsg, "Event")) {
                     reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
                 }
-                /*me.carryError({
-                	msg: reportMsg,
-                rolNum: line,
-                colNum: col,
-                targetUrl: url
+                _this2.carryError({
+                    msg: reportMsg,
+                    rolNum: line,
+                    colNum: col,
+                    targetUrl: url
                 });
-                me.send();
-                me.trigger('afterReport');
-                */
+                _this2.send();
+                //me.trigger('afterReport');
+
             };
         }
         // 处理onerror返回的error.stack
