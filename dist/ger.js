@@ -20,6 +20,17 @@ var utils = {
             parames += name + '=' + obj[name] + '&';
         });
         return parames;
+    },
+    stringify: function stringify(obj) {
+        if (JSON.stringify) {
+            return JSON.stringify(obj);
+        } else {
+            var sep = '';
+            return '{' + Object.keys(obj).map(function (k) {
+                sep = typeof obj[k] === 'number' ? '' : '"';
+                return '"' + k + '"' + ':' + sep + obj[k] + sep;
+            }).join(',') + '}';
+        }
     }
 };
 
@@ -174,6 +185,104 @@ var Config = function (_Events) {
 
 /**
  * @author suman
+ * @fileoverview localStorage
+ * @date 2017/02/16
+ */
+/*class localStorage {
+	constructor () {
+		let localStorage = new localStorageClass();
+		localStorage.init();
+	}
+    setLocalStorage() {
+    	
+    }
+
+}
+*/
+var localStorageClass = function () {
+	function localStorageClass(options) {
+		classCallCheck(this, localStorageClass);
+
+		this.options = {
+			expires: 60 * 24 * 3600,
+			domain: "xxx"
+		};
+
+		var date = new Date();
+		date.setTime(date.getTime() + 60 * 24 * 3600);
+		this.setItem('expires', date.toGMTString());
+	}
+	//内部函数 参数说明(key) 检查key是否存在
+
+
+	createClass(localStorageClass, [{
+		key: 'findItem',
+		value: function findItem() {
+			var bool = document.cookie.indexOf(key);
+			if (bool < 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		//得到元素值 获取元素值 若不存在则返回 null
+
+	}, {
+		key: 'getItem',
+		value: function getItem() {
+			var i = this.findItem(key);
+			if (!i) {
+				var array = document.cookie.split(';');
+				for (var j = 0; j < array.length; j++) {
+					var arraySplit = array[j];
+					if (arraySplit.indexOf(key) > -1) {
+						var getValue = array[j].split('=');
+						//将 getValue[0] trim删除两端空格
+						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+						if (getValue[0] == key) {
+							return getValue[1];
+						} else {
+							return 'null';
+						}
+					}
+				}
+			}
+		}
+
+		//重新设置元素
+
+	}, {
+		key: 'setItem',
+		value: function setItem(key, value) {
+			var i = this.findItem(key);
+			document.cookie = key + '=' + value;
+		}
+
+		//清除cookie 参数一个或多一
+
+	}, {
+		key: 'clear',
+		value: function clear() {
+			for (var cl = 0; cl < arguments.length; cl++) {
+				var date = new Date();
+				date.setTime(date.getTime() - 100);
+				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
+			}
+		}
+	}, {
+		key: 'localStorageHandle',
+		value: function localStorageHandle(cb) {
+			var callback = cb || function () {};
+			this.localStorage = localStorage !== undefined ? localStorage : this;
+			cb && cb.call(this, this.localStorage);
+		}
+	}]);
+	return localStorageClass;
+}();
+
+/**
+ * @author suman
  * @fileoverview report
  * @date 2017/02/15
  */
@@ -192,7 +301,7 @@ var Report = function (_Config) {
         _this.url = _this.config.url;
         _this.srcs = [];
 
-        ['info', 'log', 'warn', 'debug', 'error'].forEach(function (type, index) {
+        ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
             var _this2 = this;
 
             this[type] = function (msg) {
@@ -211,50 +320,55 @@ var Report = function (_Config) {
             //this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
             return this.repeatList[repeatName] <= this.config.repeat;
         }
+    }, {
+        key: "report",
+        value: function report(cb) {
+            var parames = '';
+            var queue = this.errorQueue;
+
+            if (this.config.mergeReport) {
+                // 合并上报
+                console.log('合并上报');
+                parames = queue.map(function (obj) {
+                    return utils.serializeObj(obj);
+                }).join('|');
+            } else {
+                // 不合并上报
+                console.log('不合并上报');
+                if (queue.length) {
+                    var obj = queue[0];
+                    parames = utils.serializeObj(obj);
+                }
+            }
+            this.url += '?' + parames;
+            var oImg = new Image();
+            oImg.onload = function () {
+                queue = [];
+                utils.stringify({ "mes": error }); //????????????????
+                if (cb) {
+                    cb.call(this);
+                }
+                this.trigger('afterReport');
+            }.bind(this);
+            oImg.src = this.url;
+            this.srcs.push(oImg.src);
+            console.log(this.srcs);
+        }
         // 发送
 
     }, {
         key: "send",
         value: function send(isNowReport, cb) {
-            var _this3 = this;
-
-            var report = function report() {
-                var parames = '';
-                var queue = _this3.errorQueue;
-
-                if (_this3.config.mergeReport) {
-                    // 合并上报
-                    console.log('合并上报');
-                    parames = queue.map(function (obj) {
-                        return utils.serializeObj(obj);
-                    }).join('|');
-                } else {
-                    // 不合并上报
-                    console.log('不合并上报');
-                    if (queue.length) {
-                        var obj = queue[0];
-                        parames = utils.serializeObj(obj);
-                    }
-                }
-                _this3.url += '?' + parames;
-                var oImg = new Image();
-                oImg.onload = function () {
-                    queue = [];
-                    if (cb) {
-                        cb.call(_this3);
-                    }
-                };
-                oImg.src = _this3.url;
-                _this3.srcs.push(oImg.src);
-                console.log(_this3.srcs);
-            };
+            this.trigger('beforeReport');
 
             if (isNowReport) {
                 // 延迟上报
-                this.mergeTimeout = setTimeout(report, this.config.delay);
+                this.mergeTimeout = setTimeout(function () {
+                    this.report(cb);
+                }.bind(this), this.config.delay);
             } else {
                 // 现在上报
-                report();
+                this.report(cb);
             }
         }
         // push错误到pool

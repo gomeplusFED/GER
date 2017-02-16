@@ -14,6 +14,17 @@ var utils = {
             parames += name + '=' + obj[ name ] + '&';
         } );
         return parames;
+    },
+    stringify: function ( obj ){
+        if( JSON.stringify ){
+            return JSON.stringify(obj);
+        } else {
+            let sep = '';
+            return '{' + Object.keys(obj).map((k)=>{
+                sep = typeof obj[k] === 'number' ? '' : '"';
+                return  '"' + k + '"' + ':' + sep + obj[ k ] + sep;
+            }).join(',')+'}';
+        } 
     }
 };
 
