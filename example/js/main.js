@@ -10,5 +10,6 @@ error_report.testsdsdsds();*/
 //console.log(error_report.get('url'));
 error_report.on('message',()=>{
 	console.log(11111)
-})
+});
+error_report.off('message');
 error_report.trigger('message');

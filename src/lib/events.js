@@ -7,21 +7,20 @@ class Events {
 	constructor(){
 		this.handlers = {};
 	}
-    on(type, handler){
-    	if( typeof type === "string" && typeof handler === "function" ){
-	    	this.handlers[type] = typeof this.handlers[type] === "undefined" ? [] : this.handlers[type];
-	        this.handlers[type].push(handler);
+    on(event, handler){
+    	if( typeof event === "string" && typeof handler === "function" ){
+	    	this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
+	        this.handlers[event].push(handler);
     	}
     }
-    off() {
-
+    off( event ) {
+        this.handlers[event] !== undefined && delete  this.handlers[event];
     }
     trigger( event ) {
         if(this.handlers[event] instanceof Array){
-            var handlers=this.handlers[event];
-            handlers.forEach((v,i)=>{
-            	handlers[i]();
-            });
+            this.handlers[event].forEach(function(v,i){
+                this.handlers[event][i]();
+            }.bind(this));
         }
     }
 
