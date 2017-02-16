@@ -154,7 +154,7 @@ var Report = function (_Config) {
     key: "send",
     value: function send(isNowReport) {
       var that = this;
-      var fn = function fn() {
+      var reports = function reports() {
         var parames = '';
         if (that.config.mergeReport) {
           // 合并上报
@@ -169,12 +169,7 @@ var Report = function (_Config) {
               }
             }
             parames += '###';
-            /*if( i != that.errorQueue.length-1 ){
-            	parames += '###';
-            }*/
           }
-          /*that.errorQueue.forEach( function (){
-          		});*/
         } else {
           // 不合并上报
           console.log('不合并上报');
@@ -193,10 +188,10 @@ var Report = function (_Config) {
       };
       if (isNowReport) {
         // 延迟上报
-        that.mergeTimeout = setTimeout(fn, that.config.delay);
+        that.mergeTimeout = setTimeout(reports, that.config.delay);
       } else {
         // 现在上报
-        fn();
+        reports();
       }
     }
     // push错误到pool
@@ -275,10 +270,7 @@ var GER = function (_Report) {
 
     function GER(options) {
         classCallCheck(this, GER);
-
-        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
-
-        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
+        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
     }
 
     createClass(GER, [{

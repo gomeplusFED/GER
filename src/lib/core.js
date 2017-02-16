@@ -6,7 +6,6 @@ import utils from './utils';
 class GER extends Report {
     constructor(options) {
         super(options);
-        super();
     }
     rewriteError() {
     	let me = this;

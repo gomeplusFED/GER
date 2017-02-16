@@ -35,7 +35,7 @@ class Report extends Config {
     // 发送
     send(isNowReport) {
     	let that = this;
-		let fn = () => {
+		let reports = () => {
 			let parames = '';
 			if( that.config.mergeReport ) {
     			// 合并上报
@@ -50,13 +50,7 @@ class Report extends Config {
 						}
 					}
 					parames += '###';
-					/*if( i != that.errorQueue.length-1 ){
-						parames += '###';
-					}*/
 				}
-				/*that.errorQueue.forEach( function (){
-
-				});*/
 			} else {
     			// 不合并上报
     			console.log('不合并上报');
@@ -75,10 +69,10 @@ class Report extends Config {
 		};
 		if( isNowReport ){
 			// 延迟上报
-			that.mergeTimeout = setTimeout( fn, that.config.delay );
+			that.mergeTimeout = setTimeout( reports, that.config.delay );
 		} else {
 			// 现在上报
-			fn();
+			reports();
 		}
     }
     // push错误到pool
