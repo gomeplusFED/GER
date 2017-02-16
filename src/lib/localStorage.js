@@ -3,22 +3,12 @@
  * @fileoverview localStorage
  * @date 2017/02/16
  */
-/*class localStorage {
-	constructor () {
-		let localStorage = new localStorageClass();
-		localStorage.init();
-	}
-    setLocalStorage() {
-    	
-    }
-
-}
-*/
 class LocalStorageClass {
 	constructor( options ) {
+		console.log(options);
 		this.options = {
-			expires : 60*24*3600,
-			domain : options.errorLSSign
+			expires : 60*24*3600
+			//domain : this.config.errorLSSign
 		};
 
     	let date = new Date();

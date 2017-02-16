@@ -6,7 +6,8 @@
 
 import Peep from './peep';
 class Events  extends Peep{
-	constructor(){
+	constructor(options){
+		super(options);
 		this.handlers = {};
 	}
     on(event, handler){

@@ -101,15 +101,207 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
+ * @author suman
+ * @fileoverview localStorage
+ * @date 2017/02/16
+ */
+/*class localStorage {
+	constructor () {
+		let localStorage = new localStorageClass();
+		localStorage.init();
+	}
+    setLocalStorage() {
+    	
+    }
+
+}
+*/
+var LocalStorageClass = function () {
+	function LocalStorageClass(options) {
+		classCallCheck(this, LocalStorageClass);
+
+		console.log(options);
+		this.options = {
+			expires: 60 * 24 * 3600
+			//domain : this.config.errorLSSign
+		};
+
+		var date = new Date();
+		date.setTime(date.getTime() + 60 * 24 * 3600);
+		this.setItem('expires', date.toGMTString());
+	}
+	//内部函数 参数说明(key) 检查key是否存在
+
+
+	createClass(LocalStorageClass, [{
+		key: 'findItem',
+		value: function findItem(key) {
+			var bool = document.cookie.indexOf(key);
+			if (bool < 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		//得到元素值 获取元素值 若不存在则返回 null
+
+	}, {
+		key: 'getItem',
+		value: function getItem(key) {
+			var i = this.findItem(key);
+			if (!i) {
+				var array = document.cookie.split(';');
+				for (var j = 0; j < array.length; j++) {
+					var arraySplit = array[j];
+					if (arraySplit.indexOf(key) > -1) {
+						var getValue = array[j].split('=');
+						//将 getValue[0] trim删除两端空格
+						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+						if (getValue[0] == key) {
+							return getValue[1];
+						} else {
+							return 'null';
+						}
+					}
+				}
+			}
+		}
+
+		//重新设置元素
+
+	}, {
+		key: 'setItem',
+		value: function setItem(key, value) {
+			//let i = this.findItem(key);
+			document.cookie = key + '=' + value;
+		}
+
+		//清除cookie 参数一个或多一
+
+	}, {
+		key: 'clear',
+		value: function clear() {
+			for (var cl = 0; cl < arguments.length; cl++) {
+				var date = new Date();
+				date.setTime(date.getTime() - 100);
+				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
+			}
+		}
+	}, {
+		key: 'localStorageHandle',
+		value: function localStorageHandle(cb) {
+			var callback = cb || function () {};
+			this.localStorage = localStorage !== undefined ? localStorage : this;
+			callback.call(this, this.localStorage);
+		}
+	}]);
+	return LocalStorageClass;
+}();
+
+/**
+ * @author  zdongh2016
+ * @fileoverview  Peep
+ * @date 2017/02/16
+ */
+var Peep /* extends LocalStorage*/ = function () {
+    function Peep(options) {
+        classCallCheck(this, Peep);
+
+        //super(options);
+        console.log(options);
+        var that = this;
+        window.onload = function () {
+            that.peep();
+        };
+
+        //判断加载完成   
+        // window.onload之后再次设置定时器判断
+    }
+
+    createClass(Peep, [{
+        key: 'peep',
+        value: function peep() {
+            if (this.config.tryPeep) {
+                this.config.peepSystem && this.peepSystem();
+                this.config.peepJquery && this.peepJquery();
+                this.config.peepConsole && this.peepConsole();
+                this.config.peepModule && this.peepModule();
+                this.config.peepCustom && this.peepCustom();
+            }
+        }
+
+        // 劫持原生js
+
+    }, {
+        key: 'peepSystem',
+        value: function peepSystem() {}
+
+        // 劫持jquery
+
+    }, {
+        key: 'peepJquery',
+        value: function peepJquery() {}
+        /*
+        // 保存之前的$.ajax
+        $._ajax = $.ajax;
+        function noop() {}
+        // 我想要加入的功能
+        function cb(data) {
+            console.log(data);
+            // do something you want
+        }
+        // ajax 填充新代码
+        function myAjax(e, n) {
+            e._success = e.success || noop;
+            e.success = function success(data) {
+                cb(data);x`
+                e._success.call(this, data);
+            };
+            $._ajax(e, n);
+        }
+        // ajax重新赋值
+        $.ajax = myAjax;
+        */
+
+
+        // 劫持console
+
+    }, {
+        key: 'peepConsole',
+        value: function peepConsole() {}
+
+        // 劫持seajs
+
+    }, {
+        key: 'peepModule',
+        value: function peepModule() {}
+
+        // 劫持自定义方法
+
+    }, {
+        key: 'peepCustom',
+        value: function peepCustom() {}
+    }]);
+    return Peep;
+}();
+
+/**
  * @author  zdongh2016
  * @fileoverview
  * @date 2017/02/16
  */
-var Events = function () {
-    function Events() {
+
+var Events = function (_Peep) {
+    inherits(Events, _Peep);
+
+    function Events(options) {
         classCallCheck(this, Events);
 
-        this.handlers = {};
+        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
+
+        _this.handlers = {};
+        return _this;
     }
 
     createClass(Events, [{
@@ -136,7 +328,7 @@ var Events = function () {
         }
     }]);
     return Events;
-}();
+}(Peep);
 
 /**
  * @author  zdongh2016
@@ -149,7 +341,7 @@ var Config = function (_Events) {
     function Config(options) {
         classCallCheck(this, Config);
 
-        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this));
+        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this, options));
 
         _this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
@@ -158,128 +350,31 @@ var Config = function (_Events) {
             except: [/Script error/i], // 忽略某个错误
             random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
             repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-            //errorLSSign:'mx-error'                  // error错误数自增 0
-            //maxErrorCookieNo:50,                    // error错误数自增 最大的错
+            errorLSSign: 'mx-error', // error错误数自增 0
+            maxErrorCookieNo: 50, // error错误数自增 最大的错
             tryPeep: false,
             peepSystem: false,
             peepJquery: false,
             peepConsole: true
         };
-        Object.assign(_this.config, options); /// this.config
+        _this.config = Object.assign(_this.config, options); /// this.config
+
         return _this;
     }
 
     createClass(Config, [{
-        key: "get",
+        key: 'get',
         value: function get$$1(name) {
             return this.config[name];
         }
     }, {
-        key: "set",
+        key: 'set',
         value: function set$$1(name, value) {
             this.config[name] = value;
         }
     }]);
     return Config;
 }(Events);
-
-/**
- * @author suman
- * @fileoverview localStorage
- * @date 2017/02/16
- */
-/*class localStorage {
-	constructor () {
-		let localStorage = new localStorageClass();
-		localStorage.init();
-	}
-    setLocalStorage() {
-    	
-    }
-
-}
-*/
-var localStorageClass = function () {
-	function localStorageClass(options) {
-		classCallCheck(this, localStorageClass);
-
-		this.options = {
-			expires: 60 * 24 * 3600,
-			domain: "xxx"
-		};
-
-		var date = new Date();
-		date.setTime(date.getTime() + 60 * 24 * 3600);
-		this.setItem('expires', date.toGMTString());
-	}
-	//内部函数 参数说明(key) 检查key是否存在
-
-
-	createClass(localStorageClass, [{
-		key: 'findItem',
-		value: function findItem() {
-			var bool = document.cookie.indexOf(key);
-			if (bool < 0) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		//得到元素值 获取元素值 若不存在则返回 null
-
-	}, {
-		key: 'getItem',
-		value: function getItem() {
-			var i = this.findItem(key);
-			if (!i) {
-				var array = document.cookie.split(';');
-				for (var j = 0; j < array.length; j++) {
-					var arraySplit = array[j];
-					if (arraySplit.indexOf(key) > -1) {
-						var getValue = array[j].split('=');
-						//将 getValue[0] trim删除两端空格
-						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-						if (getValue[0] == key) {
-							return getValue[1];
-						} else {
-							return 'null';
-						}
-					}
-				}
-			}
-		}
-
-		//重新设置元素
-
-	}, {
-		key: 'setItem',
-		value: function setItem(key, value) {
-			var i = this.findItem(key);
-			document.cookie = key + '=' + value;
-		}
-
-		//清除cookie 参数一个或多一
-
-	}, {
-		key: 'clear',
-		value: function clear() {
-			for (var cl = 0; cl < arguments.length; cl++) {
-				var date = new Date();
-				date.setTime(date.getTime() - 100);
-				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
-			}
-		}
-	}, {
-		key: 'localStorageHandle',
-		value: function localStorageHandle(cb) {
-			var callback = cb || function () {};
-			this.localStorage = localStorage !== undefined ? localStorage : this;
-			cb && cb.call(this, this.localStorage);
-		}
-	}]);
-	return localStorageClass;
-}();
 
 /**
  * @author suman
@@ -343,8 +438,11 @@ var Report = function (_Config) {
             this.url += '?' + parames;
             var oImg = new Image();
             oImg.onload = function () {
+                queue.forEach(function (v) {
+                    localStorage.setItem('mes', utils.stringify(v)); //errorObj  to string 再存localStorage
+                });
                 queue = [];
-                utils.stringify({ "mes": error }); //????????????????
+                //utils.stringify({"mes" : error});  //????????????????
                 if (cb) {
                     cb.call(this);
                 }

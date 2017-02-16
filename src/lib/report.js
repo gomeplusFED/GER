@@ -53,12 +53,12 @@ class Report extends Config {
         this.url += '?' + parames;
         let oImg = new Image();
         oImg.onload = function (){
-            queue = [];
             queue.forEach((v)=>{
-            	utils.stringify(v);//errorObj  to string
+            	localStorage.setItem('mes', utils.stringify(v)); //errorObj  to string 再存localStorage
             });
+            queue = [];
             //utils.stringify({"mes" : error});  //????????????????
-            if ( cb ) {
+            if (cb) {
                 cb.call( this );
             }
             this.trigger('afterReport');
