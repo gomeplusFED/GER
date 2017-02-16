@@ -14,7 +14,7 @@ class GER extends Report {
     }
     rewriteError() {
         window.onerror = ( msg, url, line, col, error ) => {
-            if( this.trigger('error') ){
+            if ( this.trigger( 'error' ) ) {
                 return false;
             }
             var reportMsg = msg;
