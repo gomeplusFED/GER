@@ -89,36 +89,35 @@ var possibleConstructorReturn = function (self, call) {
  * @date 2017/02/16
  */
 var Events = function () {
-    function Events() {
-        classCallCheck(this, Events);
+  function Events() {
+    classCallCheck(this, Events);
 
-        this.handlers = {};
+    this.handlers = {};
+  }
+
+  createClass(Events, [{
+    key: "on",
+    value: function on(type, handler) {
+      if (typeof type === "string" && typeof handler === "function") {
+        this.handlers[type] = typeof this.handlers[type] === "undefined" ? [] : this.handlers[type];
+        this.handlers[type].push(handler);
+      }
     }
-
-    createClass(Events, [{
-        key: "on",
-        value: function on(event, handler) {
-            if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
-                this.handlers[event].push(handler);
-            }
-        }
-    }, {
-        key: "off",
-        value: function off(event) {
-            this.handlers[event] !== undefined && delete this.handlers[event];
-        }
-    }, {
-        key: "trigger",
-        value: function trigger(event) {
-            if (this.handlers[event] instanceof Array) {
-                this.handlers[event].forEach(function (v, i) {
-                    this.handlers[event][i]();
-                }.bind(this));
-            }
-        }
-    }]);
-    return Events;
+  }, {
+    key: "off",
+    value: function off() {}
+  }, {
+    key: "trigger",
+    value: function trigger(event) {
+      if (this.handlers[event] instanceof Array) {
+        var handlers = this.handlers[event];
+        handlers.forEach(function (v, i) {
+          handlers[i]();
+        });
+      }
+    }
+  }]);
+  return Events;
 }();
 
 /**

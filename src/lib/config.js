@@ -4,7 +4,7 @@
  * @date 2017/02/16
  */
 import Events from './events';
-class Config extends Events{
+class Config extends Events {
 
     constructor( options ) {
         super();
@@ -25,10 +25,10 @@ class Config extends Events{
         Object.assign( this.config, options ); /// this.config
     }
     get( name ) {
-        return this.config[name]; 
+        return this.config[ name ];
     }
-    set( name, value) {
-        this.config[name] = value;
+    set( name, value ) {
+        this.config[ name ] = value;
     }
 
 }
