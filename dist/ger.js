@@ -7,6 +7,13 @@
 var utils = {
     typeDecide: function typeDecide(o, type) {
         return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    serializeObj: function serializeObj(obj) {
+        var parames = '';
+        Object.keys(obj).forEach(function (name) {
+            parames += name + '=' + obj[name] + '&';
+        });
+        return parames;
     }
 };
 
@@ -98,11 +105,15 @@ var Config = function () {
     }
 
     createClass(Config, [{
-        key: "set",
-        value: function set$$1() {}
-    }, {
         key: "get",
-        value: function get$$1() {}
+        value: function get$$1(name) {
+            return this.config[name];
+        }
+    }, {
+        key: "set",
+        value: function set$$1(name, value) {
+            this.config[name] = value;
+        }
     }]);
     return Config;
 }();
@@ -121,125 +132,22 @@ var Report = function (_Config) {
 
         var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
 
-    _this.errorQueue = [];
-    _this.mergeTimeout = null;
-    return _this;
-  }
-  // 手动上报
-
-
-  createClass(Report, [{
-    key: "error",
-    value: function error(msg) {
-      var that = this;
-      if (!msg) {
-        console.log('error方法内 msg 参数为空');
-        return;
-      }
-      var errorMsg = {};
-      if (utils.typeDecide(msg, 'String')) {
-        errorMsg.msg = msg;
-        errorMsg.level = 5;
-      } else if (utils.typeDecide(msg)) {
-        errorMsg = msg;
-        errorMsg.level = 5;
-      }
-      that.carryError(errorMsg);
-      that.send();
-    }
-
-    // 发送
-
-  }, {
-    key: "send",
-    value: function send(isNowReport) {
-      var that = this;
-      var reports = function reports() {
-        var parames = '';
-        if (that.config.mergeReport) {
-          // 合并上报
-          console.log('合并上报');
-          for (var i = 0; i < that.errorQueue.length; i++) {
-            var obj = that.errorQueue[i];
-            if (obj) {
-              for (var name in obj) {
-                if (obj.hasOwnProperty(name)) {
-                  parames += name + '=' + obj[name] + '&';
-                }
-              }
-            }
-            parames += '###';
-          }
-        } else {
-          // 不合并上报
-          console.log('不合并上报');
-          if (that.errorQueue.length) {
-            var _obj = that.errorQueue[0];
-            for (var _name in _obj) {
-              if (_obj.hasOwnProperty(_name)) {
-                parames += _name + '=' + _obj[_name] + '&';
-              }
-            }
-          }
-        }
-        that.config.url += '?' + parames;
-        var oImg = new Image();
-        oImg.src = that.config.url;
-      };
-      if (isNowReport) {
-        // 延迟上报
-        that.mergeTimeout = setTimeout(reports, that.config.delay);
-      } else {
-        // 现在上报
-        reports();
-      }
-    }
-    // push错误到pool
-
-  }, {
-    key: "carryError",
-    value: function carryError(error) {
-      //let that = this;
-      if (!error) {
-        console.log('carryError方法内 error 参数为空');
-        return;
-      }
-      // 拿到onerror的参数 放数组中
-      this.errorQueue.push(error);
-    }
-
-    // info
         _this.errorQueue = [];
         _this.mergeTimeout = null;
-        /*['info','log','wran','debug','error'].forEach((type,index)=>{
-            this[type] = (msg)=>{
-                this.handleMsg ( msg, type, index );
-            };
-        }.bind(this));*/
-        ['info', 'log', 'wran', 'debug', 'error'].forEach(function (type, index) {
+        ['info', 'log', 'warn', 'debug', 'error'].forEach(function (type, index) {
             var _this2 = this;
 
             this[type] = function (msg) {
-                //console.log(this,12343354)
                 _this2.handleMsg(msg, type, index);
             };
         }.bind(_this));
         return _this;
     }
 
+    // 发送
+
+
     createClass(Report, [{
-        key: "serializeObj",
-        value: function serializeObj(obj) {
-            var parames = '';
-            Object.keys(obj).forEach(function (name) {
-                parames += name + '=' + obj[name] + '&';
-            });
-            return parames;
-        }
-
-        // 发送
-
-    }, {
         key: "send",
         value: function send(isNowReport, cb) {
             var _this3 = this;
@@ -251,16 +159,14 @@ var Report = function (_Config) {
                     // 合并上报
                     console.log('合并上报');
                     parames = queue.map(function (obj) {
-                        return _this3.serializeObj(obj);
+                        return utils.serializeObj(obj);
                     }).join('|');
-                    /*that.errorQueue.forEach( function (){
-                    		});*/
                 } else {
                     // 不合并上报
                     console.log('不合并上报');
                     if (queue.length) {
                         var obj = queue[0];
-                        parames = _this3.serializeObj(obj);
+                        parames = utils.serializeObj(obj);
                     }
                 }
                 _this3.config.url += '?' + parames;
@@ -287,7 +193,6 @@ var Report = function (_Config) {
     }, {
         key: "carryError",
         value: function carryError(error) {
-            //let that = this;
             if (!error) {
                 console.wran('carryError方法内 error 参数为空');
                 return;
@@ -301,7 +206,6 @@ var Report = function (_Config) {
     }, {
         key: "handleMsg",
         value: function handleMsg(msg, type, level) {
-            //let that = this;
             if (!msg) {
                 console.wran(type + '方法内 msg 参数为空');
                 return;

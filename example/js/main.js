@@ -5,4 +5,6 @@ var error_report = new Ger({
 /*
 error_report.rewriteError();
 error_report.testsdsdsds();*/
-error_report.info('sdsdsds')
+error_report.info('sdsdsds');
+//error_report.set('url','xxxx');
+//console.log(error_report.get('url'));

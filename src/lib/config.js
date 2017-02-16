@@ -17,11 +17,11 @@ class Config {
         };
         Object.assign( this.config, options ); /// this.config
     }
-    set() {
-
+    get( name ) {
+        return this.config[name]; 
     }
-    get() {
-
+    set( name, value) {
+        this.config[name] = value;
     }
 
 }
