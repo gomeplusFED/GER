@@ -5,8 +5,6 @@ var error_report = new Ger({
 	random : 1
 });
 /*
-error_report.rewriteError();*/
-/*
 try{
 	aaa
 }catch(e){
@@ -15,3 +13,4 @@ try{
 error_report.info('111111111');
 
 error_report.on();
+

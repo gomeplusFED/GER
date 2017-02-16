@@ -9,8 +9,8 @@ import Config from "./Config";
 
 class Report extends Config {
 
-    constructor(options) {
-    	super(options);
+    constructor( options ) {
+        super( options );
         this.errorQueue = [];
         this.repeatList = {};
         this.mergeTimeout = null;
@@ -56,8 +56,8 @@ class Report extends Config {
 			let oImg = new Image();
             oImg.onload = () => {
                 queue = [];
-                if(cb){
-                    cb.call(this);
+                if ( cb ) {
+                    cb.call( this );
                 }
             };
             oImg.src = this.url;
@@ -101,8 +101,8 @@ class Report extends Config {
     	}
     	let errorMsg = utils.typeDecide(msg,'String') ? {msg:msg} : msg;
         errorMsg.level = level;
-    	this.carryError(errorMsg);
-    	this.send();
+        this.carryError( errorMsg );
+        this.send();
         return errorMsg;
     }
 }
