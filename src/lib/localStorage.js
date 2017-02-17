@@ -7,8 +7,8 @@
 import Peep from "./peep";
 
 class LocalStorageClass extends Peep {
-	constructor() {
-		super();
+	constructor(options) {
+		super(options);
 		this.options = {
 			expires : 60*24*3600,
 			domain : this.config.errorLSSign

@@ -191,17 +191,16 @@ var Config = function () {
 var Peep = function (_Config) {
     inherits(Peep, _Config);
 
-    function Peep() {
+    function Peep(options) {
         classCallCheck(this, Peep);
 
-        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this));
+        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
 
+        _this.timeoutkey = null;
         window.onload = function () {
             _this.peep();
         };
 
-        //判断加载完成   
-        // window.onload之后再次设置定时器判断
         return _this;
     }
 
@@ -216,40 +215,164 @@ var Peep = function (_Config) {
                 this.config.peepCustom && this.peepCustom();
             }
         }
+    }, {
+        key: 'onThrow',
+        value: function onThrow(error) {
+            this.carryError(error);
+        }
+    }, {
+        key: 'cat',
+        value: function cat(func, args) {
+            return function () {
+                var _this2 = this;
+
+                try {
+                    return func.apply(this, args || arguments);
+                } catch (error) {
+
+                    this.onThrow(error);
+                    if (error.stack && console && console.error) {
+                        console.error("[GER]", error.stack);
+                    }
+                    if (!this.timeoutkey) {
+                        (function () {
+                            var orgOnerror = window.onerror;
+                            window.onerror = function () {};
+                            _this2.timeoutkey = setTimeout(function () {
+                                window.onerror = orgOnerror;
+                                this.timeoutkey = null;
+                            }, 50);
+                        })();
+                    }
+                    throw error;
+                }
+            };
+        }
+    }, {
+        key: 'catArgs',
+        value: function catArgs(func) {
+            return function () {
+                var _this3 = this;
+
+                var args = [];
+                arguments.forEach(function (v) {
+                    utils.typeDecide(v, 'Function') && (v = _this3.cat(v));
+                    args.push(v);
+                });
+                return func.apply(this, args);
+            }.bind(this);
+        }
+    }, {
+        key: 'catTimeout',
+        value: function catTimeout(func) {
+            return function (cb, timeout) {
+                if (utils.typeDecide(cb, 'String')) {
+                    try {
+                        cb = new Function(cb);
+                    } catch (err) {
+                        throw err;
+                    }
+                }
+                var args = [].slice.call(arguments, 2);
+                cb = this.cat(cb, args.length && args);
+                return func(cb, timeout);
+            }.bind(this);
+        }
+    }, {
+        key: 'makeArgsTry',
+        value: function makeArgsTry(func, self) {
+            return function () {
+                var _this4 = this;
+
+                var tmp = void 0,
+                    args = [];
+                arguments.forEach(function (v) {
+                    utils.typeDecide(v, 'Function') && (tmp = _this4.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+
+                    args.push(v);
+                });
+                return func.apply(self || this, args);
+            }.bind(this);
+        }
+    }, {
+        key: 'makeObjTry',
+        value: function makeObjTry(obj) {
+            var key = void 0;
+            var value = void 0;
+            var that = this;
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    value = obj[key];
+                    if (utils.typeDecide(value, 'Function')) {
+                        obj[key] = that.cat(value);
+                    }
+                }
+            }
+            return obj;
+        }
 
         // 劫持原生js
 
     }, {
         key: 'peepSystem',
-        value: function peepSystem() {}
+        value: function peepSystem() {
+            window.setTimeout = this.catTimeout(setTimeout);
+            window.setInterval = this.catTimeout(setInterval);
+        }
 
         // 劫持jquery
 
     }, {
         key: 'peepJquery',
-        value: function peepJquery() {}
-        /*
-        // 保存之前的$.ajax
-        $._ajax = $.ajax;
-        function noop() {}
-        // 我想要加入的功能
-        function cb(data) {
-            console.log(data);
-            // do something you want
-        }
-        // ajax 填充新代码
-        function myAjax(e, n) {
-            e._success = e.success || noop;
-            e.success = function success(data) {
-                cb(data);x`
-                e._success.call(this, data);
-            };
-            $._ajax(e, n);
-        }
-        // ajax重新赋值
-        $.ajax = myAjax;
-        */
+        value: function peepJquery() {
+            var _$ = window.$;
 
+            if (!_$ || !_$.event) {
+                return this;
+            }
+
+            var _add = void 0,
+                _remove = void 0;
+            if (_$.zepto) {
+                _add = _$.fn.on, _remove = _$.fn.off;
+
+                _$.fn.on = this.makeArgsTry(_add);
+                _$.fn.off = function () {
+                    var args = [];
+                    arguments.forEach(function (v) {
+                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                        args.push(v);
+                    });
+                    return _remove.apply(this, args);
+                };
+            } else if (window.jQuery) {
+                _add = _$.event.add, _remove = _$.event.remove;
+
+                _$.event.add = this.makeArgsTry(_add);
+                _$.event.remove = function () {
+                    var args = [];
+                    arguments.forEach(function (v) {
+                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                        args.push(v);
+                    });
+                    return _remove.apply(this, args);
+                };
+            }
+
+            var _ajax = _$.ajax;
+
+            if (_ajax) {
+                _$.ajax = function (url, setting) {
+                    if (!setting) {
+                        setting = url;
+                        url = undefined;
+                    }
+                    this.makeObjTry(setting);
+                    if (url) return _ajax.call(_$, url, setting);
+                    return _ajax.call(_$, setting);
+                };
+            }
+        }
 
         // 劫持console
 
@@ -281,10 +404,10 @@ var Peep = function (_Config) {
 var LocalStorageClass = function (_Peep) {
 	inherits(LocalStorageClass, _Peep);
 
-	function LocalStorageClass() {
+	function LocalStorageClass(options) {
 		classCallCheck(this, LocalStorageClass);
 
-		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this));
+		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this, options));
 
 		_this.options = {
 			expires: 60 * 24 * 3600,
@@ -375,10 +498,10 @@ var LocalStorageClass = function (_Peep) {
 var Events = function (_Localstorage) {
     inherits(Events, _Localstorage);
 
-    function Events() {
+    function Events(options) {
         classCallCheck(this, Events);
 
-        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this));
+        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
 
         _this.handlers = {};
         return _this;
@@ -423,10 +546,10 @@ var Events = function (_Localstorage) {
 var Report = function (_Events) {
     inherits(Report, _Events);
 
-    function Report() {
+    function Report(options) {
         classCallCheck(this, Report);
 
-        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this));
+        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
 
         _this.errorQueue = [];
         _this.repeatList = {};
@@ -555,10 +678,10 @@ var Report = function (_Events) {
 var GER = function (_Report) {
     inherits(GER, _Report);
 
-    function GER() {
+    function GER(options) {
         classCallCheck(this, GER);
 
-        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
+        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
 
         _this.rewriteError();
         return _this;

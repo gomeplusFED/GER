@@ -4,7 +4,6 @@
  * @date 2017/02/16
  */
 class Config  {
-
     constructor( options ) {
         this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
