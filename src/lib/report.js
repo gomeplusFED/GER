@@ -110,6 +110,7 @@ class Report extends Events {
             msg: msg
         } : msg;
         errorMsg.level = level;
+        errorMsg  = Object.assign(utils.getSystemParams(), errorMsg);
         this.carryError( errorMsg );
         this.send();
         return errorMsg;

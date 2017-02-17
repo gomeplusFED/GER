@@ -119,6 +119,26 @@ var utils = {
 
             if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
         }
+    },
+    parse: function parse(str) {
+        return JSON.parse ? JSON.parse(str) : eval('(' + str + ')');
+    },
+    getServerPort: function getServerPort() {
+        return window.location.port === '' ? window.location.protocol === 'http:' ? '80' : '443' : window.location.port;
+    },
+    getUserAgent: function getUserAgent() {
+        return navigator.userAgent;
+    },
+    getPlatType: function getPlatType() {
+        return !!utils.getUserAgent().match(/Mobile/) ? 'Mobile' : 'PC';
+    },
+    getSystemParams: function getSystemParams() {
+        return {
+            userAgent: utils.getUserAgent(),
+            currentUrl: document.location.href,
+            timestamp: +new Date(),
+            projectType: utils.getPlatType()
+        };
     }
 };
 
@@ -518,6 +538,7 @@ var Report = function (_Events) {
                 msg: msg
             } : msg;
             errorMsg.level = level;
+            errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
             this.carryError(errorMsg);
             this.send();
             return errorMsg;
@@ -560,13 +581,12 @@ var GER = function (_Report) {
                 if (utils.typeDecide(reportMsg, "Event")) {
                     reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
                 }
-                _this2.carryError({
+                _this2.error({
                     msg: reportMsg,
                     rolNum: line,
                     colNum: col,
                     targetUrl: url
                 });
-                _this2.send();
                 return true;
             };
         }
