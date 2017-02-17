@@ -13,7 +13,7 @@ class Peep extends LocalStorage {
         super();
         console.log(this.config, 'peep');
         let that = this;
-        window.onload = function (){
+        window.onload = function () {
             that.peep();
         };
 
@@ -21,7 +21,7 @@ class Peep extends LocalStorage {
         // window.onload之后再次设置定时器判断
     }
     peep() {
-        if( this.config.tryPeep ) {
+        if ( this.config.tryPeep ) {
             this.config.peepSystem && this.peepSystem();
             this.config.peepJquery && this.peepJquery();
             this.config.peepConsole && this.peepConsole();
