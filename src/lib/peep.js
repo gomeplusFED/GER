@@ -6,6 +6,7 @@
 
 import LocalStorage from './localStorage';
 
+import Config from "./Config";
 
 class Peep extends LocalStorage {
     constructor() {

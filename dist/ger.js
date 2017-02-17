@@ -4,21 +4,35 @@
 	(factory());
 }(this, (function () { 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+/**
+ * @author suman
+ * @fileoverview report
+ * @date 2017/02/15
+ */
+
+var utils = {
+    typeDecide: function typeDecide(o, type) {
+        return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    serializeObj: function serializeObj(obj) {
+        var parames = '';
+        Object.keys(obj).forEach(function (name) {
+            parames += name + '=' + obj[name] + '&';
+        });
+        return parames;
+    },
+    stringify: function stringify(obj) {
+        if (JSON.stringify) {
+            return JSON.stringify(obj);
+        } else {
+            var sep = '';
+            return '{' + Object.keys(obj).map(function (k) {
+                sep = typeof obj[k] === 'number' ? '' : '"';
+                return '"' + k + '"' + ':' + sep + obj[k] + sep;
+            }).join(',') + '}';
+        }
+    }
 };
-
-
-
-
-
-
-
-
-
-
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -87,6 +101,7 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
+<<<<<<< HEAD
  * @author suman
  * @fileoverview report
  * @date 2017/02/15
@@ -211,10 +226,13 @@ var LocalStorageClass = function () {
 }();
 
 /**
+=======
+>>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
  * @author  zdongh2016
  * @fileoverview  Peep
  * @date 2017/02/16
  */
+<<<<<<< HEAD
 
 var Peep = function (_LocalStorage) {
     inherits(Peep, _LocalStorage);
@@ -227,6 +245,19 @@ var Peep = function (_LocalStorage) {
 
 
         console.log(_this.config, 'peep');
+=======
+//import LocalStorage from './localStorage';
+
+var Peep = function (_Config) {
+    inherits(Peep, _Config);
+
+    function Peep(options) {
+        classCallCheck(this, Peep);
+
+        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
+
+        console.log(options);
+>>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
         var that = _this;
         window.onload = function () {
             that.peep();
@@ -302,7 +333,11 @@ var Peep = function (_LocalStorage) {
         value: function peepCustom() {}
     }]);
     return Peep;
+<<<<<<< HEAD
 }(LocalStorageClass);
+=======
+}(Config);
+>>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
 
 /**
  * @author  zdongh2016
@@ -541,12 +576,16 @@ var GER = function (_Report) {
 
     function GER(options) {
         classCallCheck(this, GER);
+<<<<<<< HEAD
 
         var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
 
         console.log(_this.config, 'core');
         _this.rewriteError();
         return _this;
+=======
+        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+>>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
     }
 
     createClass(GER, [{
@@ -556,9 +595,13 @@ var GER = function (_Report) {
                 _arguments = arguments;
 
             window.onerror = function (msg, url, line, col, error) {
+<<<<<<< HEAD
                 if (_this2.trigger('error', _arguments)) {
                     return false;
                 }
+=======
+
+>>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
                 var reportMsg = msg;
                 if (error.stack && error) {
                     reportMsg = _this2.handleErrorStack(error);
@@ -573,7 +616,8 @@ var GER = function (_Report) {
                     targetUrl: url
                 });
                 _this2.send();
-                return true;
+                //me.trigger('afterReport');
+
             };
         }
         // 处理onerror返回的error.stack
