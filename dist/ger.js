@@ -123,31 +123,122 @@ var utils = {
 };
 
 /**
+ * @author suman
+ * @fileoverview localStorage
+ * @date 2017/02/16
+ */
+
+var LocalStorageClass = function () {
+	function LocalStorageClass() {
+		classCallCheck(this, LocalStorageClass);
+
+		/*this.options = {
+  	expires : 60*24*3600
+  	//domain : this.config.errorLSSign
+  };*/
+
+		var date = new Date();
+		date.setTime(date.getTime() + 60 * 24 * 3600);
+		this.setItem('expires', date.toGMTString());
+	}
+	//内部函数 参数说明(key) 检查key是否存在
+
+
+	createClass(LocalStorageClass, [{
+		key: 'findItem',
+		value: function findItem(key) {
+			var bool = document.cookie.indexOf(key);
+			if (bool < 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		//得到元素值 获取元素值 若不存在则返回 null
+
+	}, {
+		key: 'getItem',
+		value: function getItem(key) {
+			var i = this.findItem(key);
+			if (!i) {
+				var array = document.cookie.split(';');
+				for (var j = 0; j < array.length; j++) {
+					var arraySplit = array[j];
+					if (arraySplit.indexOf(key) > -1) {
+						var getValue = array[j].split('=');
+						//将 getValue[0] trim删除两端空格
+						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+						if (getValue[0] == key) {
+							return getValue[1];
+						} else {
+							return 'null';
+						}
+					}
+				}
+			}
+		}
+
+		//重新设置元素
+
+	}, {
+		key: 'setItem',
+		value: function setItem(key, value) {
+			//let i = this.findItem(key);
+			document.cookie = key + '=' + value;
+		}
+
+		//清除cookie 参数一个或多一
+
+	}, {
+		key: 'clear',
+		value: function clear() {
+			for (var cl = 0; cl < arguments.length; cl++) {
+				var date = new Date();
+				date.setTime(date.getTime() - 100);
+				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
+			}
+		}
+	}, {
+		key: 'localStorageHandle',
+		value: function localStorageHandle(cb) {
+			var callback = cb || function () {};
+			this.localStorage = localStorage !== undefined ? localStorage : this;
+			callback.call(this, this.localStorage);
+		}
+	}]);
+	return LocalStorageClass;
+}();
+
+/**
  * @author  zdongh2016
  * @fileoverview  Peep
  * @date 2017/02/16
  */
 
-//import LocalStorage from './localStorage';
+var Peep = function (_LocalStorage) {
+    inherits(Peep, _LocalStorage);
 
-
-var Peep /* extends LocalStorage*/ = function () {
-    function Peep(options) {
+    function Peep() {
         classCallCheck(this, Peep);
 
+        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this));
         //super(options);
-        console.log(options);
-        var that = this;
+
+
+        console.log(_this.config, 'peep');
+        var that = _this;
         window.onload = function () {
             that.peep();
         };
 
         //判断加载完成   
         // window.onload之后再次设置定时器判断
+        return _this;
     }
 
     createClass(Peep, [{
-        key: "peep",
+        key: 'peep',
         value: function peep() {
             if (this.config.tryPeep) {
                 this.config.peepSystem && this.peepSystem();
@@ -161,13 +252,13 @@ var Peep /* extends LocalStorage*/ = function () {
         // 劫持原生js
 
     }, {
-        key: "peepSystem",
+        key: 'peepSystem',
         value: function peepSystem() {}
 
         // 劫持jquery
 
     }, {
-        key: "peepJquery",
+        key: 'peepJquery',
         value: function peepJquery() {}
         /*
         // 保存之前的$.ajax
@@ -195,23 +286,23 @@ var Peep /* extends LocalStorage*/ = function () {
         // 劫持console
 
     }, {
-        key: "peepConsole",
+        key: 'peepConsole',
         value: function peepConsole() {}
 
         // 劫持seajs
 
     }, {
-        key: "peepModule",
+        key: 'peepModule',
         value: function peepModule() {}
 
         // 劫持自定义方法
 
     }, {
-        key: "peepCustom",
+        key: 'peepCustom',
         value: function peepCustom() {}
     }]);
     return Peep;
-}();
+}(LocalStorageClass);
 
 /**
  * @author  zdongh2016
@@ -222,37 +313,41 @@ var Peep /* extends LocalStorage*/ = function () {
 var Events = function (_Peep) {
     inherits(Events, _Peep);
 
-    function Events(options) {
+    function Events() {
         classCallCheck(this, Events);
 
-        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
+        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this));
 
+        console.log(JSON.stringify(_this), 'events');
         _this.handlers = {};
         return _this;
     }
 
     createClass(Events, [{
-        key: "on",
+        key: 'on',
         value: function on(event, handler) {
             if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
-                this.handlers[event].push(handler);
+                this.handlers[event] = this.handlers[event] ? this.handlers[event].push(handler) : [handler];
             }
         }
     }, {
-        key: "off",
+        key: 'off',
         value: function off(event) {
-            this.handlers[event] !== undefined && delete this.handlers[event];
+            if (this.handlers[event]) {
+                delete this.handlers[event];
+            }
         }
     }, {
-        key: "trigger",
-        value: function trigger(event) {
-            if (this.handlers[event] instanceof Array) {
-                this.handlers[event].forEach(function (v, i) {
-                    this.handlers[event][i]();
-                }.bind(this));
+        key: 'trigger',
+        value: function trigger(event, args) {
+            var _this2 = this;
+
+            if (this.handlers[event].length) {
+                return this.handlers[event].every(function (v, i) {
+                    var ret = _this2.handlers[event][i].apply(_this2, args);
+                    return ret === false ? false : true;
+                });
             }
-            return this.handlers[event] !== undefined;
         }
     }]);
     return Events;
@@ -269,7 +364,7 @@ var Config = function (_Events) {
     function Config(options) {
         classCallCheck(this, Config);
 
-        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this, options));
+        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this));
 
         _this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
@@ -285,8 +380,8 @@ var Config = function (_Events) {
             peepJquery: false,
             peepConsole: true
         };
-        _this.config = Object.assign(_this.config, options); /// this.config
-
+        _this.config = Object.assign(_this.config, options);
+        console.log(_this.config, 'super config');
         return _this;
     }
 
@@ -318,6 +413,7 @@ var Report = function (_Config) {
 
         var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
 
+        console.log(_this.config, 'report');
         _this.errorQueue = [];
         _this.repeatList = {};
         _this.mergeTimeout = null;
@@ -325,12 +421,10 @@ var Report = function (_Config) {
         _this.srcs = [];
 
         ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
-            var _this2 = this;
-
-            this[type] = function (msg) {
-                _this2.handleMsg(msg, type, index);
+            _this[type] = function (msg) {
+                _this.handleMsg(msg, type, index);
             };
-        }.bind(_this));
+        });
 
         return _this;
     }
@@ -450,6 +544,7 @@ var GER = function (_Report) {
 
         var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
 
+        console.log(_this.config, 'core');
         _this.rewriteError();
         return _this;
     }
@@ -457,10 +552,11 @@ var GER = function (_Report) {
     createClass(GER, [{
         key: 'rewriteError',
         value: function rewriteError() {
-            var _this2 = this;
+            var _this2 = this,
+                _arguments = arguments;
 
             window.onerror = function (msg, url, line, col, error) {
-                if (_this2.trigger('error')) {
+                if (_this2.trigger('error', _arguments)) {
                     return false;
                 }
                 var reportMsg = msg;

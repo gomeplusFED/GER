@@ -5,12 +5,11 @@
  */
 
 class LocalStorageClass {
-	constructor( options ) {
-		console.log(options);
-		this.options = {
+	constructor(  ) {
+		/*this.options = {
 			expires : 60*24*3600
 			//domain : this.config.errorLSSign
-		};
+		};*/
 
     	let date = new Date();
 		date.setTime(date.getTime() + 60*24*3600);

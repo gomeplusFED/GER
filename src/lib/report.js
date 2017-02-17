@@ -11,17 +11,18 @@ class Report extends Config {
 
     constructor( options ) {
         super( options );
+        console.log(this.config , 'report');
         this.errorQueue = [];
         this.repeatList = {};
         this.mergeTimeout = null;
         this.url = this.config.url;
         this.srcs = [];
 
-        ['log', 'debug', 'info', 'warn', 'error'].forEach(function(type, index){
+        ['log', 'debug', 'info', 'warn', 'error'].forEach((type, index)=>{
             this[type] = (msg)=>{
                 this.handleMsg ( msg, type, index );
             };  
-        }.bind(this));
+        });
 
     }
     repeat( error ){

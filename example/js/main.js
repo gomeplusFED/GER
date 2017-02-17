@@ -1,5 +1,7 @@
 'use strict';
-var error_report = new Ger();
+var error_report = new Ger({
+	url:'xxxxx'
+});
 
 //error_report.info('111111111');
 

@@ -5,27 +5,29 @@
  */
 
 import Peep from './peep';
-class Events  extends Peep{
-	constructor(options){
-		super(options);
+class Events extends Peep{
+	constructor(){
+		super();
+        console.log(JSON.stringify(this), 'events');
 		this.handlers = {};
 	}
     on(event, handler){
     	if( typeof event === "string" && typeof handler === "function" ){
-	    	this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
-	        this.handlers[event].push(handler);
+	    	this.handlers[event] = this.handlers[event] ? this.handlers[event].push(handler) : [handler];
     	}
     }
     off( event ) {
-        this.handlers[event] !== undefined && delete  this.handlers[event];
+        if(this.handlers[event]){
+            delete this.handlers[event];
+        } 
     }
-    trigger( event ) {
-        if(this.handlers[event] instanceof Array){
-            this.handlers[event].forEach(function(v,i){
-                this.handlers[event][i]();
-            }.bind(this));
+    trigger( event,args ) {
+        if(this.handlers[event].length){
+            return this.handlers[event].every((v,i)=>{
+                var ret = this.handlers[event][i].apply(this,args);
+                return ret === false ? false : true;
+            });
         }
-        return this.handlers[event] !== undefined;
     }
 
 }

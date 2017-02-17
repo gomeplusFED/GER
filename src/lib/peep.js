@@ -4,13 +4,14 @@
  * @date 2017/02/16
  */
 
-//import LocalStorage from './localStorage';
+import LocalStorage from './localStorage';
 
 
-class Peep/* extends LocalStorage*/ {
-    constructor(options) {
+class Peep extends LocalStorage {
+    constructor() {
         //super(options);
-        console.log(options);
+        super();
+        console.log(this.config, 'peep');
         let that = this;
         window.onload = function (){
             that.peep();
