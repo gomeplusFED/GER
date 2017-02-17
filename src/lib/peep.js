@@ -4,17 +4,14 @@
  * @date 2017/02/16
  */
 
-//import LocalStorage from './localStorage';
+import Config from './config';
 
-import Config from "./Config";
 
 class Peep extends Config {
-    constructor( options ) {
-        //super(options);
-        console.log( options );
-        let that = this;
-        window.onload = function () {
-            that.peep();
+    constructor() {
+        super();
+        window.onload =  () => {
+            this.peep();
         };
 
         //判断加载完成   

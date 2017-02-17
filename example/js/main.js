@@ -1,5 +1,8 @@
 'use strict';
-var error_report = new Ger();
+var error_report = new Ger({
+	url:'xxxxx',
+	failTime : 3
+});
 
 //error_report.info('111111111');
 
@@ -7,4 +10,5 @@ var error_report = new Ger();
 /*error_report.on('error',function(){
 	console.log(234546576879)
 });*/
-assada
+
+localStorage.setItem('a', '123245678');

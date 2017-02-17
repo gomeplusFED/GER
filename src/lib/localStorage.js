@@ -4,48 +4,30 @@
  * @date 2017/02/16
  */
 
-import Config from "./config";
+import Peep from "./peep";
+import utils from "./utils";
 
-class LocalStorageClass extends Config {
+class LocalStorageClass extends Peep {
 	constructor( options ) {
 		super( options );
-		let that = this;
-		// 判断浏览器是否支持localstorage
-		let hasLocal = !!window.LocalStorage;
-		let _utilsFn = {
-			setItem: hasLocal ? function(){
-				localStorage.setItem();
-			} : function(){
-				that.setItem;
-			}
-		};
-
-		_utilsFn.setItem();
-
-		this.options = {
+		/*this.options = {
 			expires : 60*24*3600,
-			//domain : this.config.errorLSSign
-		};
+			domain : this.config.errorLSSign
+		};*/
 
-    	let date = new Date();
-		date.setTime(date.getTime() + 60*24*3600);
-		this.setItem('expires',date.toGMTString());
-
+		// 判断浏览器是否支持localstorage
+		this.hasLocal = !!window.LocalStorage;
+		
 	}
-    //内部函数 参数说明(key) 检查key是否存在
+
+    // 检查key是否存在 return true/false
 	findItem( key ){
-		let b = document.cookie.indexOf(key);
-		if( b < 0 ){
-			return true;
-		}else{
-			return false;
-		}
+		return document.cookie.indexOf(key) === -1;
 	}
 
 	//得到元素值 获取元素值 若不存在则返回 null
 	getItem( key ){
-		let i = this.findItem(key);
-		if(!i){
+		if(!this.findItem(key)){
 			let array = document.cookie.split(';');           
 			for(let j=0;j<array.length;j++){
 				let arraySplit = array[j];
@@ -63,17 +45,28 @@ class LocalStorageClass extends Config {
 		}
 	}
 
-	//重新设置元素
-	setItem(key,value){
-		//let i = this.findItem(key);
-		document.cookie = key + '=' + value;
+	// 设置一条localstorage或cookie
+	setItem( key, value ){
+		let expiresTime = +new Date() + 1000*60*60*24*this.config.validTime;
+		return this.hasLocal ? function(key, value ){
+			localStorage.setItem( key, utils.stringify({
+				value:value,
+				expires: expiresTime
+			}));
+			return value;
+		}.call(this, key, value ) : function(key, value ){
+			//let i = this.findItem(key);
+			document.cookie = key + '=' + value + '; expires=' + expiresTime.toGMTString();
+		}.call(this, key, value );
+		 
 	}
+
 
 	//清除cookie 参数一个或多一
 	clear(){
 		for(let i =0 ; i < arguments.length; i ++){
 			let date = new Date();
-			date.setTime(date.getTime() - 100);
+			date.setTime( date.getTime() - 100 );
 			document.cookie = arguments[i] + "=a; expires=" + date.toGMTString();
 		}
 	}

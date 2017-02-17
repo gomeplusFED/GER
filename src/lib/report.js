@@ -5,23 +5,22 @@
  */
 
 import utils from "./utils";
-import Config from "./Config";
+import Events from "./events";
 
-class Report extends Config {
+class Report extends Events {
 
-    constructor( options ) {
-        super( options );
+    constructor() {
+        super();
         this.errorQueue = [];
         this.repeatList = {};
         this.mergeTimeout = null;
         this.url = this.config.url;
         this.srcs = [];
-
-        [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( function ( type, index ) {
-            this[ type ] = ( msg ) => {
-                this.handleMsg( msg, type, index );
-            };
-        }.bind( this ) );
+        ['log', 'debug', 'info', 'warn', 'error'].forEach((type, index)=>{
+            this[type] = (msg)=>{
+                this.handleMsg ( msg, type, index );
+            };  
+        });
 
     }
     repeat( error ) {

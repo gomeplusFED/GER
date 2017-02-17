@@ -8,13 +8,13 @@ import utils from './utils';
 
 
 class GER extends Report {
-    constructor( options ) {
-        super( options );
+    constructor() {
+        super();
         this.rewriteError();
     }
     rewriteError() {
         window.onerror = ( msg, url, line, col, error ) => {
-            if ( this.trigger( 'error' ) ) {
+            if( this.trigger('error',arguments)){
                 return false;
             }
             var reportMsg = msg;
