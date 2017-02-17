@@ -4,18 +4,14 @@
  * @date 2017/02/16
  */
 
-import LocalStorage from './localStorage';
+import Config from './config';
 
-import Config from "./Config";
 
-class Peep extends LocalStorage {
+class Peep extends Config {
     constructor() {
-        //super(options);
         super();
-        console.log(this.config, 'peep');
-        let that = this;
-        window.onload = function () {
-            that.peep();
+        window.onload =  () => {
+            this.peep();
         };
 
         //判断加载完成   

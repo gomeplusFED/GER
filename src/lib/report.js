@@ -5,13 +5,12 @@
  */
 
 import utils from "./utils";
-import Config from "./Config";
+import Events from "./events";
 
-class Report extends Config {
+class Report extends Events {
 
-    constructor( options ) {
-        super( options );
-        console.log(this.config , 'report');
+    constructor() {
+        super();
         this.errorQueue = [];
         this.repeatList = {};
         this.mergeTimeout = null;

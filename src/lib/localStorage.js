@@ -4,15 +4,14 @@
  * @date 2017/02/16
  */
 
-import Config from "./config";
+import Peep from "./peep";
 
-class LocalStorageClass extends Config {
-	constructor( options ) {
-		super( options );
-
+class LocalStorageClass extends Peep {
+	constructor() {
+		super();
 		this.options = {
 			expires : 60*24*3600,
-			//domain : this.config.errorLSSign
+			domain : this.config.errorLSSign
 		};
 
     	let date = new Date();

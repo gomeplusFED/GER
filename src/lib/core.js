@@ -8,10 +8,8 @@ import utils from './utils';
 
 
 class GER extends Report {
-    constructor( options ) {
-        super( options );
-
-        console.log(this.config ,'core');
+    constructor() {
+        super();
         this.rewriteError();
     }
     rewriteError() {

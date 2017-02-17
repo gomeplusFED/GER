@@ -4,11 +4,10 @@
  * @date 2017/02/16
  */
 
-import Peep from './peep';
-class Events extends Peep{
+import Localstorage from './localStorage';
+class Events extends Localstorage{
 	constructor(){
 		super();
-        console.log(JSON.stringify(this), 'events');
 		this.handlers = {};
 	}
     on(event, handler){
@@ -22,7 +21,7 @@ class Events extends Peep{
         } 
     }
     trigger( event,args ) {
-        if(this.handlers[event].length){
+        if(this.handlers[event]){
             return this.handlers[event].every((v,i)=>{
                 var ret = this.handlers[event][i].apply(this,args);
                 return ret === false ? false : true;

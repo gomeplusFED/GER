@@ -4,35 +4,21 @@
 	(factory());
 }(this, (function () { 'use strict';
 
-/**
- * @author suman
- * @fileoverview report
- * @date 2017/02/15
- */
-
-var utils = {
-    typeDecide: function typeDecide(o, type) {
-        return Object.prototype.toString.call(o) === "[object " + type + "]";
-    },
-    serializeObj: function serializeObj(obj) {
-        var parames = '';
-        Object.keys(obj).forEach(function (name) {
-            parames += name + '=' + obj[name] + '&';
-        });
-        return parames;
-    },
-    stringify: function stringify(obj) {
-        if (JSON.stringify) {
-            return JSON.stringify(obj);
-        } else {
-            var sep = '';
-            return '{' + Object.keys(obj).map(function (k) {
-                sep = typeof obj[k] === 'number' ? '' : '"';
-                return '"' + k + '"' + ':' + sep + obj[k] + sep;
-            }).join(',') + '}';
-        }
-    }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
+
+
+
+
+
+
+
+
+
+
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -101,7 +87,6 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
-<<<<<<< HEAD
  * @author suman
  * @fileoverview report
  * @date 2017/02/15
@@ -138,129 +123,61 @@ var utils = {
 };
 
 /**
- * @author suman
- * @fileoverview localStorage
+ * @author  zdongh2016
+ * @fileoverview config
  * @date 2017/02/16
  */
+var Config = function () {
+    function Config(options) {
+        classCallCheck(this, Config);
 
-var LocalStorageClass = function () {
-	function LocalStorageClass() {
-		classCallCheck(this, LocalStorageClass);
+        this.config = {
+            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
+            url: "ewewe", // 指定错误上报地址
+            except: [/Script error/i], // 忽略某个错误
+            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
+            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
+            errorLSSign: 'mx-error', // error错误数自增 0
+            maxErrorCookieNo: 50, // error错误数自增 最大的错
+            tryPeep: false,
+            peepSystem: false,
+            peepJquery: false,
+            peepConsole: true
+        };
+        this.config = Object.assign(this.config, options);
+    }
 
-		/*this.options = {
-  	expires : 60*24*3600
-  	//domain : this.config.errorLSSign
-  };*/
-
-		var date = new Date();
-		date.setTime(date.getTime() + 60 * 24 * 3600);
-		this.setItem('expires', date.toGMTString());
-	}
-	//内部函数 参数说明(key) 检查key是否存在
-
-
-	createClass(LocalStorageClass, [{
-		key: 'findItem',
-		value: function findItem(key) {
-			var bool = document.cookie.indexOf(key);
-			if (bool < 0) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		//得到元素值 获取元素值 若不存在则返回 null
-
-	}, {
-		key: 'getItem',
-		value: function getItem(key) {
-			var i = this.findItem(key);
-			if (!i) {
-				var array = document.cookie.split(';');
-				for (var j = 0; j < array.length; j++) {
-					var arraySplit = array[j];
-					if (arraySplit.indexOf(key) > -1) {
-						var getValue = array[j].split('=');
-						//将 getValue[0] trim删除两端空格
-						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-						if (getValue[0] == key) {
-							return getValue[1];
-						} else {
-							return 'null';
-						}
-					}
-				}
-			}
-		}
-
-		//重新设置元素
-
-	}, {
-		key: 'setItem',
-		value: function setItem(key, value) {
-			//let i = this.findItem(key);
-			document.cookie = key + '=' + value;
-		}
-
-		//清除cookie 参数一个或多一
-
-	}, {
-		key: 'clear',
-		value: function clear() {
-			for (var cl = 0; cl < arguments.length; cl++) {
-				var date = new Date();
-				date.setTime(date.getTime() - 100);
-				document.cookie = arguments[cl] + "=a; expires=" + date.toGMTString();
-			}
-		}
-	}, {
-		key: 'localStorageHandle',
-		value: function localStorageHandle(cb) {
-			var callback = cb || function () {};
-			this.localStorage = localStorage !== undefined ? localStorage : this;
-			callback.call(this, this.localStorage);
-		}
-	}]);
-	return LocalStorageClass;
+    createClass(Config, [{
+        key: "get",
+        value: function get$$1(name) {
+            return this.config[name];
+        }
+    }, {
+        key: "set",
+        value: function set$$1(name, value) {
+            this.config[name] = value;
+        }
+    }]);
+    return Config;
 }();
 
 /**
-=======
->>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
  * @author  zdongh2016
  * @fileoverview  Peep
  * @date 2017/02/16
  */
-<<<<<<< HEAD
 
-var Peep = function (_LocalStorage) {
-    inherits(Peep, _LocalStorage);
+var Peep = function (_Config) {
+    inherits(Peep, _Config);
 
     function Peep() {
         classCallCheck(this, Peep);
 
         var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this));
-        //super(options);
 
-
-        console.log(_this.config, 'peep');
-=======
-//import LocalStorage from './localStorage';
-
-var Peep = function (_Config) {
-    inherits(Peep, _Config);
-
-    function Peep(options) {
-        classCallCheck(this, Peep);
-
-        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
-
-        console.log(options);
->>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
-        var that = _this;
         window.onload = function () {
-            that.peep();
+            _this.peep();
         };
 
         //判断加载完成   
@@ -333,11 +250,101 @@ var Peep = function (_Config) {
         value: function peepCustom() {}
     }]);
     return Peep;
-<<<<<<< HEAD
-}(LocalStorageClass);
-=======
 }(Config);
->>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
+
+/**
+ * @author suman
+ * @fileoverview localStorage
+ * @date 2017/02/16
+ */
+
+var LocalStorageClass = function (_Peep) {
+	inherits(LocalStorageClass, _Peep);
+
+	function LocalStorageClass() {
+		classCallCheck(this, LocalStorageClass);
+
+		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this));
+
+		_this.options = {
+			expires: 60 * 24 * 3600,
+			domain: _this.config.errorLSSign
+		};
+
+		var date = new Date();
+		date.setTime(date.getTime() + 60 * 24 * 3600);
+		_this.setItem('expires', date.toGMTString());
+
+		return _this;
+	}
+	//内部函数 参数说明(key) 检查key是否存在
+
+
+	createClass(LocalStorageClass, [{
+		key: 'findItem',
+		value: function findItem(key) {
+			var b = document.cookie.indexOf(key);
+			if (b < 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		//得到元素值 获取元素值 若不存在则返回 null
+
+	}, {
+		key: 'getItem',
+		value: function getItem(key) {
+			var i = this.findItem(key);
+			if (!i) {
+				var array = document.cookie.split(';');
+				for (var j = 0; j < array.length; j++) {
+					var arraySplit = array[j];
+					if (arraySplit.indexOf(key) > -1) {
+						var getValue = array[j].split('=');
+						//将 getValue[0] trim删除两端空格
+						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+						if (getValue[0] == key) {
+							return getValue[1];
+						} else {
+							return 'null';
+						}
+					}
+				}
+			}
+		}
+
+		//重新设置元素
+
+	}, {
+		key: 'setItem',
+		value: function setItem(key, value) {
+			//let i = this.findItem(key);
+			document.cookie = key + '=' + value;
+		}
+
+		//清除cookie 参数一个或多一
+
+	}, {
+		key: 'clear',
+		value: function clear() {
+			for (var i = 0; i < arguments.length; i++) {
+				var date = new Date();
+				date.setTime(date.getTime() - 100);
+				document.cookie = arguments[i] + "=a; expires=" + date.toGMTString();
+			}
+		}
+	}, {
+		key: 'localStorageHandle',
+		value: function localStorageHandle(cb) {
+			var callback = cb || function () {};
+			this.localStorage = localStorage !== undefined ? localStorage : this;
+			callback.call(this, this.localStorage);
+		}
+	}]);
+	return LocalStorageClass;
+}(Peep);
 
 /**
  * @author  zdongh2016
@@ -345,39 +352,38 @@ var Peep = function (_Config) {
  * @date 2017/02/16
  */
 
-var Events = function (_Peep) {
-    inherits(Events, _Peep);
+var Events = function (_Localstorage) {
+    inherits(Events, _Localstorage);
 
     function Events() {
         classCallCheck(this, Events);
 
         var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this));
 
-        console.log(JSON.stringify(_this), 'events');
         _this.handlers = {};
         return _this;
     }
 
     createClass(Events, [{
-        key: 'on',
+        key: "on",
         value: function on(event, handler) {
             if (typeof event === "string" && typeof handler === "function") {
                 this.handlers[event] = this.handlers[event] ? this.handlers[event].push(handler) : [handler];
             }
         }
     }, {
-        key: 'off',
+        key: "off",
         value: function off(event) {
             if (this.handlers[event]) {
                 delete this.handlers[event];
             }
         }
     }, {
-        key: 'trigger',
+        key: "trigger",
         value: function trigger(event, args) {
             var _this2 = this;
 
-            if (this.handlers[event].length) {
+            if (this.handlers[event]) {
                 return this.handlers[event].every(function (v, i) {
                     var ret = _this2.handlers[event][i].apply(_this2, args);
                     return ret === false ? false : true;
@@ -386,53 +392,7 @@ var Events = function (_Peep) {
         }
     }]);
     return Events;
-}(Peep);
-
-/**
- * @author  zdongh2016
- * @fileoverview config
- * @date 2017/02/16
- */
-var Config = function (_Events) {
-    inherits(Config, _Events);
-
-    function Config(options) {
-        classCallCheck(this, Config);
-
-        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this));
-
-        _this.config = {
-            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
-            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
-            url: "ewewe", // 指定错误上报地址
-            except: [/Script error/i], // 忽略某个错误
-            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
-            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-            errorLSSign: 'mx-error', // error错误数自增 0
-            maxErrorCookieNo: 50, // error错误数自增 最大的错
-            tryPeep: false,
-            peepSystem: false,
-            peepJquery: false,
-            peepConsole: true
-        };
-        _this.config = Object.assign(_this.config, options);
-        console.log(_this.config, 'super config');
-        return _this;
-    }
-
-    createClass(Config, [{
-        key: 'get',
-        value: function get$$1(name) {
-            return this.config[name];
-        }
-    }, {
-        key: 'set',
-        value: function set$$1(name, value) {
-            this.config[name] = value;
-        }
-    }]);
-    return Config;
-}(Events);
+}(LocalStorageClass);
 
 /**
  * @author suman
@@ -440,21 +400,19 @@ var Config = function (_Events) {
  * @date 2017/02/15
  */
 
-var Report = function (_Config) {
-    inherits(Report, _Config);
+var Report = function (_Events) {
+    inherits(Report, _Events);
 
-    function Report(options) {
+    function Report() {
         classCallCheck(this, Report);
 
-        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
+        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this));
 
-        console.log(_this.config, 'report');
         _this.errorQueue = [];
         _this.repeatList = {};
         _this.mergeTimeout = null;
         _this.url = _this.config.url;
         _this.srcs = [];
-
         ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
             _this[type] = function (msg) {
                 _this.handleMsg(msg, type, index);
@@ -556,7 +514,9 @@ var Report = function (_Config) {
                 console.warn(type + '方法内 msg 参数为空');
                 return;
             }
-            var errorMsg = utils.typeDecide(msg, 'String') ? { msg: msg } : msg;
+            var errorMsg = utils.typeDecide(msg, 'String') ? {
+                msg: msg
+            } : msg;
             errorMsg.level = level;
             this.carryError(errorMsg);
             this.send();
@@ -564,7 +524,7 @@ var Report = function (_Config) {
         }
     }]);
     return Report;
-}(Config);
+}(Events);
 
 /**
  * @author  zdongh2016
@@ -574,18 +534,13 @@ var Report = function (_Config) {
 var GER = function (_Report) {
     inherits(GER, _Report);
 
-    function GER(options) {
+    function GER() {
         classCallCheck(this, GER);
-<<<<<<< HEAD
 
-        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this));
 
-        console.log(_this.config, 'core');
         _this.rewriteError();
         return _this;
-=======
-        return possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
->>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
     }
 
     createClass(GER, [{
@@ -595,13 +550,9 @@ var GER = function (_Report) {
                 _arguments = arguments;
 
             window.onerror = function (msg, url, line, col, error) {
-<<<<<<< HEAD
                 if (_this2.trigger('error', _arguments)) {
                     return false;
                 }
-=======
-
->>>>>>> 6651705f9e9e917be8a0815d7d12ef87ac48bbca
                 var reportMsg = msg;
                 if (error.stack && error) {
                     reportMsg = _this2.handleErrorStack(error);
@@ -616,8 +567,7 @@ var GER = function (_Report) {
                     targetUrl: url
                 });
                 _this2.send();
-                //me.trigger('afterReport');
-
+                return true;
             };
         }
         // 处理onerror返回的error.stack
