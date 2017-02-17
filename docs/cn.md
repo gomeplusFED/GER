@@ -17,7 +17,8 @@ errorReport.get('delay');
     random: 1,                              // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
     repeat: 5,                              // 重复上报次数(对于同一个错误超过多少次不上报)
     errorLSSign:'mx-error'                  // error错误数自增 0
-    maxErrorCookieNo:50                     // error错误数自增 最大的错
+    maxErrorCookieNo:50,                    // error错误数自增 最大的错
+    validTime: 7                             //cookie/localstorage有效时长 （单位：天）
 }
 ```
 
@@ -28,12 +29,8 @@ errorReport.get('delay');
     msg:            //错误信息
     targetUrl      //错误文件地址
     userAgent      //useragent
-    serverIp       //服务器ip
-    serverPort     //服务器端口
     currentUrl     //错误页面url
     timestamp       //错误发生时间戳
-    projectType    //错误发生终端 （手机/pc）
-    refererUrl     //引用
     ext             // 扩展属性 Object object 上传一些非常规参数
 ```
 GER是重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码
