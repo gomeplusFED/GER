@@ -9,7 +9,7 @@ import Config from "./config";
 class LocalStorageClass extends Config {
 	constructor( options ) {
 		super( options );
-		console.log(options);
+
 		this.options = {
 			expires : 60*24*3600,
 			//domain : this.config.errorLSSign
@@ -18,11 +18,12 @@ class LocalStorageClass extends Config {
     	let date = new Date();
 		date.setTime(date.getTime() + 60*24*3600);
 		this.setItem('expires',date.toGMTString());
+
 	}
     //内部函数 参数说明(key) 检查key是否存在
 	findItem( key ){
-		let bool = document.cookie.indexOf(key);
-		if( bool < 0 ){
+		let b = document.cookie.indexOf(key);
+		if( b < 0 ){
 			return true;
 		}else{
 			return false;
