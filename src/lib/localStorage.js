@@ -9,6 +9,18 @@ import Config from "./config";
 class LocalStorageClass extends Config {
 	constructor( options ) {
 		super( options );
+		let that = this;
+		// 判断浏览器是否支持localstorage
+		let hasLocal = !!window.LocalStorage;
+		let _utilsFn = {
+			setItem: hasLocal ? function(){
+				localStorage.setItem();
+			} : function(){
+				that.setItem;
+			}
+		};
+
+		_utilsFn.setItem();
 
 		this.options = {
 			expires : 60*24*3600,
