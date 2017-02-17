@@ -20,31 +20,21 @@ class LocalStorageClass extends Peep {
 		
 	}
 
-    // 检查key是否存在 return true/false
-	findItem( key ){
-		return document.cookie.indexOf(key) === -1;
-	}
-
-	//得到元素值 获取元素值 若不存在则返回 null
+	//得到元素值 获取元素值 若不存在则返回''
 	getItem( key ){
-		if(!this.findItem(key)){
-			let array = document.cookie.split(';');           
-			for(let j=0;j<array.length;j++){
-				let arraySplit = array[j];
-				if(arraySplit.indexOf(key) > -1){
-					let getValue = array[j].split('=');
-					//将 getValue[0] trim删除两端空格
-					getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-					if(getValue[0]==key){
-						return getValue[1];
-					}else{
-						return 'null';
-					}
-				}
-			}
-		}
+		return this.hasLocal ? function( key ){
+			return localStorage.hasOwnProperty(key) ? this.getParam(key,'value') : '';
+		}.call( this, key ) : function( key ){
+			return document.cookie.indexOf(key) !== -1 ? document.cookie.split('; ').forEach(function ( v ){
+						return v.split('=')[1];
+					}).call( this, key ) : '';
+		};
 	}
 
+	// 
+	getParam( key, type ){
+		return utils.parse(localStorage.getItem( key ))[type];
+	}
 	// 设置一条localstorage或cookie
 	setItem( key, value ){
 		let expiresTime = +new Date() + 1000*60*60*24*this.config.validTime;
@@ -58,7 +48,6 @@ class LocalStorageClass extends Peep {
 			//let i = this.findItem(key);
 			document.cookie = key + '=' + value + '; expires=' + expiresTime.toGMTString();
 		}.call(this, key, value );
-		 
 	}
 
 
@@ -69,12 +58,6 @@ class LocalStorageClass extends Peep {
 			date.setTime( date.getTime() - 100 );
 			document.cookie = arguments[i] + "=a; expires=" + date.toGMTString();
 		}
-	}
-	
-	localStorageHandle(cb){
-		let callback = cb || function(){};
-		this.localStorage = localStorage !== undefined ? localStorage : this;
-		callback.call(this, this.localStorage);
 	}
 }
 export default LocalStorageClass;
