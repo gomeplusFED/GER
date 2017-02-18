@@ -14,7 +14,7 @@ class GER extends Report {
     }
     rewriteError() {
         window.onerror = ( msg, url, line, col, error ) => {
-            if ( this.trigger( 'error' ) ) {
+            if ( this.trigger( 'error', arguments ) ) {
                 return false;
             }
             var reportMsg = msg;
@@ -26,13 +26,12 @@ class GER extends Report {
                     ( "--" + reportMsg.type + "--" + ( reportMsg.target ?
                         ( reportMsg.target.tagName + "::" + reportMsg.target.src ) : "" ) ) : "";
             }
-            this.carryError( {
+            this.error( {
                 msg: reportMsg,
                 rolNum: line,
                 colNum: col,
                 targetUrl: url
             } );
-            this.send();
             return true;
         };
     }

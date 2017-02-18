@@ -4,21 +4,58 @@
 	(factory());
 }(this, (function () { 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+/**
+ * @author suman
+ * @fileoverview report
+ * @date 2017/02/15
+ */
+
+var utils = {
+    fnLazyLoad: function (b, fn1, fn2) {
+        return b ? fn1 : fn2;
+    }(),
+    typeDecide: function typeDecide(o, type) {
+        return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    serializeObj: function serializeObj(obj) {
+        var parames = '';
+        Object.keys(obj).forEach(function (name) {
+            parames += name + '=' + obj[name] + '&';
+        });
+        return parames;
+    },
+    stringify: function stringify(obj) {
+        if (JSON.stringify) {
+            return JSON.stringify(obj);
+        } else {
+            var sep = '';
+            return '{' + Object.keys(obj).map(function (k) {
+                sep = typeof obj[k] === 'number' ? '' : '"';
+                return '"' + k + '"' + ':' + sep + obj[k] + sep;
+            }).join(',') + '}';
+        }
+    },
+    parse: function parse(str) {
+        return JSON.parse ? JSON.parse(str) : eval('(' + str + ')');
+    },
+    getServerPort: function getServerPort() {
+        return window.location.port === '' ? window.location.protocol === 'http:' ? '80' : '443' : window.location.port;
+    },
+    getUserAgent: function getUserAgent() {
+        return navigator.userAgent;
+    },
+    getPlatType: function getPlatType() {
+        return !!utils.getUserAgent().match(/Mobile/) ? 'Mobile' : 'PC';
+    },
+    getSystemParams: function getSystemParams() {
+        return {
+            userAgent: utils.getUserAgent(),
+            currentUrl: document.location.href,
+            timestamp: +new Date(),
+            projectType: utils.getPlatType()
+        };
+    }
 };
-
-
-
-
-
-
-
-
-
-
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -87,40 +124,44 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
- * @author suman
- * @fileoverview report
- * @date 2017/02/15
+ * @author  zdongh2016
+ * @fileoverview config
+ * @date 2017/02/16
  */
+var Config = function () {
+    function Config(options) {
+        classCallCheck(this, Config);
 
-var utils = {
-    typeDecide: function typeDecide(o, type) {
-        return Object.prototype.toString.call(o) === "[object " + type + "]";
-    },
-    serializeObj: function serializeObj(obj) {
-        var parames = '';
-        Object.keys(obj).forEach(function (name) {
-            parames += name + '=' + obj[name] + '&';
-        });
-        return parames;
-    },
-    stringify: function stringify(obj) {
-        if (JSON.stringify) {
-            return JSON.stringify(obj);
-        } else {
-            var _ret = function () {
-                var sep = '';
-                return {
-                    v: '{' + Object.keys(obj).map(function (k) {
-                        sep = typeof obj[k] === 'number' ? '' : '"';
-                        return '"' + k + '"' + ':' + sep + obj[k] + sep;
-                    }).join(',') + '}'
-                };
-            }();
-
-            if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
-        }
+        this.config = {
+            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
+            url: "ewewe", // 指定错误上报地址
+            except: [/Script error/i], // 忽略某个错误
+            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
+            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
+            errorLSSign: 'mx-error', // error错误数自增 0
+            maxErrorCookieNo: 50, // error错误数自增 最大的错
+            tryPeep: false,
+            peepSystem: false,
+            peepJquery: false,
+            peepConsole: true
+        };
+        this.config = Object.assign(this.config, options);
     }
-};
+
+    createClass(Config, [{
+        key: "get",
+        value: function get$$1(name) {
+            return this.config[name];
+        }
+    }, {
+        key: "set",
+        value: function set$$1(name, value) {
+            this.config[name] = value;
+        }
+    }]);
+    return Config;
+}();
 
 /**
  * @author  zdongh2016
@@ -128,26 +169,24 @@ var utils = {
  * @date 2017/02/16
  */
 
-//import LocalStorage from './localStorage';
+var Peep = function (_Config) {
+    inherits(Peep, _Config);
 
-
-var Peep /* extends LocalStorage*/ = function () {
     function Peep(options) {
         classCallCheck(this, Peep);
 
-        //super(options);
-        console.log(options);
-        var that = this;
+        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
+
+        _this.timeoutkey = null;
         window.onload = function () {
-            that.peep();
+            _this.peep();
         };
 
-        //判断加载完成   
-        // window.onload之后再次设置定时器判断
+        return _this;
     }
 
     createClass(Peep, [{
-        key: "peep",
+        key: 'peep',
         value: function peep() {
             if (this.config.tryPeep) {
                 this.config.peepSystem && this.peepSystem();
@@ -157,61 +196,321 @@ var Peep /* extends LocalStorage*/ = function () {
                 this.config.peepCustom && this.peepCustom();
             }
         }
+    }, {
+        key: 'onThrow',
+        value: function onThrow(error) {
+            this.carryError(error);
+        }
+    }, {
+        key: 'cat',
+        value: function cat(func, args) {
+            return function () {
+                try {
+                    return func.apply(this, args || arguments);
+                } catch (error) {
+
+                    this.onThrow(error);
+                    if (error.stack && console && console.error) {
+                        console.error("[GER]", error.stack);
+                    }
+                    if (!this.timeoutkey) {
+                        var orgOnerror = window.onerror;
+                        window.onerror = function () {};
+                        this.timeoutkey = setTimeout(function () {
+                            window.onerror = orgOnerror;
+                            this.timeoutkey = null;
+                        }, 50);
+                    }
+                    throw error;
+                }
+            };
+        }
+    }, {
+        key: 'catArgs',
+        value: function catArgs(func) {
+            return function () {
+                var _this2 = this;
+
+                var args = [];
+                arguments.forEach(function (v) {
+                    utils.typeDecide(v, 'Function') && (v = _this2.cat(v));
+                    args.push(v);
+                });
+                return func.apply(this, args);
+            }.bind(this);
+        }
+    }, {
+        key: 'catTimeout',
+        value: function catTimeout(func) {
+            return function (cb, timeout) {
+                if (utils.typeDecide(cb, 'String')) {
+                    try {
+                        cb = new Function(cb);
+                    } catch (err) {
+                        throw err;
+                    }
+                }
+                var args = [].slice.call(arguments, 2);
+                cb = this.cat(cb, args.length && args);
+                return func(cb, timeout);
+            }.bind(this);
+        }
+    }, {
+        key: 'makeArgsTry',
+        value: function makeArgsTry(func, self) {
+            return function () {
+                var _this3 = this;
+
+                var tmp = void 0,
+                    args = [];
+                arguments.forEach(function (v) {
+                    utils.typeDecide(v, 'Function') && (tmp = _this3.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+
+                    args.push(v);
+                });
+                return func.apply(self || this, args);
+            }.bind(this);
+        }
+    }, {
+        key: 'makeObjTry',
+        value: function makeObjTry(obj) {
+            var key = void 0;
+            var value = void 0;
+            var that = this;
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    value = obj[key];
+                    if (utils.typeDecide(value, 'Function')) {
+                        obj[key] = that.cat(value);
+                    }
+                }
+            }
+            return obj;
+        }
 
         // 劫持原生js
 
     }, {
-        key: "peepSystem",
-        value: function peepSystem() {}
+        key: 'peepSystem',
+        value: function peepSystem() {
+            window.setTimeout = this.catTimeout(setTimeout);
+            window.setInterval = this.catTimeout(setInterval);
+        }
 
         // 劫持jquery
 
     }, {
-        key: "peepJquery",
-        value: function peepJquery() {}
-        /*
-        // 保存之前的$.ajax
-        $._ajax = $.ajax;
-        function noop() {}
-        // 我想要加入的功能
-        function cb(data) {
-            console.log(data);
-            // do something you want
-        }
-        // ajax 填充新代码
-        function myAjax(e, n) {
-            e._success = e.success || noop;
-            e.success = function success(data) {
-                cb(data);x`
-                e._success.call(this, data);
-            };
-            $._ajax(e, n);
-        }
-        // ajax重新赋值
-        $.ajax = myAjax;
-        */
+        key: 'peepJquery',
+        value: function peepJquery() {
+            var _$ = window.$;
 
+            if (!_$ || !_$.event) {
+                return this;
+            }
+
+            var _add = void 0,
+                _remove = void 0;
+            if (_$.zepto) {
+                _add = _$.fn.on, _remove = _$.fn.off;
+
+                _$.fn.on = this.makeArgsTry(_add);
+                _$.fn.off = function () {
+                    var args = [];
+                    arguments.forEach(function (v) {
+                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                        args.push(v);
+                    });
+                    return _remove.apply(this, args);
+                };
+            } else if (window.jQuery) {
+                _add = _$.event.add, _remove = _$.event.remove;
+
+                _$.event.add = this.makeArgsTry(_add);
+                _$.event.remove = function () {
+                    var args = [];
+                    arguments.forEach(function (v) {
+                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                        args.push(v);
+                    });
+                    return _remove.apply(this, args);
+                };
+            }
+
+            var _ajax = _$.ajax;
+
+            if (_ajax) {
+                _$.ajax = function (url, setting) {
+                    if (!setting) {
+                        setting = url;
+                        url = undefined;
+                    }
+                    this.makeObjTry(setting);
+                    if (url) return _ajax.call(_$, url, setting);
+                    return _ajax.call(_$, setting);
+                };
+            }
+        }
 
         // 劫持console
 
     }, {
-        key: "peepConsole",
+        key: 'peepConsole',
         value: function peepConsole() {}
 
         // 劫持seajs
 
     }, {
-        key: "peepModule",
+        key: 'peepModule',
         value: function peepModule() {}
 
         // 劫持自定义方法
 
     }, {
-        key: "peepCustom",
+        key: 'peepCustom',
         value: function peepCustom() {}
     }]);
     return Peep;
-}();
+}(Config);
+
+/**
+ * @author suman
+ * @fileoverview localStorage
+ * @date 2017/02/16
+ */
+
+function clearCookie(value) {
+	addCookie(value, 'a', -1);
+}
+
+function addCookie(name, value, days) {
+	var times = new Date();
+	times.setDate(times.getDate() + days);
+	document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+}
+
+function getCookie(key) {
+	/*var flag = false;
+ document.cookie.split('; ').forEach(function ( v ){
+ 	var item = v.split('=');
+ 	if( item[0] == key ){
+ 		console.log('找到了------------' + item[1]);
+ 		return item[1];
+ 	}
+ 	//key == v.split('=')[1] ? return v.split('=')[1] : ????;
+ });
+ console.log('再去判断');
+ return flag;*/
+	var arr = document.cookie.split('; ');
+	for (var i = 0; i < arr.length; i++) {
+		var arr1 = arr[i].split('=');
+		if (arr1[0] == key) {
+			return arr1[1];
+		}
+	}
+	return '';
+}
+//getCookie( 'a' );
+
+/*var storage = {
+	 hasLocal : !!window.localStorage,
+	 setItem:function(){
+		let expiresTime = +new Date() + 1000*60*60*24*this.config.validTime;
+		return this.hasLocal ? function( key, value ){
+			localStorage.setItem( key, utils.stringify({
+				value : value,
+				expires : expiresTime
+			}));
+			return value;
+		} : function( key, value ){
+			document.cookie = key + '=' + value + '; expires=' + expiresTime.toGMTString();
+		};
+	}(),
+	getItem:function(){
+		return this.hasLocal ? function( key ){
+			return localStorage.hasOwnProperty(key) ? this.getParam(key,'value') : '';
+		} : function( key ){
+			return document.cookie.indexOf(key) !== -1 ? document.cookie.split('; ').forEach(( v ) => {
+						return v.split('=')[1];
+			}) : '';
+		};
+	}(),
+	clear:function(){
+		
+		return this.hasLocal ? function( key ){
+			// ls
+			return key ? localStorage.removeItem(key) : localStorage.clear();
+		} : function( key ){
+			// cookie
+			return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
+		};
+	}()
+};*/
+
+var LocalStorageClass = function (_Peep) {
+	inherits(LocalStorageClass, _Peep);
+
+	function LocalStorageClass(options) {
+		classCallCheck(this, LocalStorageClass);
+
+		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this, options));
+
+		_this.hasLocal = !!window.localStorage;
+		_this.errorSign = _this.config.errorLSSign;
+		return _this;
+	}
+
+	//得到元素值 获取元素值 若不存在则返回''
+	//getItem : storage.getItem
+
+
+	createClass(LocalStorageClass, [{
+		key: "getItem",
+		value: function getItem() {
+			utils.fnLazyLoad(this.hasLocal, function (key) {
+				return localStorage.hasOwnProperty(key) ? this.getParam(key, 'value') : '';
+			}, function (key) {
+				getCookie(key);
+			});
+		}
+		// 
+
+	}, {
+		key: "getParam",
+		value: function getParam(key, type) {
+			return utils.parse(localStorage.getItem(key))[type];
+		}
+		// 设置一条localstorage或cookie
+		//setItem : storage.setItem
+
+	}, {
+		key: "setItem",
+		value: function setItem() {
+			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * this.config.validTime;
+			utils.fnLazyLoad(this.hasLocal, function (key, value) {
+				localStorage.setItem(key, utils.stringify({
+					value: value,
+					expires: expiresTime
+				}));
+				return value;
+			}, function (key, value) {
+				addCookie(key, value, this.config.validTime);
+			});
+		}
+
+		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+
+	}, {
+		key: "clear",
+		value: function clear() {
+			utils.fnLazyLoad(this.hasLocal, function (key) {
+				return key ? localStorage.removeItem(key) : localStorage.clear();
+			}, function (key) {
+				return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
+			});
+		}
+	}]);
+	return LocalStorageClass;
+}(Peep);
 
 /**
  * @author  zdongh2016
@@ -219,8 +518,8 @@ var Peep /* extends LocalStorage*/ = function () {
  * @date 2017/02/16
  */
 
-var Events = function (_Peep) {
-    inherits(Events, _Peep);
+var Events = function (_Localstorage) {
+    inherits(Events, _Localstorage);
 
     function Events(options) {
         classCallCheck(this, Events);
@@ -235,74 +534,31 @@ var Events = function (_Peep) {
         key: "on",
         value: function on(event, handler) {
             if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = typeof this.handlers[event] === "undefined" ? [] : this.handlers[event];
-                this.handlers[event].push(handler);
+                this.handlers[event] = this.handlers[event] ? this.handlers[event].push(handler) : [handler];
             }
         }
     }, {
         key: "off",
         value: function off(event) {
-            this.handlers[event] !== undefined && delete this.handlers[event];
+            if (this.handlers[event]) {
+                delete this.handlers[event];
+            }
         }
     }, {
         key: "trigger",
-        value: function trigger(event) {
-            if (this.handlers[event] instanceof Array) {
-                this.handlers[event].forEach(function (v, i) {
-                    this.handlers[event][i]();
-                }.bind(this));
+        value: function trigger(event, args) {
+            var _this2 = this;
+
+            if (this.handlers[event]) {
+                return this.handlers[event].every(function (v, i) {
+                    var ret = _this2.handlers[event][i].apply(_this2, args);
+                    return ret === false ? false : true;
+                });
             }
-            return this.handlers[event] !== undefined;
         }
     }]);
     return Events;
-}(Peep);
-
-/**
- * @author  zdongh2016
- * @fileoverview config
- * @date 2017/02/16
- */
-var Config = function (_Events) {
-    inherits(Config, _Events);
-
-    function Config(options) {
-        classCallCheck(this, Config);
-
-        var _this = possibleConstructorReturn(this, (Config.__proto__ || Object.getPrototypeOf(Config)).call(this, options));
-
-        _this.config = {
-            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
-            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
-            url: "ewewe", // 指定错误上报地址
-            except: [/Script error/i], // 忽略某个错误
-            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
-            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-            errorLSSign: 'mx-error', // error错误数自增 0
-            maxErrorCookieNo: 50, // error错误数自增 最大的错
-            tryPeep: false,
-            peepSystem: false,
-            peepJquery: false,
-            peepConsole: true
-        };
-        _this.config = Object.assign(_this.config, options); /// this.config
-
-        return _this;
-    }
-
-    createClass(Config, [{
-        key: 'get',
-        value: function get$$1(name) {
-            return this.config[name];
-        }
-    }, {
-        key: 'set',
-        value: function set$$1(name, value) {
-            this.config[name] = value;
-        }
-    }]);
-    return Config;
-}(Events);
+}(LocalStorageClass);
 
 /**
  * @author suman
@@ -310,8 +566,8 @@ var Config = function (_Events) {
  * @date 2017/02/15
  */
 
-var Report = function (_Config) {
-    inherits(Report, _Config);
+var Report = function (_Events) {
+    inherits(Report, _Events);
 
     function Report(options) {
         classCallCheck(this, Report);
@@ -323,14 +579,11 @@ var Report = function (_Config) {
         _this.mergeTimeout = null;
         _this.url = _this.config.url;
         _this.srcs = [];
-
         ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
-            var _this2 = this;
-
-            this[type] = function (msg) {
-                _this2.handleMsg(msg, type, index);
+            _this[type] = function (msg) {
+                _this.handleMsg(msg, type, index);
             };
-        }.bind(_this));
+        });
 
         return _this;
     }
@@ -431,13 +684,14 @@ var Report = function (_Config) {
                 msg: msg
             } : msg;
             errorMsg.level = level;
+            errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
             this.carryError(errorMsg);
             this.send();
             return errorMsg;
         }
     }]);
     return Report;
-}(Config);
+}(Events);
 
 /**
  * @author  zdongh2016
@@ -459,10 +713,11 @@ var GER = function (_Report) {
     createClass(GER, [{
         key: 'rewriteError',
         value: function rewriteError() {
-            var _this2 = this;
+            var _this2 = this,
+                _arguments = arguments;
 
             window.onerror = function (msg, url, line, col, error) {
-                if (_this2.trigger('error')) {
+                if (_this2.trigger('error', _arguments)) {
                     return false;
                 }
                 var reportMsg = msg;
@@ -472,13 +727,12 @@ var GER = function (_Report) {
                 if (utils.typeDecide(reportMsg, "Event")) {
                     reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
                 }
-                _this2.carryError({
+                _this2.error({
                     msg: reportMsg,
                     rolNum: line,
                     colNum: col,
                     targetUrl: url
                 });
-                _this2.send();
                 return true;
             };
         }

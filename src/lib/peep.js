@@ -4,20 +4,18 @@
  * @date 2017/02/16
  */
 
-//import LocalStorage from './localStorage';
+import Config from './config';
+import utils from './utils';
 
 
-class Peep /* extends LocalStorage*/ {
+class Peep extends Config {
     constructor( options ) {
-        //super(options);
-        console.log( options );
-        let that = this;
-        window.onload = function () {
-            that.peep();
+        super( options );
+        this.timeoutkey = null;
+        window.onload = () => {
+            this.peep();
         };
 
-        //判断加载完成   
-        // window.onload之后再次设置定时器判断
     }
     peep() {
         if ( this.config.tryPeep ) {
@@ -28,35 +26,140 @@ class Peep /* extends LocalStorage*/ {
             this.config.peepCustom && this.peepCustom();
         }
     }
+    onThrow( error ) {
+        this.carryError( error );
+    }
+    cat( func, args ) {
+        return function () {
+            try {
+                return func.apply( this, args || arguments );
+            } catch ( error ) {
+
+                this.onThrow( error );
+                if ( error.stack && console && console.error ) {
+                    console.error( "[GER]", error.stack );
+                }
+                if ( !this.timeoutkey ) {
+                    let orgOnerror = window.onerror;
+                    window.onerror = function () {};
+                    this.timeoutkey = setTimeout( function () {
+                        window.onerror = orgOnerror;
+                        this.timeoutkey = null;
+                    }, 50 );
+                }
+                throw error;
+            }
+        };
+    }
+
+    catArgs( func ) {
+        return function () {
+            let args = [];
+            arguments.forEach( ( v ) => {
+                utils.typeDecide( v, 'Function' ) && ( v = this.cat( v ) );
+                args.push( v );
+            } );
+            return func.apply( this, args );
+        }.bind( this );
+    }
+
+    catTimeout( func ) {
+        return function ( cb, timeout ) {
+            if ( utils.typeDecide( cb, 'String' ) ) {
+                try {
+                    cb = new Function( cb );
+                } catch ( err ) {
+                    throw err;
+                }
+            }
+            let args = [].slice.call( arguments, 2 );
+            cb = this.cat( cb, args.length && args );
+            return func( cb, timeout );
+        }.bind( this );
+    }
+
+    makeArgsTry( func, self ) {
+        return function () {
+            let tmp, args = [];
+            arguments.forEach( v => {
+                utils.typeDecide( v, 'Function' ) && ( tmp = this.cat( v ) ) &&
+                    ( v.tryWrap = tmp ) && ( v = tmp );
+
+                args.push( v );
+            } );
+            return func.apply( self || this, args );
+        }.bind( this );
+    }
+    makeObjTry( obj ) {
+        let key;
+        let value;
+        let that = this;
+        for ( key in obj ) {
+            if ( obj.hasOwnProperty( key ) ) {
+                value = obj[ key ];
+                if ( utils.typeDecide( value, 'Function' ) ) {
+                    obj[ key ] = that.cat( value );
+                }
+            }
+        }
+        return obj;
+    }
 
     // 劫持原生js
     peepSystem() {
-
+        window.setTimeout = this.catTimeout( setTimeout );
+        window.setInterval = this.catTimeout( setInterval );
     }
 
     // 劫持jquery
     peepJquery() {
-        /*
-        // 保存之前的$.ajax
-        $._ajax = $.ajax;
-        function noop() {}
-        // 我想要加入的功能
-        function cb(data) {
-            console.log(data);
-            // do something you want
+        let _$ = window.$;
+
+        if ( !_$ || !_$.event ) {
+            return this;
         }
-        // ajax 填充新代码
-        function myAjax(e, n) {
-            e._success = e.success || noop;
-            e.success = function success(data) {
-                cb(data);x`
-                e._success.call(this, data);
+
+        let _add, _remove;
+        if ( _$.zepto ) {
+            _add = _$.fn.on, _remove = _$.fn.off;
+
+            _$.fn.on = this.makeArgsTry( _add );
+            _$.fn.off = function () {
+                let args = [];
+                arguments.forEach( v => {
+                    utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
+                    args.push( v );
+                } );
+                return _remove.apply( this, args );
             };
-            $._ajax(e, n);
+
+        } else if ( window.jQuery ) {
+            _add = _$.event.add, _remove = _$.event.remove;
+
+            _$.event.add = this.makeArgsTry( _add );
+            _$.event.remove = function () {
+                let args = [];
+                arguments.forEach( v => {
+                    utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
+                    args.push( v );
+                } );
+                return _remove.apply( this, args );
+            };
         }
-        // ajax重新赋值
-        $.ajax = myAjax;
-        */
+
+        let _ajax = _$.ajax;
+
+        if ( _ajax ) {
+            _$.ajax = function ( url, setting ) {
+                if ( !setting ) {
+                    setting = url;
+                    url = undefined;
+                }
+                this.makeObjTry( setting );
+                if ( url ) return _ajax.call( _$, url, setting );
+                return _ajax.call( _$, setting );
+            };
+        }
     }
 
     // 劫持console

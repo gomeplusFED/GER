@@ -4,28 +4,29 @@
  * @date 2017/02/16
  */
 
-import Peep from './peep';
-class Events extends Peep {
+import Localstorage from './localStorage';
+class Events extends Localstorage {
     constructor( options ) {
         super( options );
         this.handlers = {};
     }
     on( event, handler ) {
         if ( typeof event === "string" && typeof handler === "function" ) {
-            this.handlers[ event ] = typeof this.handlers[ event ] === "undefined" ? [] : this.handlers[ event ];
-            this.handlers[ event ].push( handler );
+            this.handlers[ event ] = this.handlers[ event ] ? this.handlers[ event ].push( handler ) : [ handler ];
         }
     }
     off( event ) {
-        this.handlers[ event ] !== undefined && delete this.handlers[ event ];
-    }
-    trigger( event ) {
-        if ( this.handlers[ event ] instanceof Array ) {
-            this.handlers[ event ].forEach( function ( v, i ) {
-                this.handlers[ event ][ i ]();
-            }.bind( this ) );
+        if ( this.handlers[ event ] ) {
+            delete this.handlers[ event ];
         }
-        return this.handlers[ event ] !== undefined;
+    }
+    trigger( event, args ) {
+        if ( this.handlers[ event ] ) {
+            return this.handlers[ event ].every( ( v, i ) => {
+                var ret = this.handlers[ event ][ i ].apply( this, args );
+                return ret === false ? false : true;
+            } );
+        }
     }
 
 }

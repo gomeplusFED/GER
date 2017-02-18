@@ -5,9 +5,9 @@
  */
 
 import utils from "./utils";
-import Config from "./Config";
+import Events from "./events";
 
-class Report extends Config {
+class Report extends Events {
 
     constructor( options ) {
         super( options );
@@ -16,12 +16,11 @@ class Report extends Config {
         this.mergeTimeout = null;
         this.url = this.config.url;
         this.srcs = [];
-
-        [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( function ( type, index ) {
+        [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
                 this.handleMsg( msg, type, index );
             };
-        }.bind( this ) );
+        } );
 
     }
     repeat( error ) {
@@ -111,6 +110,7 @@ class Report extends Config {
             msg: msg
         } : msg;
         errorMsg.level = level;
+        errorMsg = Object.assign( utils.getSystemParams(), errorMsg );
         this.carryError( errorMsg );
         this.send();
         return errorMsg;

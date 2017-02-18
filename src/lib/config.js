@@ -3,11 +3,8 @@
  * @fileoverview config
  * @date 2017/02/16
  */
-import Events from './events';
-class Config extends Events {
-
+class Config {
     constructor( options ) {
-        super( options );
         this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
@@ -22,8 +19,7 @@ class Config extends Events {
             peepJquery: false,
             peepConsole: true
         };
-        this.config = Object.assign( this.config, options ); /// this.config
-
+        this.config = Object.assign( this.config, options );
     }
     get( name ) {
         return this.config[ name ];
