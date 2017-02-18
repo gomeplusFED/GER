@@ -11,6 +11,9 @@
  */
 
 var utils = {
+    fnLazyLoad: function (b, fn1, fn2) {
+        return b ? fn1 : fn2;
+    }(),
     typeDecide: function typeDecide(o, type) {
         return Object.prototype.toString.call(o) === "[object " + type + "]";
     },
@@ -31,6 +34,26 @@ var utils = {
                 return '"' + k + '"' + ':' + sep + obj[k] + sep;
             }).join(',') + '}';
         }
+    },
+    parse: function parse(str) {
+        return JSON.parse ? JSON.parse(str) : eval('(' + str + ')');
+    },
+    getServerPort: function getServerPort() {
+        return window.location.port === '' ? window.location.protocol === 'http:' ? '80' : '443' : window.location.port;
+    },
+    getUserAgent: function getUserAgent() {
+        return navigator.userAgent;
+    },
+    getPlatType: function getPlatType() {
+        return !!utils.getUserAgent().match(/Mobile/) ? 'Mobile' : 'PC';
+    },
+    getSystemParams: function getSystemParams() {
+        return {
+            userAgent: utils.getUserAgent(),
+            currentUrl: document.location.href,
+            timestamp: +new Date(),
+            projectType: utils.getPlatType()
+        };
     }
 };
 
@@ -236,92 +259,98 @@ var Peep = function (_Config) {
  * @date 2017/02/16
  */
 
+function clearCookie(value) {
+	addCookie(value, 'a', -1);
+}
+
+function addCookie(name, value, days) {
+	var times = new Date();
+	times.setDate(times.getDate() + days);
+	document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+}
+
+function getCookie(key) {
+	/*var flag = false;
+ document.cookie.split('; ').forEach(function ( v ){
+ 	var item = v.split('=');
+ 	if( item[0] == key ){
+ 		console.log('找到了------------' + item[1]);
+ 		return item[1];
+ 	}
+ 	//key == v.split('=')[1] ? return v.split('=')[1] : ????;
+ });
+ console.log('再去判断');
+ return flag;*/
+	var arr = document.cookie.split('; ');
+	for (var i = 0; i < arr.length; i++) {
+		var arr1 = arr[i].split('=');
+		if (arr1[0] == key) {
+			return arr1[1];
+		}
+	}
+	return '';
+}
 var LocalStorageClass = function (_Peep) {
 	inherits(LocalStorageClass, _Peep);
 
 	function LocalStorageClass(options) {
 		classCallCheck(this, LocalStorageClass);
 
-		/*this.options = {
-  	expires : 60*24*3600,
-  	domain : this.config.errorLSSign
-  };*/
-
-		// 判断浏览器是否支持localstorage
 		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this, options));
 
-		var hasLocal = !!window.LocalStorage;
-
+		_this.hasLocal = !!window.localStorage;
+		_this.errorSign = _this.config.errorLSSign;
 		return _this;
 	}
 
-	// 检查key是否存在 return true/false
+	//得到元素值 获取元素值 若不存在则返回''
+	//getItem : storage.getItem
 
 
 	createClass(LocalStorageClass, [{
-		key: 'findItem',
-		value: function findItem(key) {
-			return document.cookie.indexOf(key) === -1;
-		}
-
-		//得到元素值 获取元素值 若不存在则返回 null
-
-	}, {
-		key: 'getItem',
+		key: "getItem",
 		value: function getItem(key) {
-			if (!this.findItem(key)) {
-				var array = document.cookie.split(';');
-				for (var j = 0; j < array.length; j++) {
-					var arraySplit = array[j];
-					if (arraySplit.indexOf(key) > -1) {
-						var getValue = array[j].split('=');
-						//将 getValue[0] trim删除两端空格
-						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-						if (getValue[0] == key) {
-							return getValue[1];
-						} else {
-							return 'null';
-						}
-					}
-				}
-			}
+			utils.fnLazyLoad(this.hasLocal, function (key) {
+				return localStorage.hasOwnProperty(key) ? this.getParam(key, 'value') : '';
+			}, function (key) {
+				getCookie(key);
+			});
 		}
-
-		// 设置一条localstorage或cookie
+		// 
 
 	}, {
-		key: 'setItem',
+		key: "getParam",
+		value: function getParam(key, type) {
+			return utils.parse(localStorage.getItem(key))[type];
+		}
+		// 设置一条localstorage或cookie
+		//setItem : storage.setItem
+
+	}, {
+		key: "setItem",
 		value: function setItem(key, value) {
 			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * this.config.validTime;
-			return this.hasLocal ? function (key, value) {
-				localStorage.setItem(key, stringify({
+			utils.fnLazyLoad(this.hasLocal, function (key, value) {
+				localStorage.setItem(key, utils.stringify({
 					value: value,
 					expires: expiresTime
 				}));
 				return value;
-			}.call(this, key, value) : function (key, value) {
-				//let i = this.findItem(key);
-				document.cookie = key + '=' + value + '; expires=' + oDate.toGMTString();
-			}.call(this, key, value);
+			}, function (key, value) {
+				addCookie(key, value, this.config.validTime);
+			});
 		}
 
-		//清除cookie 参数一个或多一
+		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
 	}, {
-		key: 'clear',
-		value: function clear() {
-			for (var i = 0; i < arguments.length; i++) {
-				var date = new Date();
-				date.setTime(date.getTime() - 100);
-				document.cookie = arguments[i] + "=a; expires=" + date.toGMTString();
-			}
-		}
-	}, {
-		key: 'localStorageHandle',
-		value: function localStorageHandle(cb) {
-			var callback = cb || function () {};
-			this.localStorage = localStorage !== undefined ? localStorage : this;
-			callback.call(this, this.localStorage);
+		key: "clear",
+		value: function clear(key) {
+			utils.fnLazyLoad(this.hasLocal, function (key) {
+				return key ? localStorage.removeItem(key) : localStorage.clear();
+			}, function (key) {
+				return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
+			});
 		}
 	}]);
 	return LocalStorageClass;
@@ -499,6 +528,7 @@ var Report = function (_Events) {
                 msg: msg
             } : msg;
             errorMsg.level = level;
+            errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
             this.carryError(errorMsg);
             this.send();
             return errorMsg;
@@ -541,13 +571,12 @@ var GER = function (_Report) {
                 if (utils.typeDecide(reportMsg, "Event")) {
                     reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
                 }
-                _this2.carryError({
+                _this2.error({
                     msg: reportMsg,
                     rolNum: line,
                     colNum: col,
                     targetUrl: url
                 });
-                _this2.send();
                 return true;
             };
         }

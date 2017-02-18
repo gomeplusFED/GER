@@ -5,6 +5,9 @@
  */
 
 var utils = {
+    fnLazyLoad : function ( b, fn1, fn2 ){
+        return b ? fn1 : fn2;
+    }(),
     typeDecide: function ( o, type ) {
         return Object.prototype.toString.call( o ) === "[object " + type + "]";
     },
