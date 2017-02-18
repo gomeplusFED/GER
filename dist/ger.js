@@ -383,14 +383,57 @@ var Peep = function (_Config) {
         // 劫持seajs
 
     }, {
-        key: 'peepModule',
-        value: function peepModule() {}
+        key: 'peepModules',
+        value: function peepModules() {
+            var _require = window.require,
+                _define = window.define;
+            if (_define && _define.amd && _require) {
+                window.require = this.catArgs(_require);
+                Object.assign(window.require, _require);
+                window.define = this.catArgs(_define);
+                Object.assign(window.define, _define);
+            }
+
+            if (window.seajs && _define) {
+                window.define = function () {
+                    var _this5 = this,
+                        _arguments = arguments;
+
+                    var arg,
+                        args = [];
+                    arguments.forEach(function (v, i) {
+                        if (utils.typeDecide('v', 'Function')) {
+                            v = _this5.cat(v);
+                            v.toString = function (orgArg) {
+                                return function () {
+                                    return orgArg.toString();
+                                };
+                            }(_arguments[i]);
+                        }
+                        args.push(arg);
+                    });
+                    return _define.apply(this, args);
+                };
+
+                window.seajs.use = this.catArgs(window.seajs.use);
+
+                Object.assign(window.define, _define);
+            }
+        }
 
         // 劫持自定义方法
 
     }, {
         key: 'peepCustom',
-        value: function peepCustom() {}
+        value: function peepCustom(obj) {
+            if (utils.typeDecide(obj, 'Function')) {
+                return this.cat(obj);
+            } else if (utils.typeDecide(obj, 'Object')) {
+                return this.makeObjTry(obj);
+            } else {
+                this.makeArgsTry(obj);
+            }
+        }
     }]);
     return Peep;
 }(Config);
