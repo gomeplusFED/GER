@@ -6,8 +6,8 @@
 
 import Localstorage from './localStorage';
 class Events extends Localstorage{
-	constructor(){
-		super();
+	constructor(options){
+		super(options);
 		this.handlers = {};
 	}
     on(event, handler){

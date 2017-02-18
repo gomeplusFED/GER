@@ -9,8 +9,8 @@ import Events from "./events";
 
 class Report extends Events {
 
-    constructor() {
-        super();
+    constructor(options) {
+        super(options);
         this.errorQueue = [];
         this.repeatList = {};
         this.mergeTimeout = null;
