@@ -377,9 +377,8 @@ var Peep = function (_Config) {
  * @fileoverview localStorage
  * @date 2017/02/16
  */
-
 function clearCookie(value) {
-	addCookie(value, 'a', -1);
+	addCookie(value, '', -1);
 }
 
 function addCookie(name, value, days) {
@@ -400,51 +399,49 @@ function getCookie(key) {
  });
  console.log('再去判断');
  return flag;*/
-	var arr = document.cookie.split('; ');
-	for (var i = 0; i < arr.length; i++) {
-		var arr1 = arr[i].split('=');
-		if (arr1[0] == key) {
-			return arr1[1];
+	var cookieList = document.cookie.split('; ');
+	for (var i = 0; i < cookieList.length; i++) {
+		var item = cookieList[i].split('=');
+		if (item[0] == key) {
+			return item[1];
 		}
 	}
 	return '';
 }
-//getCookie( 'a' );
 
-/*var storage = {
-	 hasLocal : !!window.localStorage,
-	 setItem:function(){
-		let expiresTime = +new Date() + 1000*60*60*24*this.config.validTime;
-		return this.hasLocal ? function( key, value ){
-			localStorage.setItem( key, utils.stringify({
-				value : value,
-				expires : expiresTime
+var stor = {
+	hasLocal: !!!window.localStorage,
+	setItem: function () {
+		console.log(stor);
+		return this.hasLocal ? function (key, value, validTime) {
+			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * validTime;
+			console.log('lslslsllslslsls');
+			localStorage.setItem(key, utils.stringify({
+				value: value,
+				expires: expiresTime
 			}));
 			return value;
-		} : function( key, value ){
-			document.cookie = key + '=' + value + '; expires=' + expiresTime.toGMTString();
+		} : function (key, value, validTime) {
+			console.log('addCookieaddCookieaddCookieaddCookie');
+			addCookie(key, value, validTime);
 		};
 	}(),
-	getItem:function(){
-		return this.hasLocal ? function( key ){
-			return localStorage.hasOwnProperty(key) ? this.getParam(key,'value') : '';
-		} : function( key ){
-			return document.cookie.indexOf(key) !== -1 ? document.cookie.split('; ').forEach(( v ) => {
-						return v.split('=')[1];
-			}) : '';
+	getItem: function () {
+		return this.hasLocal ? function (key) {
+			return localStorage.hasOwnProperty(key) ? this.getParam(key, 'value') : '';
+		} : function (key) {
+			return getCookie(key);
 		};
 	}(),
-	clear:function(){
-		
-		return this.hasLocal ? function( key ){
-			// ls
+	clear: function () {
+		return this.hasLocal ? function (key) {
 			return key ? localStorage.removeItem(key) : localStorage.clear();
-		} : function( key ){
-			// cookie
+		} : function (key) {
 			return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
 		};
 	}()
-};*/
+};
+console.log(stor);
 
 var LocalStorageClass = function (_Peep) {
 	inherits(LocalStorageClass, _Peep);
@@ -452,63 +449,35 @@ var LocalStorageClass = function (_Peep) {
 	function LocalStorageClass(options) {
 		classCallCheck(this, LocalStorageClass);
 
+		//this.hasLocal = !!window.localStorage;
 		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this, options));
 
-		_this.hasLocal = !!window.localStorage;
 		_this.errorSign = _this.config.errorLSSign;
 		return _this;
 	}
 
 	//得到元素值 获取元素值 若不存在则返回''
-	//getItem : storage.getItem
+	/*getItem( key ) {
+ 	//storages.getItem( key );
+ }
+ // 
+ getParam( key, type ){
+ 	return utils.parse(localStorage.getItem( key ))[type];
+ }
+ // 设置一条localstorage或cookie
+ //setItem : storages.setItem
+ setItem( key, value, days ){
+ 	//console.log(storages)
+ 	//storages.setItem( key, value, days );
+ }
+ 
+ //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+ //clear : storages.clear
+ clear(){
+ 	//storages.clear( key );
+ }*/
 
 
-	createClass(LocalStorageClass, [{
-		key: "getItem",
-		value: function getItem() {
-			utils.fnLazyLoad(this.hasLocal, function (key) {
-				return localStorage.hasOwnProperty(key) ? this.getParam(key, 'value') : '';
-			}, function (key) {
-				getCookie(key);
-			});
-		}
-		// 
-
-	}, {
-		key: "getParam",
-		value: function getParam(key, type) {
-			return utils.parse(localStorage.getItem(key))[type];
-		}
-		// 设置一条localstorage或cookie
-		//setItem : storage.setItem
-
-	}, {
-		key: "setItem",
-		value: function setItem() {
-			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * this.config.validTime;
-			utils.fnLazyLoad(this.hasLocal, function (key, value) {
-				localStorage.setItem(key, utils.stringify({
-					value: value,
-					expires: expiresTime
-				}));
-				return value;
-			}, function (key, value) {
-				addCookie(key, value, this.config.validTime);
-			});
-		}
-
-		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
-
-	}, {
-		key: "clear",
-		value: function clear() {
-			utils.fnLazyLoad(this.hasLocal, function (key) {
-				return key ? localStorage.removeItem(key) : localStorage.clear();
-			}, function (key) {
-				return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
-			});
-		}
-	}]);
 	return LocalStorageClass;
 }(Peep);
 
