@@ -30,7 +30,7 @@ var utils = {
         }
     },
     parse: function ( str ) {
-        return JSON.parse ? JSON.parse( str ) : eval( '(' + str + ')' );
+        return JSON.parse ? JSON.parse( str ) : new Function( 'return ' + str )();
     },
     getServerPort: function () {
         return window.location.port === '' ? ( window.location.protocol === 'http:' ? '80' : '443' ) : window.location.port;
