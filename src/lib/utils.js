@@ -5,6 +5,9 @@
  */
 
 var utils = {
+    fnLazyLoad: function ( b, fn1, fn2 ) {
+        return b ? fn1 : fn2;
+    }(),
     typeDecide: function ( o, type ) {
         return Object.prototype.toString.call( o ) === "[object " + type + "]";
     },
@@ -26,23 +29,23 @@ var utils = {
             } ).join( ',' ) + '}';
         }
     },
-    parse: function(str){
-        return JSON.parse ? JSON.parse(str) : eval('(' + str +')');
+    parse: function ( str ) {
+        return JSON.parse ? JSON.parse( str ) : eval( '(' + str + ')' );
     },
-    getServerPort: function(){
+    getServerPort: function () {
         return window.location.port === '' ? ( window.location.protocol === 'http:' ? '80' : '443' ) : window.location.port;
     },
-    getUserAgent:function() {
+    getUserAgent: function () {
         return navigator.userAgent;
     },
-    getPlatType:function(){
-        return !!utils.getUserAgent().match(/Mobile/) ? 'Mobile' : 'PC';
+    getPlatType: function () {
+        return !!utils.getUserAgent().match( /Mobile/ ) ? 'Mobile' : 'PC';
     },
-    getSystemParams: function(){
+    getSystemParams: function () {
         return {
             userAgent: utils.getUserAgent(),
             currentUrl: document.location.href,
-            timestamp: + new Date(),
+            timestamp: +new Date(),
             projectType: utils.getPlatType()
         };
     }

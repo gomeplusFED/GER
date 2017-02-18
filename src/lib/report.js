@@ -9,18 +9,18 @@ import Events from "./events";
 
 class Report extends Events {
 
-    constructor(options) {
-        super(options);
+    constructor( options ) {
+        super( options );
         this.errorQueue = [];
         this.repeatList = {};
         this.mergeTimeout = null;
         this.url = this.config.url;
         this.srcs = [];
-        ['log', 'debug', 'info', 'warn', 'error'].forEach((type, index)=>{
-            this[type] = (msg)=>{
-                this.handleMsg ( msg, type, index );
-            };  
-        });
+        [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
+            this[ type ] = ( msg ) => {
+                this.handleMsg( msg, type, index );
+            };
+        } );
 
     }
     repeat( error ) {
@@ -110,7 +110,7 @@ class Report extends Events {
             msg: msg
         } : msg;
         errorMsg.level = level;
-        errorMsg  = Object.assign(utils.getSystemParams(), errorMsg);
+        errorMsg = Object.assign( utils.getSystemParams(), errorMsg );
         this.carryError( errorMsg );
         this.send();
         return errorMsg;

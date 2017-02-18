@@ -4,21 +4,58 @@
 	(factory());
 }(this, (function () { 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+/**
+ * @author suman
+ * @fileoverview report
+ * @date 2017/02/15
+ */
+
+var utils = {
+    fnLazyLoad: function (b, fn1, fn2) {
+        return b ? fn1 : fn2;
+    }(),
+    typeDecide: function typeDecide(o, type) {
+        return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    serializeObj: function serializeObj(obj) {
+        var parames = '';
+        Object.keys(obj).forEach(function (name) {
+            parames += name + '=' + obj[name] + '&';
+        });
+        return parames;
+    },
+    stringify: function stringify(obj) {
+        if (JSON.stringify) {
+            return JSON.stringify(obj);
+        } else {
+            var sep = '';
+            return '{' + Object.keys(obj).map(function (k) {
+                sep = typeof obj[k] === 'number' ? '' : '"';
+                return '"' + k + '"' + ':' + sep + obj[k] + sep;
+            }).join(',') + '}';
+        }
+    },
+    parse: function parse(str) {
+        return JSON.parse ? JSON.parse(str) : eval('(' + str + ')');
+    },
+    getServerPort: function getServerPort() {
+        return window.location.port === '' ? window.location.protocol === 'http:' ? '80' : '443' : window.location.port;
+    },
+    getUserAgent: function getUserAgent() {
+        return navigator.userAgent;
+    },
+    getPlatType: function getPlatType() {
+        return !!utils.getUserAgent().match(/Mobile/) ? 'Mobile' : 'PC';
+    },
+    getSystemParams: function getSystemParams() {
+        return {
+            userAgent: utils.getUserAgent(),
+            currentUrl: document.location.href,
+            timestamp: +new Date(),
+            projectType: utils.getPlatType()
+        };
+    }
 };
-
-
-
-
-
-
-
-
-
-
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -84,62 +121,6 @@ var possibleConstructorReturn = function (self, call) {
   }
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-/**
- * @author suman
- * @fileoverview report
- * @date 2017/02/15
- */
-
-var utils = {
-    typeDecide: function typeDecide(o, type) {
-        return Object.prototype.toString.call(o) === "[object " + type + "]";
-    },
-    serializeObj: function serializeObj(obj) {
-        var parames = '';
-        Object.keys(obj).forEach(function (name) {
-            parames += name + '=' + obj[name] + '&';
-        });
-        return parames;
-    },
-    stringify: function stringify(obj) {
-        if (JSON.stringify) {
-            return JSON.stringify(obj);
-        } else {
-            var _ret = function () {
-                var sep = '';
-                return {
-                    v: '{' + Object.keys(obj).map(function (k) {
-                        sep = typeof obj[k] === 'number' ? '' : '"';
-                        return '"' + k + '"' + ':' + sep + obj[k] + sep;
-                    }).join(',') + '}'
-                };
-            }();
-
-            if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
-        }
-    },
-    parse: function parse(str) {
-        return JSON.parse ? JSON.parse(str) : eval('(' + str + ')');
-    },
-    getServerPort: function getServerPort() {
-        return window.location.port === '' ? window.location.protocol === 'http:' ? '80' : '443' : window.location.port;
-    },
-    getUserAgent: function getUserAgent() {
-        return navigator.userAgent;
-    },
-    getPlatType: function getPlatType() {
-        return !!utils.getUserAgent().match(/Mobile/) ? 'Mobile' : 'PC';
-    },
-    getSystemParams: function getSystemParams() {
-        return {
-            userAgent: utils.getUserAgent(),
-            currentUrl: document.location.href,
-            timestamp: +new Date(),
-            projectType: utils.getPlatType()
-        };
-    }
 };
 
 /**
@@ -224,8 +205,6 @@ var Peep = function (_Config) {
         key: 'cat',
         value: function cat(func, args) {
             return function () {
-                var _this2 = this;
-
                 try {
                     return func.apply(this, args || arguments);
                 } catch (error) {
@@ -235,14 +214,12 @@ var Peep = function (_Config) {
                         console.error("[GER]", error.stack);
                     }
                     if (!this.timeoutkey) {
-                        (function () {
-                            var orgOnerror = window.onerror;
-                            window.onerror = function () {};
-                            _this2.timeoutkey = setTimeout(function () {
-                                window.onerror = orgOnerror;
-                                this.timeoutkey = null;
-                            }, 50);
-                        })();
+                        var orgOnerror = window.onerror;
+                        window.onerror = function () {};
+                        this.timeoutkey = setTimeout(function () {
+                            window.onerror = orgOnerror;
+                            this.timeoutkey = null;
+                        }, 50);
                     }
                     throw error;
                 }
@@ -252,11 +229,11 @@ var Peep = function (_Config) {
         key: 'catArgs',
         value: function catArgs(func) {
             return function () {
-                var _this3 = this;
+                var _this2 = this;
 
                 var args = [];
                 arguments.forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (v = _this3.cat(v));
+                    utils.typeDecide(v, 'Function') && (v = _this2.cat(v));
                     args.push(v);
                 });
                 return func.apply(this, args);
@@ -282,12 +259,12 @@ var Peep = function (_Config) {
         key: 'makeArgsTry',
         value: function makeArgsTry(func, self) {
             return function () {
-                var _this4 = this;
+                var _this3 = this;
 
                 var tmp = void 0,
                     args = [];
                 arguments.forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (tmp = _this4.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+                    utils.typeDecide(v, 'Function') && (tmp = _this3.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
 
                     args.push(v);
                 });
@@ -444,6 +421,74 @@ var Peep = function (_Config) {
  * @date 2017/02/16
  */
 
+function clearCookie(value) {
+	addCookie(value, 'a', -1);
+}
+
+function addCookie(name, value, days) {
+	var times = new Date();
+	times.setDate(times.getDate() + days);
+	document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+}
+
+function getCookie(key) {
+	/*var flag = false;
+ document.cookie.split('; ').forEach(function ( v ){
+ 	var item = v.split('=');
+ 	if( item[0] == key ){
+ 		console.log('找到了------------' + item[1]);
+ 		return item[1];
+ 	}
+ 	//key == v.split('=')[1] ? return v.split('=')[1] : ????;
+ });
+ console.log('再去判断');
+ return flag;*/
+	var arr = document.cookie.split('; ');
+	for (var i = 0; i < arr.length; i++) {
+		var arr1 = arr[i].split('=');
+		if (arr1[0] == key) {
+			return arr1[1];
+		}
+	}
+	return '';
+}
+//getCookie( 'a' );
+
+/*var storage = {
+	 hasLocal : !!window.localStorage,
+	 setItem:function(){
+		let expiresTime = +new Date() + 1000*60*60*24*this.config.validTime;
+		return this.hasLocal ? function( key, value ){
+			localStorage.setItem( key, utils.stringify({
+				value : value,
+				expires : expiresTime
+			}));
+			return value;
+		} : function( key, value ){
+			document.cookie = key + '=' + value + '; expires=' + expiresTime.toGMTString();
+		};
+	}(),
+	getItem:function(){
+		return this.hasLocal ? function( key ){
+			return localStorage.hasOwnProperty(key) ? this.getParam(key,'value') : '';
+		} : function( key ){
+			return document.cookie.indexOf(key) !== -1 ? document.cookie.split('; ').forEach(( v ) => {
+						return v.split('=')[1];
+			}) : '';
+		};
+	}(),
+	clear:function(){
+		
+		return this.hasLocal ? function( key ){
+			// ls
+			return key ? localStorage.removeItem(key) : localStorage.clear();
+		} : function( key ){
+			// cookie
+			return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
+		};
+	}()
+};*/
+
 var LocalStorageClass = function (_Peep) {
 	inherits(LocalStorageClass, _Peep);
 
@@ -452,81 +497,59 @@ var LocalStorageClass = function (_Peep) {
 
 		var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this, options));
 
-		_this.options = {
-			expires: 60 * 24 * 3600,
-			domain: _this.config.errorLSSign
-		};
-
-		var date = new Date();
-		date.setTime(date.getTime() + 60 * 24 * 3600);
-		_this.setItem('expires', date.toGMTString());
-
+		_this.hasLocal = !!window.localStorage;
+		_this.errorSign = _this.config.errorLSSign;
 		return _this;
 	}
-	//内部函数 参数说明(key) 检查key是否存在
+
+	//得到元素值 获取元素值 若不存在则返回''
+	//getItem : storage.getItem
 
 
 	createClass(LocalStorageClass, [{
-		key: 'findItem',
-		value: function findItem(key) {
-			var b = document.cookie.indexOf(key);
-			if (b < 0) {
-				return true;
-			} else {
-				return false;
-			}
+		key: "getItem",
+		value: function getItem() {
+			utils.fnLazyLoad(this.hasLocal, function (key) {
+				return localStorage.hasOwnProperty(key) ? this.getParam(key, 'value') : '';
+			}, function (key) {
+				getCookie(key);
+			});
 		}
-
-		//得到元素值 获取元素值 若不存在则返回 null
+		// 
 
 	}, {
-		key: 'getItem',
-		value: function getItem(key) {
-			var i = this.findItem(key);
-			if (!i) {
-				var array = document.cookie.split(';');
-				for (var j = 0; j < array.length; j++) {
-					var arraySplit = array[j];
-					if (arraySplit.indexOf(key) > -1) {
-						var getValue = array[j].split('=');
-						//将 getValue[0] trim删除两端空格
-						getValue[0] = getValue[0].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-						if (getValue[0] == key) {
-							return getValue[1];
-						} else {
-							return 'null';
-						}
-					}
-				}
-			}
+		key: "getParam",
+		value: function getParam(key, type) {
+			return utils.parse(localStorage.getItem(key))[type];
 		}
-
-		//重新设置元素
+		// 设置一条localstorage或cookie
+		//setItem : storage.setItem
 
 	}, {
-		key: 'setItem',
-		value: function setItem(key, value) {
-			//let i = this.findItem(key);
-			document.cookie = key + '=' + value;
+		key: "setItem",
+		value: function setItem() {
+			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * this.config.validTime;
+			utils.fnLazyLoad(this.hasLocal, function (key, value) {
+				localStorage.setItem(key, utils.stringify({
+					value: value,
+					expires: expiresTime
+				}));
+				return value;
+			}, function (key, value) {
+				addCookie(key, value, this.config.validTime);
+			});
 		}
 
-		//清除cookie 参数一个或多一
+		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
 	}, {
-		key: 'clear',
+		key: "clear",
 		value: function clear() {
-			for (var i = 0; i < arguments.length; i++) {
-				var date = new Date();
-				date.setTime(date.getTime() - 100);
-				document.cookie = arguments[i] + "=a; expires=" + date.toGMTString();
-			}
-		}
-	}, {
-		key: 'localStorageHandle',
-		value: function localStorageHandle(cb) {
-			var callback = cb || function () {};
-			this.localStorage = localStorage !== undefined ? localStorage : this;
-			callback.call(this, this.localStorage);
+			utils.fnLazyLoad(this.hasLocal, function (key) {
+				return key ? localStorage.removeItem(key) : localStorage.clear();
+			}, function (key) {
+				return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
+			});
 		}
 	}]);
 	return LocalStorageClass;
