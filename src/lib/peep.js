@@ -9,10 +9,10 @@ import utils from './utils';
 
 
 class Peep extends Config {
-    constructor(options) {
-        super(options);
+    constructor( options ) {
+        super( options );
         this.timeoutkey = null;
-        window.onload =  () => {
+        window.onload = () => {
             this.peep();
         };
 
@@ -26,79 +26,79 @@ class Peep extends Config {
             this.config.peepCustom && this.peepCustom();
         }
     }
-    onThrow( error ){
-        this.carryError(error);
+    onThrow( error ) {
+        this.carryError( error );
     }
-    cat( func, args){
-        return function() {
+    cat( func, args ) {
+        return function () {
             try {
-                return func.apply(this, args || arguments);
-            } catch (error) {
+                return func.apply( this, args || arguments );
+            } catch ( error ) {
 
-                this.onThrow(error);
-                if (error.stack && console && console.error) {
-                    console.error("[GER]", error.stack);
+                this.onThrow( error );
+                if ( error.stack && console && console.error ) {
+                    console.error( "[GER]", error.stack );
                 }
-                if (!this.timeoutkey) {
+                if ( !this.timeoutkey ) {
                     let orgOnerror = window.onerror;
-                    window.onerror = function() {};
-                    this.timeoutkey = setTimeout(function() {
+                    window.onerror = function () {};
+                    this.timeoutkey = setTimeout( function () {
                         window.onerror = orgOnerror;
                         this.timeoutkey = null;
-                    }, 50);
+                    }, 50 );
                 }
                 throw error;
             }
         };
     }
 
-    catArgs (func) {
-        return function() {
+    catArgs( func ) {
+        return function () {
             let args = [];
-            arguments.forEach((v)=>{
-                utils.typeDecide(v, 'Function') && (v = this.cat(v));
-                args.push(v);
-            });
-            return func.apply(this, args);
-        }.bind(this);
+            arguments.forEach( ( v ) => {
+                utils.typeDecide( v, 'Function' ) && ( v = this.cat( v ) );
+                args.push( v );
+            } );
+            return func.apply( this, args );
+        }.bind( this );
     }
 
-    catTimeout(func) {
-        return function(cb, timeout) {
-            if(utils.typeDecide(cb,'String')){
+    catTimeout( func ) {
+        return function ( cb, timeout ) {
+            if ( utils.typeDecide( cb, 'String' ) ) {
                 try {
-                    cb = new Function(cb);
-                } catch (err) {
+                    cb = new Function( cb );
+                } catch ( err ) {
                     throw err;
                 }
             }
-            let args = [].slice.call(arguments, 2);
-            cb = this.cat(cb, args.length && args);
-            return func(cb, timeout);
-        }.bind(this);
+            let args = [].slice.call( arguments, 2 );
+            cb = this.cat( cb, args.length && args );
+            return func( cb, timeout );
+        }.bind( this );
     }
 
-    makeArgsTry (func, self) {
-        return function() {
+    makeArgsTry( func, self ) {
+        return function () {
             let tmp, args = [];
-            arguments.forEach(v =>{
-                utils.typeDecide(v, 'Function') && (tmp = this.cat(v)) &&
-                    (v.tryWrap = tmp) && (v = tmp);
+            arguments.forEach( v => {
+                utils.typeDecide( v, 'Function' ) && ( tmp = this.cat( v ) ) &&
+                    ( v.tryWrap = tmp ) && ( v = tmp );
 
-                args.push(v);
-            });
-            return func.apply(self || this, args);
-        }.bind(this);
+                args.push( v );
+            } );
+            return func.apply( self || this, args );
+        }.bind( this );
     }
-    makeObjTry(obj) {
+    makeObjTry( obj ) {
         let key;
         let value;
         let that = this;
-        for (key in obj) {
-            if( obj.hasOwnProperty(key) ){
-                value = obj[key];
-                if (utils.typeDecide(value,'Function')) {
-                    obj[key] = that.cat(value);
+        for ( key in obj ) {
+            if ( obj.hasOwnProperty( key ) ) {
+                value = obj[ key ];
+                if ( utils.typeDecide( value, 'Function' ) ) {
+                    obj[ key ] = that.cat( value );
                 }
             }
         }
@@ -107,57 +107,57 @@ class Peep extends Config {
 
     // 劫持原生js
     peepSystem() {
-        window.setTimeout = this.catTimeout(setTimeout);
-        window.setInterval = this.catTimeout(setInterval);
+        window.setTimeout = this.catTimeout( setTimeout );
+        window.setInterval = this.catTimeout( setInterval );
     }
 
     // 劫持jquery
     peepJquery() {
         let _$ = window.$;
 
-        if (!_$ || !_$.event) {
+        if ( !_$ || !_$.event ) {
             return this;
         }
 
         let _add, _remove;
-        if (_$.zepto) {
+        if ( _$.zepto ) {
             _add = _$.fn.on, _remove = _$.fn.off;
 
-            _$.fn.on = this.makeArgsTry(_add);
-            _$.fn.off = function() {
+            _$.fn.on = this.makeArgsTry( _add );
+            _$.fn.off = function () {
                 let args = [];
-                arguments.forEach(v=>{
-                    utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
-                    args.push(v);
-                });
-                return _remove.apply(this, args);
+                arguments.forEach( v => {
+                    utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
+                    args.push( v );
+                } );
+                return _remove.apply( this, args );
             };
 
-        } else if (window.jQuery) {
+        } else if ( window.jQuery ) {
             _add = _$.event.add, _remove = _$.event.remove;
 
-            _$.event.add = this.makeArgsTry(_add);
-            _$.event.remove = function() {
+            _$.event.add = this.makeArgsTry( _add );
+            _$.event.remove = function () {
                 let args = [];
-                arguments.forEach(v=>{
-                    utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
-                    args.push(v);
-                });
-                return _remove.apply(this, args);
+                arguments.forEach( v => {
+                    utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
+                    args.push( v );
+                } );
+                return _remove.apply( this, args );
             };
         }
 
         let _ajax = _$.ajax;
 
-        if (_ajax) {
-            _$.ajax = function(url, setting) {
-                if (!setting) {
+        if ( _ajax ) {
+            _$.ajax = function ( url, setting ) {
+                if ( !setting ) {
                     setting = url;
                     url = undefined;
                 }
-                this.makeObjTry(setting);
-                if (url) return _ajax.call(_$, url, setting);
-                return _ajax.call(_$, setting);
+                this.makeObjTry( setting );
+                if ( url ) return _ajax.call( _$, url, setting );
+                return _ajax.call( _$, setting );
             };
         }
     }

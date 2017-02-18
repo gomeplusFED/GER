@@ -3,7 +3,7 @@
  * @fileoverview config
  * @date 2017/02/16
  */
-class Config  {
+class Config {
     constructor( options ) {
         this.config = {
             mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
@@ -19,7 +19,7 @@ class Config  {
             peepJquery: false,
             peepConsole: true
         };
-        this.config = Object.assign( this.config, options ); 
+        this.config = Object.assign( this.config, options );
     }
     get( name ) {
         return this.config[ name ];

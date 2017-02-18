@@ -9,11 +9,12 @@
     "test": "test"
   },
   "scripts": {
-    "pretest": "./node_modules/.bin/jshint -c .jshintrc src",
-    "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register",
-    "build": "./node_modules/.bin/rollup -c rollup.config.js",
+    "pretest": "jshint -c .jshintrc src",
+    "test": "mocha --compilers js:babel-core/register",
+    "devbuild": "rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.js",
     "beautify": "node ./scripts/beatufyjs.js src test",
-    "watch": "./node_modules/.bin/rollup -c -w",
+    "watch": "rollup -c -w",
     "server": "http-server -a 0.0.0.0 -p 8080 -s",
     "serverwatch": "npm-run-all --parallel server watch"
   },

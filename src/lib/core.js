@@ -8,13 +8,13 @@ import utils from './utils';
 
 
 class GER extends Report {
-    constructor(options) {
-        super(options);
+    constructor( options ) {
+        super( options );
         this.rewriteError();
     }
     rewriteError() {
         window.onerror = ( msg, url, line, col, error ) => {
-            if( this.trigger('error',arguments)){
+            if ( this.trigger( 'error', arguments ) ) {
                 return false;
             }
             var reportMsg = msg;
@@ -26,12 +26,12 @@ class GER extends Report {
                     ( "--" + reportMsg.type + "--" + ( reportMsg.target ?
                         ( reportMsg.target.tagName + "::" + reportMsg.target.src ) : "" ) ) : "";
             }
-            this.error({
+            this.error( {
                 msg: reportMsg,
                 rolNum: line,
                 colNum: col,
                 targetUrl: url
-            });
+            } );
             return true;
         };
     }
