@@ -12,6 +12,7 @@
     "pretest": "./node_modules/.bin/jshint -c .jshintrc src",
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register",
     "build": "NODE_ENV=production ./node_modules/.bin/rollup -c rollup.config.js",
+    "devbuild": "./node_modules/.bin/rollup -c rollup.config.js",
     "beautify": "node ./scripts/beatufyjs.js src test",
     "watch": "./node_modules/.bin/rollup -c -w",
     "server": "http-server -a 0.0.0.0 -p 8080 -s",

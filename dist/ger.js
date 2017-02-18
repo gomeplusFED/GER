@@ -427,7 +427,9 @@ var Report = function (_Config) {
                 console.warn(type + '方法内 msg 参数为空');
                 return;
             }
-            var errorMsg = utils.typeDecide(msg, 'String') ? { msg: msg } : msg;
+            var errorMsg = utils.typeDecide(msg, 'String') ? {
+                msg: msg
+            } : msg;
             errorMsg.level = level;
             this.carryError(errorMsg);
             this.send();
