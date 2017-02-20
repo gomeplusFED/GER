@@ -36,7 +36,7 @@ var utils = {
 
             for (n in obj) {
                 if( obj.hasOwnProperty(n) ){
-                    
+
                     v = obj[n];
                     t = typeof(v);
                     if (obj.hasOwnProperty(n)) {
@@ -60,14 +60,77 @@ var utils = {
         return navigator.userAgent;
     },
     getPlatType: function () {
-        return !!utils.getUserAgent().match( /Mobile/ ) ? 'Mobile' : 'PC';
+        try {
+            document.createEvent("TouchEvent");
+            return 'Mobile';
+        } catch (e) {
+            return 'PC';
+        }
+    },
+    flashVer: function(){
+        let f = "-";
+        let n = navigator;
+        let ii;
+        if (n.plugins && n.plugins.length) {
+            for (ii = 0; ii < n.plugins.length; ii++) {
+                if (n.plugins[ii].name.indexOf('Shockwave Flash') !== -1) {
+                    f = n.plugins[ii].description.split('Shockwave Flash ')[1];
+                    break;
+                }
+            }
+        } else if (window.ActiveXObject) {
+            for (ii = 10; ii >= 2; ii--) {
+                try {
+                    var fl = eval("new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');");
+                    if (fl) {
+                        f = ii + '.0';
+                        break;
+                    }
+                } catch (e) {}
+            }
+        }
+        return f;
+    },
+    // 从字符串 src 中查找 k+sp 和  e 之间的字符串，如果 k==e 且 k 只有一个，或者 e 不存在，从 k+sp 截取到字符串结束
+    // abcd=1&b=1&c=3;
+    // abdc=1;b=1;a=3;
+    stringSplice: function(src, k, e, sp) {
+        if (src === "") {
+            return "";
+        }
+        sp = (sp === "") ? "=" : sp;
+        k += sp;
+        var ps = src.indexOf(k);
+        if (ps < 0) {
+            return "";
+        }
+        ps += k.length;
+        var pe = pe < ps ? src.length : src.indexOf(e, ps);
+        return src.substring(ps, pe);
+    },
+    getReferer:function(){
+        let ref = document.referrer.toLowerCase();
+        let re = /^[^\?&#]*.swf([\?#])?/;
+        // 如果页面 Referer 为空，从 URL 中获取
+        if ((ref === "") || (ref.match(re))) {
+            ref = utils.stringSplice(window.location.href, "ref", "&", "");
+            if (ref !== "") {
+                return encodeURIComponent(ref);
+            }
+        }
+        return encodeURIComponent(ref);
     },
     getSystemParams: function () {
+        let scr = window.screen;
         return {
             userAgent: utils.getUserAgent(),
             currentUrl: document.location.href,
             timestamp: +new Date(),
-            projectType: utils.getPlatType()
+            projectType: utils.getPlatType(),
+            flashVer: utils.flashVer(),
+            title: document.title,
+            screenSize: scr.width + "x" + scr.height,
+            referer: document.referer ? document.referer : ''
         };
     },
     toArray: function( arr ){
