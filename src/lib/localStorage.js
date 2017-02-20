@@ -37,7 +37,7 @@ let storage = {
 		let loac = storage.getItem( key );
 		if( errorObj !== undefined ){
 			let keys = Object.keys( loac );
-			if( keys.length >  number ){
+			if( keys.length >=  number ){
 				delete loac[keys[0]];
 			}
 			let expiresTime = storage.setEpires(validTime);
@@ -100,8 +100,8 @@ class Localstroage extends Peep {
 		storage.clear( key );
 	}
 	init (){
-		this.getItem(  );
-		this.setItem(   );
+		this.getItem();
+		this.setItem();
 	}
 
 }

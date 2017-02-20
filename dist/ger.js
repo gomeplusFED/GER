@@ -629,7 +629,7 @@ var storage = {
 		var loac = storage.getItem(key);
 		if (errorObj !== undefined) {
 			var keys = Object.keys(loac);
-			if (keys.length > number) {
+			if (keys.length >= number) {
 				delete loac[keys[0]];
 			}
 			var expiresTime = storage.setEpires(validTime);
