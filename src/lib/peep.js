@@ -55,7 +55,7 @@ class Peep extends Config {
     catArgs( func ) {
         return function () {
             let args = [];
-            arguments.forEach( ( v ) => {
+            utils.toArray(arguments).forEach( ( v ) => {
                 utils.typeDecide( v, 'Function' ) && ( v = this.cat( v ) );
                 args.push( v );
             } );
@@ -72,7 +72,7 @@ class Peep extends Config {
                     throw err;
                 }
             }
-            let args = [].slice.call( arguments, 2 );
+            let args = utils.toArray(arguments);
             cb = this.cat( cb, args.length && args );
             return func( cb, timeout );
         }.bind( this );
@@ -81,7 +81,8 @@ class Peep extends Config {
     makeArgsTry( func, self ) {
         return function () {
             let tmp, args = [];
-            arguments.forEach( v => {
+           
+            utils.toArray(arguments).forEach( v => {
                 utils.typeDecide( v, 'Function' ) && ( tmp = this.cat( v ) ) &&
                     ( v.tryWrap = tmp ) && ( v = tmp );
 
@@ -126,7 +127,7 @@ class Peep extends Config {
             _$.fn.on = this.makeArgsTry( _add );
             _$.fn.off = function () {
                 let args = [];
-                arguments.forEach( v => {
+                utils.toArray(arguments).forEach( v => {
                     utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -139,7 +140,7 @@ class Peep extends Config {
             _$.event.add = this.makeArgsTry( _add );
             _$.event.remove = function () {
                 let args = [];
-                arguments.forEach( v => {
+                utils.toArray(arguments).forEach( v => {
                     utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -162,11 +163,29 @@ class Peep extends Config {
         }
     }
 
+
     // 劫持console
     peepConsole() {
-
+        /*let _log = console.log;*/
+        window.console.log = this.peepConsoleLog( window.console.log );
+        
     }
 
+
+    peepConsoleLog (func, self){
+        return function () {
+            let tmp, args = [];
+            //alert(arguments[0])
+            utils.toArray(arguments).forEach( v => {
+
+                utils.typeDecide( v, 'Function' ) && ( tmp = this.cat( v ) ) &&
+                    ( v.tryWrap = tmp ) && ( v = tmp );
+
+                args.push( v );
+            } );
+            return func.apply( self || this, args );
+        }.bind( this );
+    }
     // 劫持seajs
     peepModules() {
         var _require = window.require,
@@ -181,7 +200,7 @@ class Peep extends Config {
         if (window.seajs && _define) {
             window.define = function() {
                 var arg, args = [];
-                arguments.forEach((v,i)=>{
+                utils.toArray(arguments).forEach((v,i)=>{
                     if(utils.typeDecide('v', 'Function')){
                         v = this.cat(v);
                         v.toString = (function(orgArg) {

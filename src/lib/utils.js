@@ -48,6 +48,9 @@ var utils = {
             timestamp: +new Date(),
             projectType: utils.getPlatType()
         };
+    },
+    toArray: function( arr ){
+        return Array.prototype.slice.call(arr);
     }
 };
 

@@ -1,10 +1,11 @@
 'use strict';
 var error_report = new Ger({
 	url:'xxxxx',
-	failTime : 3
+	failTime : 3,
 	tryPeep: true,
 	peepSystem: true,
-	repeat:10000
+	repeat:10000,
+	peepConsole: true
 });
 
 //error_report.info('111111111');
@@ -15,6 +16,8 @@ var error_report = new Ger({
 });*/
 
 localStorage.setItem('a', '123245678');
-setTimeout(function(){
+/*setTimeout(function(){
 	console.log(1111)
 },1000);
+*/
+console.log(1)
