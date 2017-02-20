@@ -105,7 +105,20 @@ var createClass = function () {
 
 
 
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
+  return obj;
+};
 
 
 
@@ -399,38 +412,125 @@ var Peep = function (_Config) {
  */
 var hasLocal = !!window.localStorage;
 var storage = {
+	init: function init(key, errorLSSign) {
+		this.data = hasLocal ? {} : utils.getCookie(key);
+		//this.data = eval("({'targetUrlajscolNumnullrowNumnull':{'value':{'targetUrl':'ajs'},'exp':5},'error2':{'value':{'targetUrl':'ajs'},'exp':5})")
+		/*this.data = {
+  	'error1' : {
+  		'value': {
+  				'targetUrl':'ajs',
+  				'row':'rr',
+  				'line':'ll',
+  				'ua':'usus'
+  			},
+  		'exp':14876044208965,
+  		'days' :5
+  	},
+  	'error2' : {
+  		'value': {
+  				'targetUrl':'bbb',
+  				'row':'frgthy',
+  				'line':'rtyty',
+  				'ua':'uaua'
+  			},
+  		'exp':1487777708143,
+  		'days' :1
+  	},
+  	'error3' : {
+  		'value': {
+  				'targetUrl':'bbb',
+  				'row':'frgthy',
+  				'line':'rtyty',
+  				'ua':'uaua'
+  			},
+  		'exp':34567,
+  		'days' :-1
+  	}
+  };*/
+		for (var name in this.data) {
+			var exp = this.data[name].exp;
+			/*console.log(+new Date() + 86400*this.data[name].days*1000);
+   console.log(exp);*/
+			if (+new Date() + 86400 * this.data[name].days * 1000 >= exp) {
+				delete this.data[name];
+				console.log('shanle');
+			}
+		}
+		this.setItem(errorLSSign, this.data, 888);
+	},
+
 	getParam: function getParam(key, type) {
 		return utils.parse(localStorage.getItem(key))[type];
 	},
+
 	setItem: function () {
-		return hasLocal ? function (key, value, validTime) {
+		return hasLocal ? function (key, errorObj, validTime) {
+			console.log('ls');
+			console.log(key, errorObj, validTime);
 			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * validTime;
-			localStorage.setItem(key, utils.stringify({
-				value: value,
-				expires: expiresTime
-			}));
-			return value;
-		} : function (key, value, validTime) {
-			utils.addCookie(key, value, validTime);
+			var errorKey = '\\targetUrl_' + errorObj.targetUrl + '_colNum_' + (errorObj.colNum || null) + '_rowNum_' + (errorObj.rowNum || null) + '\\';
+			localStorage.setItem(key, utils.stringify(defineProperty({}, errorKey, {
+				'value': errorObj,
+				'exp': expiresTime,
+				'days': validTime
+			})));
+			return errorObj;
+		} : function (key, errorObj, validTime) {
+			console.log('cookie');
+			var errorKey = '\\targetUrl_' + errorObj.targetUrl + '_colNum_' + (errorObj.colNum || null) + '_rowNum_' + (errorObj.rowNum || null) + '\\';
+			// value 就是传入的一个error对象
+			/*
+   	let json = {
+   		targetUrl : 'a.js',
+   		colNum : 3,
+   		rowNum : 5
+   	}
+   	'error3' : {
+   		'value': {
+   				'targetUrl':'bbb',
+   				'row':'frgthy',
+   				'line':'rtyty',
+   				'ua':'uaua'
+   			},
+   		'exp':34567,
+   		'days' :-1
+   	}
+   */
+			this.data[errorKey] = {
+				'value': {
+					'targetUrl': 'bbb',
+					'row': 'frgthy',
+					'line': 'rtyty',
+					'ua': 'uaua'
+				},
+				'exp': +new Date() + 1000 * 60 * 60 * 24 * validTime,
+				'days': validTime
+			};
+			//let res = '{{' + errorKey + ':{"value":' + utils.stringify(errorObj) + ',"exp":' + (+new Date() + 1000*60*60*24*validTime) + ',"days":' + validTime +'}}';
+			utils.addCookie(key, utils.stringify(this.data), 888);
 		};
 	}(),
+
 	getItem: function () {
 		return hasLocal ? function (key) {
+			console.log('ls');
 			return localStorage.hasOwnProperty(key) ? storage.getParam(key, 'value') : '';
 		} : function (key) {
+			console.log('cookie');
+			// 取什么数据？是否需要处理？
 			return utils.getCookie(key);
 		};
 	}(),
 
 	clear: function () {
 		return hasLocal ? function (key) {
+			console.log('ls');
 			return key ? localStorage.removeItem(key) : localStorage.clear();
 		} : function (key) {
+			console.log('cookie');
 			return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
 		};
 	}()
-
-	// 
 
 };
 
@@ -439,13 +539,22 @@ var Localstroage = function (_Peep) {
 
 	function Localstroage(options) {
 		classCallCheck(this, Localstroage);
-		return possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+
+		var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+
+		_this.init(_this.config.errorLSSign);
+		return _this;
 	}
 
-	//得到元素值 获取元素值 若不存在则返回''
-
-
 	createClass(Localstroage, [{
+		key: "init",
+		value: function init(key) {
+			return storage.init(key, this.config.errorLSSign);
+		}
+
+		//得到元素值 获取元素值 若不存在则返回''
+
+	}, {
 		key: "getItem",
 		value: function getItem(key) {
 			return storage.getItem(key);
@@ -454,8 +563,8 @@ var Localstroage = function (_Peep) {
 
 	}, {
 		key: "setItem",
-		value: function setItem(key, value, days) {
-			storage.setItem(key, value, days);
+		value: function setItem(errorObj, days) {
+			storage.setItem(this.config.errorLSSign, errorObj, days);
 		}
 
 		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
