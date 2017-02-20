@@ -115,6 +115,7 @@ class Report extends Events {
         errorMsg = Object.assign( utils.getSystemParams(), errorMsg );
         this.carryError( errorMsg );
         this.send();
+        this.setItem(errorMsg);
         return errorMsg;
     }
 }

@@ -19,14 +19,35 @@ var utils = {
         return parames;
     },
     stringify: function ( obj ) {
-        if ( JSON.stringify ) {
-            return JSON.stringify( obj );
+        if (window.JSON) {
+            return JSON.stringify(obj);
+        }
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
         } else {
-            let sep = '';
-            return '{' + Object.keys( obj ).map( ( k ) => {
-                sep = typeof obj[ k ] === 'number' ? '' : '"';
-                return '"' + k + '"' + ':' + sep + obj[ k ] + sep;
-            } ).join( ',' ) + '}';
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+
+            // fix.
+            var self = arguments.callee;
+
+            for (n in obj) {
+                if( obj.hasOwnProperty(n) ){
+                    
+                    v = obj[n];
+                    t = typeof(v);
+                    if (obj.hasOwnProperty(n)) {
+                        if (t == "string") v = '"' + v + '"'; else if (t == "object" && v !== null)
+                            // v = jQuery.stringify(v);
+                            v = self(v);
+                        json.push((arr ? "" : '"' + n + '":') + String(v));
+                    }
+                }
+            }
+            return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
         }
     },
     parse: function ( str ) {
@@ -64,9 +85,9 @@ var utils = {
         }
         return str;
     },
-    addCookie: function( name, value, days ){
+    addCookie: function( name, value ){
         var times = new Date();
-        times.setDate( times.getDate() + days );
+        times.setDate( times.getDate() + 100 );
         document.cookie = name + "="+ value +"; expires=" + times.toGMTString();
     },
     clearCookie: function( value ){

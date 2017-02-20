@@ -107,20 +107,38 @@ var utils = {
         return parames;
     },
     stringify: function stringify(obj) {
-        if (JSON.stringify) {
+        if (window.JSON) {
             return JSON.stringify(obj);
+        }
+        var t = typeof obj === "undefined" ? "undefined" : _typeof(obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
         } else {
-            var _ret = function () {
-                var sep = '';
-                return {
-                    v: '{' + Object.keys(obj).map(function (k) {
-                        sep = typeof obj[k] === 'number' ? '' : '"';
-                        return '"' + k + '"' + ':' + sep + obj[k] + sep;
-                    }).join(',') + '}'
-                };
-            }();
+            // recurse array or object
+            var n,
+                v,
+                json = [],
+                arr = obj && obj.constructor == Array;
 
-            if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+            // fix.
+            var self = arguments.callee;
+
+            for (n in obj) {
+                if (obj.hasOwnProperty(n)) {
+
+                    v = obj[n];
+                    t = typeof v === "undefined" ? "undefined" : _typeof(v);
+                    if (obj.hasOwnProperty(n)) {
+                        if (t == "string") v = '"' + v + '"';else if (t == "object" && v !== null)
+                            // v = jQuery.stringify(v);
+                            v = self(v);
+                        json.push((arr ? "" : '"' + n + '":') + String(v));
+                    }
+                }
+            }
+            return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
         }
     },
     parse: function parse(str) {
@@ -158,9 +176,9 @@ var utils = {
         }
         return str;
     },
-    addCookie: function addCookie(name, value, days) {
+    addCookie: function addCookie(name, value) {
         var times = new Date();
-        times.setDate(times.getDate() + days);
+        times.setDate(times.getDate() + 100);
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
     clearCookie: function clearCookie(value) {
@@ -185,11 +203,12 @@ var Config = function () {
             random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
             repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
             errorLSSign: 'mx-error', // error错误数自增 0
-            maxErrorCookieNo: 50, // error错误数自增 最大的错
+            maxErrorCookieNo: 20, // error错误数自增 最大的错
             tryPeep: false,
             peepSystem: false,
             peepJquery: false,
-            peepConsole: true
+            peepConsole: false,
+            validTime: 7
         };
         this.config = Object.assign(this.config, options);
     }
@@ -227,7 +246,6 @@ var Peep = function (_Config) {
         window.onload = function () {
             _this.peep();
         };
-
         _this.config.peepSystem && _this.peepSystem();
         if (_this.config.peepConsole) {
             ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
@@ -519,29 +537,63 @@ var Peep = function (_Config) {
  */
 var hasLocal = !!window.localStorage;
 var storage = {
-	getParam: function getParam(key, type) {
-		return utils.parse(localStorage.getItem(key))[type];
+	//设置cookie内json的key名
+	setKey: function setKey(errorObj) {
+		var keyArr = [];
+		errorObj.msg && keyArr.push(errorObj.msg);
+		errorObj.colNum && keyArr.push(errorObj.colNum);
+		errorObj.rowNum && keyArr.push(errorObj.rowNum);
+		return keyArr.join('@');
 	},
+	//检查是否有效
+	checkData: function checkData(data) {
+		var oData = data === '' ? {} : utils.parse(data);
+		var date = +new Date();
+		for (var key in oData) {
+			if (utils.parse(oData[key]).expiresTime <= date) {
+				delete oData[key];
+			}
+		}
+		return oData;
+	},
+	//设置失效时间
+	setEpires: function setEpires(validTime) {
+		return +new Date() + 1000 * 60 * 60 * 24 * validTime;
+	},
+	//获取cookie/localStorage内容体
+	setInfo: function setInfo(key, errorObj, validTime, number) {
+
+		var loac = storage.getItem(key);
+		if (errorObj !== undefined) {
+			var keys = Object.keys(loac);
+			if (keys.length > number) {
+				delete loac[keys[0]];
+			}
+			var expiresTime = storage.setEpires(validTime);
+			loac[storage.setKey(errorObj)] = utils.stringify({
+				value: errorObj,
+				expiresTime: expiresTime
+			});
+		}
+		return utils.stringify(loac);
+	},
+	//设置cookie/localStorage
 	setItem: function () {
-		return hasLocal ? function (key, value, validTime) {
-			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * validTime;
-			localStorage.setItem(key, utils.stringify({
-				value: value,
-				expires: expiresTime
-			}));
-			return value;
-		} : function (key, value, validTime) {
-			utils.addCookie(key, value, validTime);
+		return hasLocal ? function (key, errorObj, validTime, number) {
+			localStorage.setItem(key, storage.setInfo(key, errorObj, validTime, number));
+		} : function (key, errorObj, validTime, number) {
+			utils.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
 		};
 	}(),
+	//获取cookie/localStorage
 	getItem: function () {
 		return hasLocal ? function (key) {
-			return localStorage.hasOwnProperty(key) ? storage.getParam(key, 'value') : '';
+			return storage.checkData(localStorage.getItem(key) || '');
 		} : function (key) {
-			return utils.getCookie(key);
+			return storage.checkData(utils.getCookie(key));
 		};
 	}(),
-
+	//清除cookie/localStorage
 	clear: function () {
 		return hasLocal ? function (key) {
 			return key ? localStorage.removeItem(key) : localStorage.clear();
@@ -557,7 +609,11 @@ var Localstroage = function (_Peep) {
 
 	function Localstroage(options) {
 		classCallCheck(this, Localstroage);
-		return possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+
+		var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+
+		_this.init();
+		return _this;
 	}
 
 	//得到元素值 获取元素值 若不存在则返回''
@@ -572,8 +628,9 @@ var Localstroage = function (_Peep) {
 
 	}, {
 		key: "setItem",
-		value: function setItem(key, value, days) {
-			storage.setItem(key, value, days);
+		value: function setItem(errorObj) {
+			var _config = this.config;
+			storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
 		}
 
 		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
@@ -582,6 +639,12 @@ var Localstroage = function (_Peep) {
 		key: "clear",
 		value: function clear(key) {
 			storage.clear(key);
+		}
+	}, {
+		key: "init",
+		value: function init() {
+			this.getItem();
+			this.setItem();
 		}
 	}]);
 	return Localstroage;
@@ -764,6 +827,7 @@ var Report = function (_Events) {
             errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
             this.carryError(errorMsg);
             this.send();
+            this.setItem(errorMsg);
             return errorMsg;
         }
     }]);
