@@ -124,7 +124,7 @@ var utils = {
         }
     },
     parse: function parse(str) {
-        return JSON.parse ? JSON.parse(str) : eval('(' + str + ')');
+        return JSON.parse ? JSON.parse(str) : new Function('return ' + str)();
     },
     getServerPort: function getServerPort() {
         return window.location.port === '' ? window.location.protocol === 'http:' ? '80' : '443' : window.location.port;
@@ -145,6 +145,26 @@ var utils = {
     },
     toArray: function toArray$$1(arr) {
         return Array.prototype.slice.call(arr);
+    },
+    getCookie: function getCookie(key) {
+        var cookieList = document.cookie.split('; ');
+        var str = '';
+        for (var i = 0; i < cookieList.length; i++) {
+            var item = cookieList[i].split('=');
+            if (item[0] == key) {
+                str = item[1];
+                break;
+            }
+        }
+        return str;
+    },
+    addCookie: function addCookie(name, value, days) {
+        var times = new Date();
+        times.setDate(times.getDate() + days);
+        document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+    },
+    clearCookie: function clearCookie(value) {
+        utils.addCookie(value, '', -1);
     }
 };
 
@@ -158,7 +178,7 @@ var Config = function () {
         classCallCheck(this, Config);
 
         this.config = {
-            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+            mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
             url: "ewewe", // 指定错误上报地址
             except: [/Script error/i], // 忽略某个错误
@@ -203,9 +223,17 @@ var Peep = function (_Config) {
         var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
 
         _this.timeoutkey = null;
+        _this.consoleList = {};
         window.onload = function () {
             _this.peep();
         };
+
+        _this.config.peepSystem && _this.peepSystem();
+        if (_this.config.peepConsole) {
+            ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
+                window.console[type] = _this.peepConsole(window.console[type], type, index);
+            });
+        }
 
         return _this;
     }
@@ -214,9 +242,7 @@ var Peep = function (_Config) {
         key: 'peep',
         value: function peep() {
             if (this.config.tryPeep) {
-                this.config.peepSystem && this.peepSystem();
                 this.config.peepJquery && this.peepJquery();
-                this.config.peepConsole && this.peepConsole();
                 this.config.peepModule && this.peepModule();
                 this.config.peepCustom && this.peepCustom();
             }
@@ -380,31 +406,36 @@ var Peep = function (_Config) {
                 };
             }
         }
-
-        // 劫持console
-
+    }, {
+        key: 'carryConsole',
+        value: function carryConsole() {}
     }, {
         key: 'peepConsole',
-        value: function peepConsole() {
-            /*let _log = console.log;*/
-            window.console.log = this.peepConsoleLog(window.console.log);
-        }
-    }, {
-        key: 'peepConsoleLog',
-        value: function peepConsoleLog(func, self) {
+        value: function peepConsole(func, type, level) {
             return function () {
                 var _this5 = this;
 
-                var tmp = void 0,
-                    args = [];
-                //alert(arguments[0])
-                utils.toArray(arguments).forEach(function (v) {
-
-                    utils.typeDecide(v, 'Function') && (tmp = _this5.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
-
-                    args.push(v);
-                });
-                return func.apply(self || this, args);
+                var mergeReport = this.config.mergeReport;
+                if (!mergeReport) {
+                    this.on('beforeReport', function () {
+                        _this5.config.mergeReport = true;
+                    });
+                    this.on('afterReport', function () {
+                        _this5.config.mergeReport = mergeReport;
+                    });
+                }
+                var msg = utils.toArray(arguments).join(',');
+                this.consoleList[type] = this.consoleList[type] !== undefined ? this.consoleList[type] : [];
+                this.consoleList[type].push(Object.assign(utils.getSystemParams(), {
+                    msg: msg,
+                    level: level
+                }));
+                if (this.consoleList[type].length > 10) {
+                    this.errorQueue = this.errorQueue.concat(this.consoleList[type]);
+                    this.send(true);
+                    this.consoleList[type] = [];
+                }
+                return func.apply(this, arguments);
             }.bind(this);
         }
         // 劫持seajs
@@ -452,14 +483,30 @@ var Peep = function (_Config) {
 
     }, {
         key: 'peepCustom',
-        value: function peepCustom(obj) {
-            if (utils.typeDecide(obj, 'Function')) {
-                return this.cat(obj);
-            } else if (utils.typeDecide(obj, 'Object')) {
-                return this.makeObjTry(obj);
-            } else {
-                this.makeArgsTry(obj);
-            }
+        value: function peepCustom() {
+            var _this8 = this;
+
+            this.config.peepCustom.forEach(function (v) {
+                if (utils.typeDecide(v, 'Function')) {
+                    return function () {
+                        var _this7 = this;
+
+                        utils.toArray(arguments).forEach(function (f) {
+                            if (utils.typeDecide(f, 'Function')) {
+                                _this7.cat(f);
+                            } else {
+                                _this7.makeObjTry(f);
+                            }
+                        });
+                    };
+                } else {
+                    _this8.error({
+                        msg: '自定义方法类型必须为function',
+                        level: 4
+                    });
+                    //console.error('自定义方法类型必须为function');
+                }
+            });
         }
     }]);
     return Peep;
@@ -470,139 +517,74 @@ var Peep = function (_Config) {
  * @fileoverview localStorage
  * @date 2017/02/16
  */
-
-function clearCookie(value) {
-    addCookie(value, 'a', -1);
-}
-
-function addCookie(name, value, days) {
-    var times = new Date();
-    times.setDate(times.getDate() + days);
-    document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
-}
-
-function getCookie(key) {
-    /*var flag = false;
-    document.cookie.split('; ').forEach(function ( v ){
-    	var item = v.split('=');
-    	if( item[0] == key ){
-    		console.log('找到了------------' + item[1]);
-    		return item[1];
-    	}
-    	//key == v.split('=')[1] ? return v.split('=')[1] : ????;
-    });
-    console.log('再去判断');
-    return flag;*/
-    var arr = document.cookie.split('; ');
-    for (var i = 0; i < arr.length; i++) {
-        var arr1 = arr[i].split('=');
-        if (arr1[0] == key) {
-            return arr1[1];
-        }
-    }
-    return '';
-}
-//getCookie( 'a' );
-
-/*var storage = {
-	 hasLocal : !!window.localStorage,
-	 setItem:function(){
-		let expiresTime = +new Date() + 1000*60*60*24*this.config.validTime;
-		return this.hasLocal ? function( key, value ){
-			localStorage.setItem( key, utils.stringify({
-				value : value,
-				expires : expiresTime
+var hasLocal = !!window.localStorage;
+var storage = {
+	getParam: function getParam(key, type) {
+		return utils.parse(localStorage.getItem(key))[type];
+	},
+	setItem: function () {
+		return hasLocal ? function (key, value, validTime) {
+			var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * validTime;
+			localStorage.setItem(key, utils.stringify({
+				value: value,
+				expires: expiresTime
 			}));
 			return value;
-		} : function( key, value ){
-			document.cookie = key + '=' + value + '; expires=' + expiresTime.toGMTString();
+		} : function (key, value, validTime) {
+			utils.addCookie(key, value, validTime);
 		};
 	}(),
-	getItem:function(){
-		return this.hasLocal ? function( key ){
-			return localStorage.hasOwnProperty(key) ? this.getParam(key,'value') : '';
-		} : function( key ){
-			return document.cookie.indexOf(key) !== -1 ? document.cookie.split('; ').forEach(( v ) => {
-						return v.split('=')[1];
-			}) : '';
+	getItem: function () {
+		return hasLocal ? function (key) {
+			return localStorage.hasOwnProperty(key) ? storage.getParam(key, 'value') : '';
+		} : function (key) {
+			return utils.getCookie(key);
 		};
 	}(),
-	clear:function(){
-		
-		return this.hasLocal ? function( key ){
-			// ls
+
+	clear: function () {
+		return hasLocal ? function (key) {
 			return key ? localStorage.removeItem(key) : localStorage.clear();
-		} : function( key ){
-			// cookie
-			return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
+		} : function (key) {
+			return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
 		};
 	}()
-};*/
 
-var LocalStorageClass = function (_Peep) {
-    inherits(LocalStorageClass, _Peep);
+};
 
-    function LocalStorageClass(options) {
-        classCallCheck(this, LocalStorageClass);
+var Localstroage = function (_Peep) {
+	inherits(Localstroage, _Peep);
 
-        var _this = possibleConstructorReturn(this, (LocalStorageClass.__proto__ || Object.getPrototypeOf(LocalStorageClass)).call(this, options));
+	function Localstroage(options) {
+		classCallCheck(this, Localstroage);
+		return possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+	}
 
-        _this.hasLocal = !!window.localStorage;
-        _this.errorSign = _this.config.errorLSSign;
-        return _this;
-    }
-
-    //得到元素值 获取元素值 若不存在则返回''
-    //getItem : storage.getItem
+	//得到元素值 获取元素值 若不存在则返回''
 
 
-    createClass(LocalStorageClass, [{
-        key: "getItem",
-        value: function getItem() {
-            utils.fnLazyLoad(this.hasLocal, function (key) {
-                return localStorage.hasOwnProperty(key) ? this.getParam(key, 'value') : '';
-            }, function (key) {
-                getCookie(key);
-            });
-        }
-        // 
+	createClass(Localstroage, [{
+		key: "getItem",
+		value: function getItem(key) {
+			return storage.getItem(key);
+		}
+		// 设置一条localstorage或cookie
 
-    }, {
-        key: "getParam",
-        value: function getParam(key, type) {
-            return utils.parse(localStorage.getItem(key))[type];
-        }
-        // 设置一条localstorage或cookie
-        //setItem : storage.setItem
+	}, {
+		key: "setItem",
+		value: function setItem(key, value, days) {
+			storage.setItem(key, value, days);
+		}
 
-    }, {
-        key: "setItem",
-        value: function setItem() {
-            var expiresTime = +new Date() + 1000 * 60 * 60 * 24 * this.config.validTime;
-            utils.fnLazyLoad(this.hasLocal, function (key, value) {
-                localStorage.setItem(key, utils.stringify({
-                    value: value,
-                    expires: expiresTime
-                }));
-                return value;
-            }, function (key, value) {
-                addCookie(key, value, this.config.validTime);
-            });
-        }
+		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
-        //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
-
-    }, {
-        key: "clear",
-        value: function clear() {
-            utils.fnLazyLoad(this.hasLocal, function (key) {
-                return key ? localStorage.removeItem(key) : localStorage.clear();
-            }, function (key) {
-                return key ? clearCookie(key) : document.cookie.split('; ').forEach(clearCookie);
-            });
-        }
-    }]);
-    return LocalStorageClass;
+	}, {
+		key: "clear",
+		value: function clear(key) {
+			storage.clear(key);
+		}
+	}]);
+	return Localstroage;
 }(Peep);
 
 /**
@@ -627,7 +609,8 @@ var Events = function (_Localstorage) {
         key: "on",
         value: function on(event, handler) {
             if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = this.handlers[event] ? this.handlers[event].push(handler) : [handler];
+                this.handlers[event] = this.handlers[event] !== undefined ? this.handlers[event] : [];
+                this.handlers[event].push(handler);
             }
         }
     }, {
@@ -651,7 +634,7 @@ var Events = function (_Localstorage) {
         }
     }]);
     return Events;
-}(LocalStorageClass);
+}(Localstroage);
 
 /**
  * @author suman
@@ -694,16 +677,15 @@ var Report = function (_Events) {
         value: function report(cb) {
             var parames = '';
             var queue = this.errorQueue;
-
             if (this.config.mergeReport) {
                 // 合并上报
-                console.log('合并上报');
+                // console.log( '合并上报' );
                 parames = queue.map(function (obj) {
                     return utils.serializeObj(obj);
                 }).join('|');
             } else {
                 // 不合并上报
-                console.log('不合并上报');
+                //console.log( '不合并上报' );
                 if (queue.length) {
                     var obj = queue[0];
                     parames = utils.serializeObj(obj);
@@ -724,7 +706,7 @@ var Report = function (_Events) {
             }.bind(this);
             oImg.src = this.url;
             this.srcs.push(oImg.src);
-            console.log(this.srcs);
+            //console.log( this.srcs );
         }
         // 发送
 
@@ -732,15 +714,15 @@ var Report = function (_Events) {
         key: "send",
         value: function send(isNowReport, cb) {
             this.trigger('beforeReport');
-
+            var callback = arguments.length === 1 ? isNowReport : cb;
             if (isNowReport) {
+                // 现在上报
+                this.report(callback);
+            } else {
                 // 延迟上报
                 this.mergeTimeout = setTimeout(function () {
-                    this.report(cb);
+                    this.report(callback);
                 }.bind(this), this.config.delay);
-            } else {
-                // 现在上报
-                this.report(cb);
             }
         }
         // push错误到pool
@@ -749,18 +731,20 @@ var Report = function (_Events) {
         key: "carryError",
         value: function carryError(error) {
             if (!error) {
-                console.warn('carryError方法内 error 参数为空');
+                //console.warn( 'carryError方法内 error 参数为空' );
                 return;
             }
             // 拿到onerror的参数 先判断重复 抽样 再放数组中
 
             var rnd = Math.random();
             if (rnd >= this.config.random) {
-                console.warn('抽样' + rnd + '|||' + this.config.random);
+                //console.warn( '抽样' + rnd + '|||' + this.config.random );
                 return error;
             }
-            console.warn('不抽样');
+            //console.warn( '不抽样' );
             //console.log(this.repeat(error))
+
+
             this.repeat(error) && this.errorQueue.push(error);
         }
 
@@ -773,7 +757,7 @@ var Report = function (_Events) {
                 console.warn(type + '方法内 msg 参数为空');
                 return;
             }
-            var errorMsg = utils.typeDecide(msg, 'String') ? {
+            var errorMsg = !utils.typeDecide(msg, 'Object') ? {
                 msg: msg
             } : msg;
             errorMsg.level = level;
@@ -826,7 +810,6 @@ var GER = function (_Report) {
                     colNum: col,
                     targetUrl: url
                 });
-                return true;
             };
         }
         // 处理onerror返回的error.stack

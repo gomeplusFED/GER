@@ -32,7 +32,6 @@ class GER extends Report {
                 colNum: col,
                 targetUrl: url
             } );
-            return true;
         };
     }
     // 处理onerror返回的error.stack

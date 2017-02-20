@@ -12,7 +12,8 @@ class Events extends Localstorage {
     }
     on( event, handler ) {
         if ( typeof event === "string" && typeof handler === "function" ) {
-            this.handlers[ event ] = this.handlers[ event ] ? this.handlers[ event ].push( handler ) : [ handler ];
+            this.handlers[ event ] = this.handlers[ event ] !== undefined ? this.handlers[ event ] : [];
+            this.handlers[event].push(handler);
         }
     }
     off( event ) {

@@ -30,7 +30,7 @@ var utils = {
         }
     },
     parse: function ( str ) {
-        return JSON.parse ? JSON.parse( str ) : eval( '(' + str + ')' );
+        return JSON.parse ? JSON.parse( str ) : new Function( 'return ' + str )();
     },
     getServerPort: function () {
         return window.location.port === '' ? ( window.location.protocol === 'http:' ? '80' : '443' ) : window.location.port;
@@ -51,6 +51,26 @@ var utils = {
     },
     toArray: function( arr ){
         return Array.prototype.slice.call(arr);
+    },
+    getCookie: function( key ){
+        let cookieList = document.cookie.split('; ');
+        let str = '';
+        for(var i = 0 ; i < cookieList.length; i++){
+            var item = cookieList[i].split('=');
+            if( item[0] == key ){
+                str = item[1];
+                break;
+            }
+        }
+        return str;
+    },
+    addCookie: function( name, value, days ){
+        var times = new Date();
+        times.setDate( times.getDate() + days );
+        document.cookie = name + "="+ value +"; expires=" + times.toGMTString();
+    },
+    clearCookie: function( value ){
+        utils.addCookie( value, '', -1 );
     }
 };
 
