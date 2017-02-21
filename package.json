@@ -9,18 +9,18 @@
     "test": "test"
   },
   "scripts": {
-    "pretest": "jshint -c .jshintrc src",  //jshint 验证
-    "testmocha": "mocha --compilers js:babel-core/register", //node执行mocha
-    "devbuild": "rollup -c rollup.config.js", //开发js  build
+    "pretest": "jshint -c .jshintrc src", 
+    "testmocha": "mocha --compilers js:babel-core/register",
+    "devbuild": "rollup -c rollup.config.js",
     "build": "rollup -c rollup.config.js",  
-    "beautify": "node ./scripts/beatufyjs.js src test", // js代码美化
-    "devwatch": "rollup -c  rollup.config.js -w", //开发watch
-    "testwatch": "rollup -c  rollup.test.config.js -w ", //测试watch
-    "server": "http-server -a 0.0.0.0 -p 8080 -s",  //启服务
-    "dev": "npm-run-all --parallel server devwatch", //启dev环境
-    "testbuild": "rollup -c rollup.test.config.js", //测试js  build
-    "phantomjs":"mocha-phantomjs test/index.html", //node 通过phantom测试
-    "test": "npm-run-all --parallel server testwatch" //启测试环境
+    "beautify": "node ./scripts/beatufyjs.js src test", 
+    "devwatch": "rollup -c  rollup.config.js -w",
+    "testwatch": "rollup -c  rollup.test.config.js -w ",
+    "server": "http-server -a 0.0.0.0 -p 8080 -s", 
+    "dev": "npm-run-all --parallel server devwatch", 
+    "testbuild": "rollup -c rollup.test.config.js",
+    "phantomjs":"mocha-phantomjs test/index.html", 
+    "test": "npm-run-all --parallel server testwatch"
   },
   "config": {
     "pre-git": {
