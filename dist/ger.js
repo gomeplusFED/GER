@@ -93,9 +93,6 @@ var possibleConstructorReturn = function (self, call) {
  */
 
 var utils = {
-    fnLazyLoad: function (b, fn1, fn2) {
-        return b ? fn1 : fn2;
-    }(),
     typeDecide: function typeDecide(o, type) {
         return Object.prototype.toString.call(o) === "[object " + type + "]";
     },
