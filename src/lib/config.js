@@ -13,11 +13,12 @@ class Config {
             random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
             repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
             errorLSSign: 'mx-error', // error错误数自增 0
-            maxErrorCookieNo: 50, // error错误数自增 最大的错
+            maxErrorCookieNo: 20, // error错误数自增 最大的错
             tryPeep: false,
             peepSystem: false,
             peepJquery: false,
-            peepConsole: true
+            peepConsole: false,
+            validTime: 7
         };
         this.config = Object.assign( this.config, options );
     }

@@ -1,5 +1,5 @@
 'use strict';
-function test1(callback){
+/*function test1(callback){
 	callback.call(this);
 }
 function test2(callback){
@@ -19,16 +19,16 @@ test1(function(){
 })
 test2(function(){
 	alert(222222222);
-})
+})*/
 var error_report = new Ger({
 	url:'xxxxx',
 	failTime : 3,
 	tryPeep: true,
 	peepSystem: true,
 	repeat:10000,
-	peepConsole: true,
-	validTime : 3,
-	peepCustom: [test1,test2,test3]
+	//peepConsole: true,
+	validTime : 3
+	//peepCustom: [test1,test2,test3]
 });
 
 //error_report.info('111111111');
@@ -70,9 +70,11 @@ console.log(1)
 
 console.log(1)
 
-console.log(1)
+console.log(1)*/
 
-console.log(1);*/
+console.log(1);
+
+sdsd
 //localStorage.setItem('a', '123245678');
 /*setTimeout(function(){
 	console.log(1111)
@@ -83,3 +85,4 @@ console.log(1);*/
 /*error_report.setItem('key', 'ertyudfgfhghfgdfsdasa', 8)
 console.log(error_report.getItem('key'));
 error_report.clear();*/
+//error_report.setItem({'msg':'te12222211st',level:1,rowNum:1},1, 2);
