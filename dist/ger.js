@@ -801,12 +801,15 @@ var Report = function (_Events) {
     }, {
         key: "report",
         value: function report(cb) {
+            var _this2 = this;
+
             var parames = '';
             var queue = this.errorQueue;
             if (this.config.mergeReport) {
                 // 合并上报
                 // console.log( '合并上报' );
                 parames = queue.map(function (obj) {
+                    _this2.setItem(obj);
                     return utils.serializeObj(obj);
                 }).join('|');
             } else {
@@ -814,6 +817,7 @@ var Report = function (_Events) {
                 //console.log( '不合并上报' );
                 if (queue.length) {
                     var obj = queue[0];
+                    this.setItem(obj);
                     parames = utils.serializeObj(obj);
                 }
             }
@@ -890,7 +894,6 @@ var Report = function (_Events) {
             errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
             this.carryError(errorMsg);
             this.send();
-            this.setItem(errorMsg);
             return errorMsg;
         }
     }]);
