@@ -91,8 +91,11 @@ class Localstroage extends Peep {
 	}
 	// 设置一条localstorage或cookie
 	setItem( errorObj ){
+		/*let _config = this.config;
+		storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );*/
 		let _config = this.config;
-		storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );
+		let fn = storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );
+		return fn;
 	}
 
 	//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
