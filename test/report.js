@@ -4,13 +4,9 @@
  * @date 2017/02/21
  */
 
-import chai from 'chai';
 import report from '../src/lib/report';
 const assert = chai.assert;
-describe( 'my report', () => {
-    describe( 'report info', () => {
-        it( 'should return the Object realy type', () => {
-            assert.equal( true, report.info( 'abc', 'String' ) );
-        } );
-    } );
-} );
+export default ()=>{
+
+	
+}
