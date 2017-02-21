@@ -34,16 +34,15 @@ class Report extends Events {
     report( cb ) {
         let parames = '';
         let queue = this.errorQueue;
-
         if ( this.config.mergeReport ) {
             // 合并上报
-            console.log( '合并上报' );
+           // console.log( '合并上报' );
             parames = queue.map( obj => {
                 return utils.serializeObj( obj );
             } ).join( '|' );
         } else {
             // 不合并上报
-            console.log( '不合并上报' );
+            //console.log( '不合并上报' );
             if ( queue.length ) {
                 let obj = queue[ 0 ];
                 parames = utils.serializeObj( obj );
@@ -64,37 +63,40 @@ class Report extends Events {
         }.bind( this );
         oImg.src = this.url;
         this.srcs.push( oImg.src );
-        console.log( this.srcs );
+        //console.log( this.srcs );
     }
     // 发送
     send( isNowReport, cb ) {
         this.trigger( 'beforeReport' );
-
-        if ( isNowReport ) {
+        let  callback =  arguments.length === 1 ?  isNowReport : cb;
+        if ( isNowReport ) { 
+            // 现在上报
+            this.report( callback );
+            
+        } else {
             // 延迟上报
             this.mergeTimeout = setTimeout( function () {
-                this.report( cb );
+                this.report( callback );
             }.bind( this ), this.config.delay );
-        } else {
-            // 现在上报
-            this.report( cb );
         }
     }
     // push错误到pool
     carryError( error ) {
         if ( !error ) {
-            console.warn( 'carryError方法内 error 参数为空' );
+            //console.warn( 'carryError方法内 error 参数为空' );
             return;
         }
         // 拿到onerror的参数 先判断重复 抽样 再放数组中
 
         var rnd = Math.random();
         if ( rnd >= this.config.random ) {
-            console.warn( '抽样' + rnd + '|||' + this.config.random );
+            //console.warn( '抽样' + rnd + '|||' + this.config.random );
             return error;
         }
-        console.warn( '不抽样' );
+        //console.warn( '不抽样' );
         //console.log(this.repeat(error))
+
+        
         this.repeat( error ) && this.errorQueue.push( error );
 
 
@@ -106,7 +108,7 @@ class Report extends Events {
             console.warn( type + '方法内 msg 参数为空' );
             return;
         }
-        let errorMsg = utils.typeDecide( msg, 'String' ) ? {
+        let errorMsg = !utils.typeDecide( msg, 'Object' ) ? {
             msg: msg
         } : msg;
         errorMsg.level = level;

@@ -12,16 +12,22 @@ class Peep extends Config {
     constructor( options ) {
         super( options );
         this.timeoutkey = null;
+        this.consoleList = {};
         window.onload = () => {
             this.peep();
         };
 
+        this.config.peepSystem && this.peepSystem();
+        if (this.config.peepConsole){
+            [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
+                window.console[ type ] = this.peepConsole(window.console[type], type, index);
+            } );
+        }
+
     }
     peep() {
         if ( this.config.tryPeep ) {
-            this.config.peepSystem && this.peepSystem();
             this.config.peepJquery && this.peepJquery();
-            this.config.peepConsole && this.peepConsole();
             this.config.peepModule && this.peepModule();
             this.config.peepCustom && this.peepCustom();
         }
@@ -55,7 +61,7 @@ class Peep extends Config {
     catArgs( func ) {
         return function () {
             let args = [];
-            arguments.forEach( ( v ) => {
+            utils.toArray(arguments).forEach( ( v ) => {
                 utils.typeDecide( v, 'Function' ) && ( v = this.cat( v ) );
                 args.push( v );
             } );
@@ -72,7 +78,7 @@ class Peep extends Config {
                     throw err;
                 }
             }
-            let args = [].slice.call( arguments, 2 );
+            let args = utils.toArray(arguments);
             cb = this.cat( cb, args.length && args );
             return func( cb, timeout );
         }.bind( this );
@@ -81,7 +87,8 @@ class Peep extends Config {
     makeArgsTry( func, self ) {
         return function () {
             let tmp, args = [];
-            arguments.forEach( v => {
+           
+            utils.toArray(arguments).forEach( v => {
                 utils.typeDecide( v, 'Function' ) && ( tmp = this.cat( v ) ) &&
                     ( v.tryWrap = tmp ) && ( v = tmp );
 
@@ -126,7 +133,7 @@ class Peep extends Config {
             _$.fn.on = this.makeArgsTry( _add );
             _$.fn.off = function () {
                 let args = [];
-                arguments.forEach( v => {
+                utils.toArray(arguments).forEach( v => {
                     utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -139,7 +146,7 @@ class Peep extends Config {
             _$.event.add = this.makeArgsTry( _add );
             _$.event.remove = function () {
                 let args = [];
-                arguments.forEach( v => {
+                utils.toArray(arguments).forEach( v => {
                     utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -162,19 +169,95 @@ class Peep extends Config {
         }
     }
 
-    // 劫持console
-    peepConsole() {
+    carryConsole(){
 
     }
-
+    peepConsole (func, type, level){
+        return function () {
+            let mergeReport = this.config.mergeReport;
+            if( !mergeReport ){
+                this.on('beforeReport',()=>{
+                    this.config.mergeReport = true;
+                });
+                this.on('afterReport',()=>{
+                    this.config.mergeReport = mergeReport;
+                });
+            }
+            let msg  =  utils.toArray(arguments).join(',');
+            this.consoleList[type] = this.consoleList[type] !== undefined ? this.consoleList[type] : [];
+            this.consoleList[type].push(
+                Object.assign( utils.getSystemParams(), {
+                    msg:msg,
+                    level: level
+                })
+            );
+            if( this.consoleList[type].length  > 10 ){
+                this.errorQueue = this.errorQueue.concat( this.consoleList[type] );
+                this.send(true);
+                this.consoleList[type] = [];
+            }
+            return func.apply( this, arguments );
+        }.bind( this );
+    }
     // 劫持seajs
-    peepModule() {
+    peepModules() {
+        var _require = window.require,
+            _define = window.define;
+        if (_define && _define.amd && _require) {
+            window.require = this.catArgs(_require);
+            Object.assign(window.require, _require);
+            window.define = this.catArgs(_define);
+            Object.assign(window.define, _define);
+        }
+
+        if (window.seajs && _define) {
+            window.define = function() {
+                var arg, args = [];
+                utils.toArray(arguments).forEach((v,i)=>{
+                    if(utils.typeDecide('v', 'Function')){
+                        v = this.cat(v);
+                        v.toString = (function(orgArg) {
+                            return function() {
+                                return orgArg.toString();
+                            };
+                        }(arguments[i]));
+                    }
+                    args.push(arg);
+                });
+                return _define.apply(this, args);
+                
+            };
+
+            window.seajs.use = this.catArgs(window.seajs.use);
+
+            Object.assign(window.define, _define);
+        }
 
     }
 
     // 劫持自定义方法
     peepCustom() {
 
+        this.config.peepCustom.forEach((v)=>{
+            if (utils.typeDecide(v, 'Function')) {
+                return function(){
+                    utils.toArray(arguments).forEach( (f) =>{
+                        if( utils.typeDecide(f, 'Function') ){
+                            this.cat(f);
+                        }else{
+                            this.makeObjTry(f);
+                        }
+                    });
+                };
+            }else{
+                this.error({
+                    msg: '自定义方法类型必须为function',
+                    level:4
+                });
+                //console.error('自定义方法类型必须为function');
+            }
+        });
+        
     }
 }
 export default Peep;

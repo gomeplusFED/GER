@@ -49,6 +49,9 @@ var utils = {
             projectType: utils.getPlatType()
         };
     },
+    toArray: function( arr ){
+        return Array.prototype.slice.call(arr);
+    },
     getCookie: function( key ){
         let cookieList = document.cookie.split('; ');
         let str = '';
