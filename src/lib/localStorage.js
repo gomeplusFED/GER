@@ -100,7 +100,6 @@ class Localstroage extends Peep {
 		storage.clear( key );
 	}
 	init (){
-		this.getItem();
 		this.setItem();
 	}
 

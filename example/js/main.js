@@ -79,6 +79,9 @@ sdsd
 /*setTimeout(function(){
 	console.log(1111)
 },1000);*/
+// error_report.setItem('key', 'ertyudfgfhghfgdfsdasa', 8)
+// console.log(error_report.getItem('key'));
+// error_report.clear();
 /*error_report.setItem('key', 'ertyudfgfhghfgdfsdasa', 8)
 console.log(error_report.getItem('key'));
 error_report.clear();*/

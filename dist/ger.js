@@ -337,8 +337,6 @@ var Peep = function (_Config) {
         key: 'cat',
         value: function cat(func, args) {
             return function () {
-                var _this2 = this;
-
                 try {
                     return func.apply(this, args || arguments);
                 } catch (error) {
@@ -348,14 +346,12 @@ var Peep = function (_Config) {
                         console.error("[GER]", error.stack);
                     }
                     if (!this.timeoutkey) {
-                        (function () {
-                            var orgOnerror = window.onerror;
-                            window.onerror = function () {};
-                            _this2.timeoutkey = setTimeout(function () {
-                                window.onerror = orgOnerror;
-                                this.timeoutkey = null;
-                            }, 50);
-                        })();
+                        var orgOnerror = window.onerror;
+                        window.onerror = function () {};
+                        this.timeoutkey = setTimeout(function () {
+                            window.onerror = orgOnerror;
+                            this.timeoutkey = null;
+                        }, 50);
                     }
                     throw error;
                 }
@@ -365,11 +361,11 @@ var Peep = function (_Config) {
         key: 'catArgs',
         value: function catArgs(func) {
             return function () {
-                var _this3 = this;
+                var _this2 = this;
 
                 var args = [];
                 utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (v = _this3.cat(v));
+                    utils.typeDecide(v, 'Function') && (v = _this2.cat(v));
                     args.push(v);
                 });
                 return func.apply(this, args);
@@ -395,13 +391,13 @@ var Peep = function (_Config) {
         key: 'makeArgsTry',
         value: function makeArgsTry(func, self) {
             return function () {
-                var _this4 = this;
+                var _this3 = this;
 
                 var tmp = void 0,
                     args = [];
 
                 utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (tmp = _this4.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+                    utils.typeDecide(v, 'Function') && (tmp = _this3.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
 
                     args.push(v);
                 });
@@ -494,15 +490,15 @@ var Peep = function (_Config) {
         key: 'peepConsole',
         value: function peepConsole(func, type, level) {
             return function () {
-                var _this5 = this;
+                var _this4 = this;
 
                 var mergeReport = this.config.mergeReport;
                 if (!mergeReport) {
                     this.on('beforeReport', function () {
-                        _this5.config.mergeReport = true;
+                        _this4.config.mergeReport = true;
                     });
                     this.on('afterReport', function () {
-                        _this5.config.mergeReport = mergeReport;
+                        _this4.config.mergeReport = mergeReport;
                     });
                 }
                 var msg = utils.toArray(arguments).join(',');
@@ -535,14 +531,14 @@ var Peep = function (_Config) {
 
             if (window.seajs && _define) {
                 window.define = function () {
-                    var _this6 = this,
+                    var _this5 = this,
                         _arguments = arguments;
 
                     var arg,
                         args = [];
                     utils.toArray(arguments).forEach(function (v, i) {
                         if (utils.typeDecide('v', 'Function')) {
-                            v = _this6.cat(v);
+                            v = _this5.cat(v);
                             v.toString = function (orgArg) {
                                 return function () {
                                     return orgArg.toString();
@@ -565,23 +561,23 @@ var Peep = function (_Config) {
     }, {
         key: 'peepCustom',
         value: function peepCustom() {
-            var _this8 = this;
+            var _this7 = this;
 
             this.config.peepCustom.forEach(function (v) {
                 if (utils.typeDecide(v, 'Function')) {
                     return function () {
-                        var _this7 = this;
+                        var _this6 = this;
 
                         utils.toArray(arguments).forEach(function (f) {
                             if (utils.typeDecide(f, 'Function')) {
-                                _this7.cat(f);
+                                _this6.cat(f);
                             } else {
-                                _this7.makeObjTry(f);
+                                _this6.makeObjTry(f);
                             }
                         });
                     };
                 } else {
-                    _this8.error({
+                    _this7.error({
                         msg: '自定义方法类型必须为function',
                         level: 4
                     });
@@ -706,7 +702,6 @@ var Localstroage = function (_Peep) {
 	}, {
 		key: "init",
 		value: function init() {
-			this.getItem();
 			this.setItem();
 		}
 	}]);
