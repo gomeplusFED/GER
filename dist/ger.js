@@ -702,7 +702,6 @@ var Localstroage = function (_Peep) {
 	}, {
 		key: "init",
 		value: function init() {
-			this.getItem();
 			this.setItem();
 		}
 	}]);
