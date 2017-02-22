@@ -233,11 +233,10 @@ var utils$1 = {
         }
         return str;
     },
-    addCookie: function addCookie(name, value) {
+    addCookie: function addCookie(name, value, days) {
         var times = new Date();
-        times.setDate(times.getDate() + 100);
+        times.setDate(times.getDate() + (days || 100));
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
-        return utils$1.getCookie(name);
     },
     clearCookie: function clearCookie(value) {
         utils$1.addCookie(value, '', -1);
@@ -268,13 +267,22 @@ var utils = (function () {
         });
         describe('utils serializeObj', function () {
             it('should return the Object to String like a=1&b=1&', function () {
-                assert.equal(utils$1.serializeObj({ a: 1, b: 1 }), "a=1&b=1&");
+                assert.equal(utils$1.serializeObj({
+                    a: 1,
+                    b: 1
+                }), "a=1&b=1&");
             });
         });
         describe('utils stringify', function () {
             it('should return the Object to String', function () {
-                assert.equal(utils$1.stringify({ a: 1, b: 1 }), '{"a":1,"b":1}');
-                assert.equal(utils$1.stringify({ a: "1", b: "1" }), '{"a":"1","b":"1"}');
+                assert.equal(utils$1.stringify({
+                    a: 1,
+                    b: 1
+                }), '{"a":1,"b":1}');
+                assert.equal(utils$1.stringify({
+                    a: "1",
+                    b: "1"
+                }), '{"a":"1","b":"1"}');
             });
         });
         describe('utils parse', function () {
@@ -697,116 +705,115 @@ var Peep = function (_Config) {
  */
 var hasLocal = !!window.localStorage;
 var storage = {
-	//设置cookie内json的key名
-	setKey: function setKey(errorObj) {
-		var keyArr = [];
-		errorObj.msg && keyArr.push(errorObj.msg);
-		errorObj.colNum && keyArr.push(errorObj.colNum);
-		errorObj.rowNum && keyArr.push(errorObj.rowNum);
-		return keyArr.join('@');
-	},
-	//检查是否有效
-	checkData: function checkData(data) {
-		var oData = data === '' ? {} : utils$1.parse(data);
-		var date = +new Date();
-		for (var key in oData) {
-			if (utils$1.parse(oData[key]).expiresTime <= date) {
-				delete oData[key];
-			}
-		}
-		return oData;
-	},
-	//设置失效时间
-	setEpires: function setEpires(validTime) {
-		return +new Date() + 1000 * 60 * 60 * 24 * validTime;
-	},
-	//获取cookie/localStorage内容体
-	setInfo: function setInfo(key, errorObj, validTime, number) {
+    //设置cookie内json的key名
+    setKey: function setKey(errorObj) {
+        var keyArr = [];
+        errorObj.msg && keyArr.push(errorObj.msg);
+        errorObj.colNum && keyArr.push(errorObj.colNum);
+        errorObj.rowNum && keyArr.push(errorObj.rowNum);
+        return keyArr.join('@');
+    },
+    //检查是否有效
+    checkData: function checkData(data) {
+        var oData = data === '' ? {} : utils$1.parse(data);
+        var date = +new Date();
+        for (var key in oData) {
+            if (utils$1.parse(oData[key]).expiresTime <= date) {
+                delete oData[key];
+            }
+        }
+        return oData;
+    },
+    //设置失效时间
+    setEpires: function setEpires(validTime) {
+        return +new Date() + 1000 * 60 * 60 * 24 * validTime;
+    },
+    //获取cookie/localStorage内容体
+    setInfo: function setInfo(key, errorObj, validTime, number) {
 
-		var loac = storage.getItem(key);
-		if (errorObj !== undefined) {
-			var keys = Object.keys(loac);
-			if (keys.length >= number) {
-				delete loac[keys[0]];
-			}
-			var expiresTime = storage.setEpires(validTime);
-			loac[storage.setKey(errorObj)] = utils$1.stringify({
-				value: errorObj,
-				expiresTime: expiresTime
-			});
-		}
-		return utils$1.stringify(loac);
-	},
-	//设置cookie/localStorage
-	setItem: function () {
-		return hasLocal ? function (key, errorObj, validTime, number) {
-			localStorage.setItem(key, storage.setInfo(key, errorObj, validTime, number));
-		} : function (key, errorObj, validTime, number) {
-			utils$1.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
-		};
-	}(),
-	//获取cookie/localStorage
-	getItem: function () {
-		return hasLocal ? function (key) {
-			return storage.checkData(localStorage.getItem(key) || '');
-		} : function (key) {
-			return storage.checkData(utils$1.getCookie(key));
-		};
-	}(),
-	//清除cookie/localStorage
-	clear: function () {
-		return hasLocal ? function (key) {
-			return key ? localStorage.removeItem(key) : localStorage.clear();
-		} : function (key) {
-			return key ? utils$1.clearCookie(key) : document.cookie.split('; ').forEach(utils$1.clearCookie);
-		};
-	}()
-
+        var loac = storage.getItem(key);
+        if (errorObj !== undefined) {
+            var keys = Object.keys(loac);
+            if (keys.length >= number) {
+                delete loac[keys[0]];
+            }
+            var expiresTime = storage.setEpires(validTime);
+            loac[storage.setKey(errorObj)] = utils$1.stringify({
+                value: errorObj,
+                expiresTime: expiresTime
+            });
+        }
+        return utils$1.stringify(loac);
+    },
+    //设置cookie/localStorage
+    setItem: function () {
+        return hasLocal ? function (key, errorObj, validTime, number) {
+            localStorage.setItem(key, storage.setInfo(key, errorObj, validTime, number));
+        } : function (key, errorObj, validTime, number) {
+            utils$1.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
+        };
+    }(),
+    //获取cookie/localStorage
+    getItem: function () {
+        return hasLocal ? function (key) {
+            return storage.checkData(localStorage.getItem(key) || '');
+        } : function (key) {
+            return storage.checkData(utils$1.getCookie(key));
+        };
+    }(),
+    //清除cookie/localStorage
+    clear: function () {
+        return hasLocal ? function (key) {
+            return key ? localStorage.removeItem(key) : localStorage.clear();
+        } : function (key) {
+            return key ? utils$1.clearCookie(key) : document.cookie.split('; ').forEach(utils$1.clearCookie);
+        };
+    }()
 };
 
 var Localstroage = function (_Peep) {
-	inherits(Localstroage, _Peep);
+    inherits(Localstroage, _Peep);
 
-	function Localstroage(options) {
-		classCallCheck(this, Localstroage);
+    function Localstroage(options) {
+        classCallCheck(this, Localstroage);
 
-		var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+        var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
 
-		_this.init();
-		return _this;
-	}
+        _this.init();
+        return _this;
+    }
 
-	//得到元素值 获取元素值 若不存在则返回''
+    //得到元素值 获取元素值 若不存在则返回''
 
 
-	createClass(Localstroage, [{
-		key: "getItem",
-		value: function getItem(key) {
-			return storage.getItem(key);
-		}
-		// 设置一条localstorage或cookie
+    createClass(Localstroage, [{
+        key: "getItem",
+        value: function getItem(key) {
+            return storage.getItem(key);
+        }
+        // 设置一条localstorage或cookie
 
-	}, {
-		key: "setItem",
-		value: function setItem(errorObj) {
-			var _config = this.config;
-			storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-		}
+    }, {
+        key: "setItem",
+        value: function setItem(errorObj) {
+            var _config = this.config;
+            storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
+        }
 
-		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+        //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
-	}, {
-		key: "clear",
-		value: function clear(key) {
-			storage.clear(key);
-		}
-	}, {
-		key: "init",
-		value: function init() {
-			this.setItem();
-		}
-	}]);
-	return Localstroage;
+    }, {
+        key: "clear",
+        value: function clear(key) {
+            storage.clear(key);
+        }
+    }, {
+        key: "init",
+        value: function init() {
+            this.setItem();
+        }
+    }]);
+    return Localstroage;
 }(Peep);
 
 /**
@@ -1005,13 +1012,13 @@ var Report = function (_Events) {
 var assert$1 = chai.assert;
 var report = (function () {
 
-	describe('my report', function () {
-		describe('report info', function () {
-			it('should return the Object realy type', function () {
-				assert$1.equal(true, Report.info('abc', 'String'));
-			});
-		});
-	});
+    describe('my report', function () {
+        describe('report info', function () {
+            it('should return the Object realy type', function () {
+                assert$1.equal(true, Report.info('abc', 'String'));
+            });
+        });
+    });
 });
 
 /**
@@ -1019,10 +1026,6 @@ var report = (function () {
  * @fileoverview report tests
  * @date 2017/02/21
  */
-/*import events from './events';
-import peep from './peep';
-import core from './core';
-import localStorage from './localStorage';*/
 utils();
 report();
 

@@ -11,5 +11,3 @@ import localStorage from './localStorage';*/
 import report from './report';
 utils();
 report();
-
-
