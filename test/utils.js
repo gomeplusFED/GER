@@ -98,19 +98,18 @@ export default () => {
         describe( 'utils addCookie', () => {
             it( 'should return the string', () => {
                 expect( utils.addCookie( 'testMocha', '5678' ) ).to.be.a( 'string' );
-                expect( utils.addCookie( 'testMocha', '5678' ) ).to.have.length.above( 3 );
-                expect( utils.addCookie( 'testMocha', '5678' ) ).to.have.length.within( 0, 4 );
+                expect( utils.addCookie( 'testMocha2', '5678' ) ).to.have.length.above( 3 );
+                expect( utils.addCookie( 'testMocha3', '5678' ) ).to.have.length.within( 0, 4 );
                 assert.equal( utils.addCookie( 'testMocha', '5678' ), '5678' );
+                assert.equal( utils.addCookie( 'testMocha1', '567822', -2 ), '' );
             } );
         } );
-        /*describe( 'utils clearCookie', () => {
+        describe( 'utils clearCookie', () => {
             it( 'should return the string', () => {
-                expect(utils.addCookie('testMocha', '5678')).to.be.a('string');
-                expect(utils.addCookie('testMocha', '5678')).to.have.length.above(3);
-                expect(utils.addCookie('testMocha', '5678')).to.have.length.within(0,4);
-                assert.equal( utils.addCookie('testMocha', '5678'), '5678' );
+                expect(utils.clearCookie('testMocha1')).to.be.a('string');
+                assert.equal( utils.clearCookie('testMocha3'), '' );
             } );
-        } );*/
+        } );
 
     } );
 
