@@ -1019,6 +1019,10 @@ var report = (function () {
  * @fileoverview report tests
  * @date 2017/02/21
  */
+/*import events from './events';
+import peep from './peep';
+import core from './core';
+import localStorage from './localStorage';*/
 utils();
 report();
 
