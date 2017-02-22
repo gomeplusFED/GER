@@ -237,6 +237,7 @@ var utils$1 = {
         var times = new Date();
         times.setDate(times.getDate() + 100);
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+        return utils$1.getCookie(name);
     },
     clearCookie: function clearCookie(value) {
         utils$1.addCookie(value, '', -1);
@@ -250,6 +251,7 @@ var utils$1 = {
  */
 
 var assert = chai.assert;
+var expect = chai.expect;
 var utils = (function () {
 
     describe('lib/utils', function () {
@@ -264,6 +266,87 @@ var utils = (function () {
                 assert.equal(true, utils$1.typeDecide([1, 2], 'Array'));
             });
         });
+        describe('utils serializeObj', function () {
+            it('should return the Object to String like a=1&b=1&', function () {
+                assert.equal(utils$1.serializeObj({ a: 1, b: 1 }), "a=1&b=1&");
+            });
+        });
+        describe('utils stringify', function () {
+            it('should return the Object to String', function () {
+                assert.equal(utils$1.stringify({ a: 1, b: 1 }), '{"a":1,"b":1}');
+                assert.equal(utils$1.stringify({ a: "1", b: "1" }), '{"a":"1","b":"1"}');
+            });
+        });
+        describe('utils parse', function () {
+            it('should return the String to Object', function () {
+                expect(utils$1.parse('{"a":1,"b":1}')).to.have.all.keys('a', 'b');
+                expect(utils$1.parse('{"a":1,"b":1}')).to.be.a('object');
+            });
+        });
+        describe('utils getServerPort', function () {
+            it('should return the String', function () {
+                expect(utils$1.getServerPort()).to.be.a('string');
+                expect(parseInt(utils$1.getServerPort(), 10)).to.be.a('number');
+            });
+        });
+        describe('utils getUserAgent', function () {
+            it('should return the String', function () {
+                expect(utils$1.getUserAgent()).to.be.a('string');
+            });
+        });
+        describe('utils getPlatType', function () {
+            it('should return the String like Mobild/PC', function () {
+                expect(utils$1.getPlatType()).to.be.a('string');
+            });
+        });
+        describe('utils flashVer', function () {
+            it('should return the String', function () {
+                expect(utils$1.flashVer()).to.be.a('string');
+            });
+        });
+        describe('utils getReferer', function () {
+            it('should return the String', function () {
+                expect(utils$1.getReferer()).to.be.a('string');
+            });
+        });
+        describe('utils getSystemParams', function () {
+            it('should return the Object', function () {
+                expect(utils$1.getSystemParams()).to.be.a('object');
+                expect(utils$1.getSystemParams()).to.have.any.keys('timestamp', 'referer');
+            });
+        });
+        describe('utils toArray', function () {
+            it('should return the Array', function () {
+                expect(utils$1.toArray([1, 2, 3, 4])).to.be.a('array');
+                expect(utils$1.toArray([1, 2, 3, 4])).to.have.length.above(3);
+                expect(utils$1.toArray([1, 2, 3, 4])).to.have.length.within(0, 4);
+            });
+        });
+        describe('utils getCookie', function () {
+            it('should return the string', function () {
+                document.cookie = 'testMocha=1234';
+                expect(utils$1.getCookie('testMocha')).to.be.a('string');
+                expect(utils$1.getCookie('testMocha')).to.have.length.above(3);
+                expect(utils$1.getCookie('testMocha')).to.have.length.within(0, 4);
+                assert.equal(utils$1.getCookie('testMocha'), '1234');
+            });
+        });
+        describe('utils addCookie', function () {
+            it('should return the string', function () {
+                expect(utils$1.addCookie('testMocha', '5678')).to.be.a('string');
+                expect(utils$1.addCookie('testMocha', '5678')).to.have.length.above(3);
+                expect(utils$1.addCookie('testMocha', '5678')).to.have.length.within(0, 4);
+                assert.equal(utils$1.addCookie('testMocha', '5678'), '5678');
+            });
+        });
+        /*describe( 'utils clearCookie', () => {
+            it( 'should return the string', () => {
+                expect(utils.addCookie('testMocha', '5678')).to.be.a('string');
+                expect(utils.addCookie('testMocha', '5678')).to.have.length.above(3);
+                expect(utils.addCookie('testMocha', '5678')).to.have.length.within(0,4);
+                assert.equal( utils.addCookie('testMocha', '5678'), '5678' );
+            } );
+        } );*/
     });
 });
 
@@ -915,7 +998,7 @@ var Report$1 = function (_Events) {
  */
 
 var assert$1 = chai.assert;
-var expect = chai.expect;
+var expect$1 = chai.expect;
 var Report = new Report$1();
 var report = (function () {
 
@@ -924,11 +1007,13 @@ var report = (function () {
         describe('report info', function () {
 
             it('incoming msg(string) should return an error object', function () {
-                expect(Report.info('msgmsg')).to.be.an('object');
-                expect(Report.info('msgmsg')).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
+                expect$1(Report.info('msgmsg')).to.be.an('object');
+                expect$1(Report.info('msgmsg')).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
             });
             it('incoming msgError(object) return an error object', function () {
-                assert$1.equal();
+                //assert.equal();
+                expect$1(Report.info({ 'msg': 'objectmsg', 'targetUrl': 'aaa.js', 'rowNo': 1, 'colNo': 2 })).to.be.an('object');
+                expect$1(Report.info({ 'msg': 'objectmsg', 'targetUrl': 'aaa.js', 'rowNo': 1, 'colNo': 2 })).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
             });
         });
 

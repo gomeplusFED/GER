@@ -19,7 +19,9 @@ export default ()=>{
                 expect( Report.info('msgmsg') ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo');
             });
             it( 'incoming msgError(object) return an error object', () => {
-                assert.equal();
+                //assert.equal();
+                expect( Report.info({'msg' : 'objectmsg', 'targetUrl' : 'aaa.js', 'rowNo' : 1, 'colNo' : 2}) ).to.be.an('object');
+                expect( Report.info({'msg' : 'objectmsg', 'targetUrl' : 'aaa.js', 'rowNo' : 1, 'colNo' : 2}) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo');
             });
 
         });

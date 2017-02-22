@@ -149,6 +149,7 @@ var utils = {
         var times = new Date();
         times.setDate( times.getDate() + 100 );
         document.cookie = name + "="+ value +"; expires=" + times.toGMTString();
+        return utils.getCookie(name);
     },
     clearCookie: function( value ){
         utils.addCookie( value, '', -1 );
