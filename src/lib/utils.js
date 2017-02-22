@@ -149,7 +149,7 @@ var utils = {
     },
     addCookie: function ( name, value, days ) {
         var times = new Date();
-        times.setDate( times.getDate() + days );
+        times.setDate( times.getDate() + (days || 100) );
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
     clearCookie: function ( value ) {
