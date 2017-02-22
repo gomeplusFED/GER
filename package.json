@@ -10,7 +10,7 @@
   },
   "scripts": {
     "pretest": "jshint -c .jshintrc src",
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --compilers js:babel-core/register --ui tdd",
     "devbuild": "rollup -c rollup.config.js",
     "build": "rollup -c rollup.config.js",
     "beautify": "node ./scripts/beatufyjs.js src test",

@@ -36,7 +36,7 @@ class Report extends Events {
         let queue = this.errorQueue;
         if ( this.config.mergeReport ) {
             // 合并上报
-           // console.log( '合并上报' );
+            // console.log( '合并上报' );
             parames = queue.map( obj => {
                 return utils.serializeObj( obj );
             } ).join( '|' );
@@ -68,11 +68,11 @@ class Report extends Events {
     // 发送
     send( isNowReport, cb ) {
         this.trigger( 'beforeReport' );
-        let  callback =  arguments.length === 1 ?  isNowReport : cb;
-        if ( isNowReport ) { 
+        let callback = arguments.length === 1 ? isNowReport : cb;
+        if ( isNowReport ) {
             // 现在上报
             this.report( callback );
-            
+
         } else {
             // 延迟上报
             this.mergeTimeout = setTimeout( function () {
@@ -96,7 +96,7 @@ class Report extends Events {
         //console.warn( '不抽样' );
         //console.log(this.repeat(error))
 
-        
+
         this.repeat( error ) && this.errorQueue.push( error );
 
 

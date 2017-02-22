@@ -49,27 +49,27 @@ var utils = {
             projectType: utils.getPlatType()
         };
     },
-    toArray: function( arr ){
-        return Array.prototype.slice.call(arr);
+    toArray: function ( arr ) {
+        return Array.prototype.slice.call( arr );
     },
-    getCookie: function( key ){
-        let cookieList = document.cookie.split('; ');
+    getCookie: function ( key ) {
+        let cookieList = document.cookie.split( '; ' );
         let str = '';
-        for(var i = 0 ; i < cookieList.length; i++){
-            var item = cookieList[i].split('=');
-            if( item[0] == key ){
-                str = item[1];
+        for ( var i = 0; i < cookieList.length; i++ ) {
+            var item = cookieList[ i ].split( '=' );
+            if ( item[ 0 ] == key ) {
+                str = item[ 1 ];
                 break;
             }
         }
         return str;
     },
-    addCookie: function( name, value, days ){
+    addCookie: function ( name, value, days ) {
         var times = new Date();
         times.setDate( times.getDate() + days );
-        document.cookie = name + "="+ value +"; expires=" + times.toGMTString();
+        document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
-    clearCookie: function( value ){
+    clearCookie: function ( value ) {
         utils.addCookie( value, '', -1 );
     }
 };
