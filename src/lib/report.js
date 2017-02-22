@@ -38,6 +38,7 @@ class Report extends Events {
             // 合并上报
             // console.log( '合并上报' );
             parames = queue.map( obj => {
+                this.setItem( obj );
                 return utils.serializeObj( obj );
             } ).join( '|' );
         } else {
@@ -45,6 +46,7 @@ class Report extends Events {
             //console.log( '不合并上报' );
             if ( queue.length ) {
                 let obj = queue[ 0 ];
+                this.setItem( obj );
                 parames = utils.serializeObj( obj );
             }
         }

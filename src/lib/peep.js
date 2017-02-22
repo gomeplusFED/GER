@@ -16,7 +16,6 @@ class Peep extends Config {
         window.onload = () => {
             this.peep();
         };
-
         this.config.peepSystem && this.peepSystem();
         if ( this.config.peepConsole ) {
             [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {

@@ -56,13 +56,18 @@ console.log(1)
 
 console.log(1)
 
-console.log(1)
+console.log(1)*/
 
-console.log(1);*/
+console.log(1);
+
 //localStorage.setItem('a', '123245678');
 /*setTimeout(function(){
     console.log(1111)
 },1000);*/
+// error_report.setItem('key', 'ertyudfgfhghfgdfsdasa', 8)
+// console.log(error_report.getItem('key'));
+// error_report.clear();
 /*error_report.setItem('key', 'ertyudfgfhghfgdfsdasa', 8)
 console.log(error_report.getItem('key'));
 error_report.clear();*/
+//error_report.setItem({'msg':'te12222211st',level:1,rowNum:1},1, 2);
