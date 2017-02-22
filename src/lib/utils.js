@@ -151,9 +151,11 @@ var utils = {
         var times = new Date();
         times.setDate( times.getDate() + (days || 100) );
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+        return utils.getCookie(name);
     },
-    clearCookie: function ( value ) {
-        utils.addCookie( value, '', -1 );
+    clearCookie: function ( name ) {
+        utils.addCookie( name, '', -1 );
+        return utils.getCookie(name);
     }
 };
 

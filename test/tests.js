@@ -237,9 +237,11 @@ var utils$1 = {
         var times = new Date();
         times.setDate(times.getDate() + (days || 100));
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+        return utils$1.getCookie(name);
     },
-    clearCookie: function clearCookie(value) {
-        utils$1.addCookie(value, '', -1);
+    clearCookie: function clearCookie(name) {
+        utils$1.addCookie(name, '', -1);
+        return utils$1.getCookie(name);
     }
 };
 
@@ -342,19 +344,18 @@ var utils = (function () {
         describe('utils addCookie', function () {
             it('should return the string', function () {
                 expect(utils$1.addCookie('testMocha', '5678')).to.be.a('string');
-                expect(utils$1.addCookie('testMocha', '5678')).to.have.length.above(3);
-                expect(utils$1.addCookie('testMocha', '5678')).to.have.length.within(0, 4);
+                expect(utils$1.addCookie('testMocha2', '5678')).to.have.length.above(3);
+                expect(utils$1.addCookie('testMocha3', '5678')).to.have.length.within(0, 4);
                 assert.equal(utils$1.addCookie('testMocha', '5678'), '5678');
+                assert.equal(utils$1.addCookie('testMocha1', '567822', -2), '');
             });
         });
-        /*describe( 'utils clearCookie', () => {
-            it( 'should return the string', () => {
-                expect(utils.addCookie('testMocha', '5678')).to.be.a('string');
-                expect(utils.addCookie('testMocha', '5678')).to.have.length.above(3);
-                expect(utils.addCookie('testMocha', '5678')).to.have.length.within(0,4);
-                assert.equal( utils.addCookie('testMocha', '5678'), '5678' );
-            } );
-        } );*/
+        describe('utils clearCookie', function () {
+            it('should return the string', function () {
+                expect(utils$1.clearCookie('testMocha1')).to.be.a('string');
+                assert.equal(utils$1.clearCookie('testMocha3'), '');
+            });
+        });
     });
 });
 
