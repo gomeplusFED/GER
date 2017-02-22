@@ -16,35 +16,37 @@ var utils = {
         return parames;
     },
     stringify: function ( obj ) {
-        if (window.JSON) {
-            return JSON.stringify(obj);
+        if ( window.JSON ) {
+            return JSON.stringify( obj );
         }
-        var t = typeof (obj);
-        if (t != "object" || obj === null) {
+        var t = typeof ( obj );
+        if ( t != "object" || obj === null ) {
             // simple data type
-            if (t == "string") obj = '"' + obj + '"';
-            return String(obj);
+            if ( t == "string" ) obj = '"' + obj + '"';
+            return String( obj );
         } else {
             // recurse array or object
-            var n, v, json = [], arr = (obj && obj.constructor == Array);
+            var n, v, json = [],
+                arr = ( obj && obj.constructor == Array );
 
             // fix.
             var self = arguments.callee;
 
-            for (n in obj) {
-                if( obj.hasOwnProperty(n) ){
+            for ( n in obj ) {
+                if ( obj.hasOwnProperty( n ) ) {
 
-                    v = obj[n];
-                    t = typeof(v);
-                    if (obj.hasOwnProperty(n)) {
-                        if (t == "string") v = '"' + v + '"'; else if (t == "object" && v !== null)
+                    v = obj[ n ];
+                    t = typeof ( v );
+                    if ( obj.hasOwnProperty( n ) ) {
+                        if ( t == "string" ) v = '"' + v + '"';
+                        else if ( t == "object" && v !== null )
                             // v = jQuery.stringify(v);
-                            v = self(v);
-                        json.push((arr ? "" : '"' + n + '":') + String(v));
+                            v = self( v );
+                        json.push( ( arr ? "" : '"' + n + '":' ) + String( v ) );
                     }
                 }
             }
-            return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            return ( arr ? "[" : "{" ) + String( json ) + ( arr ? "]" : "}" );
         }
     },
     parse: function ( str ) {
@@ -58,32 +60,32 @@ var utils = {
     },
     getPlatType: function () {
         try {
-            document.createEvent("TouchEvent");
+            document.createEvent( "TouchEvent" );
             return 'Mobile';
-        } catch (e) {
+        } catch ( e ) {
             return 'PC';
         }
     },
-    flashVer: function(){
+    flashVer: function () {
         let f = "-";
         let n = navigator;
         let ii;
-        if (n.plugins && n.plugins.length) {
-            for (ii = 0; ii < n.plugins.length; ii++) {
-                if (n.plugins[ii].name.indexOf('Shockwave Flash') !== -1) {
-                    f = n.plugins[ii].description.split('Shockwave Flash ')[1];
+        if ( n.plugins && n.plugins.length ) {
+            for ( ii = 0; ii < n.plugins.length; ii++ ) {
+                if ( n.plugins[ ii ].name.indexOf( 'Shockwave Flash' ) !== -1 ) {
+                    f = n.plugins[ ii ].description.split( 'Shockwave Flash ' )[ 1 ];
                     break;
                 }
             }
-        } else if (window.ActiveXObject) {
-            for (ii = 10; ii >= 2; ii--) {
+        } else if ( window.ActiveXObject ) {
+            for ( ii = 10; ii >= 2; ii-- ) {
                 try {
-                    var fl = eval("new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');");
-                    if (fl) {
+                    var fl = eval( "new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');" );
+                    if ( fl ) {
                         f = ii + '.0';
                         break;
                     }
-                } catch (e) {}
+                } catch ( e ) {}
             }
         }
         return f;
@@ -91,31 +93,31 @@ var utils = {
     // 从字符串 src 中查找 k+sp 和  e 之间的字符串，如果 k==e 且 k 只有一个，或者 e 不存在，从 k+sp 截取到字符串结束
     // abcd=1&b=1&c=3;
     // abdc=1;b=1;a=3;
-    stringSplice: function(src, k, e, sp) {
-        if (src === "") {
+    stringSplice: function ( src, k, e, sp ) {
+        if ( src === "" ) {
             return "";
         }
-        sp = (sp === "") ? "=" : sp;
+        sp = ( sp === "" ) ? "=" : sp;
         k += sp;
-        var ps = src.indexOf(k);
-        if (ps < 0) {
+        var ps = src.indexOf( k );
+        if ( ps < 0 ) {
             return "";
         }
         ps += k.length;
-        var pe = pe < ps ? src.length : src.indexOf(e, ps);
-        return src.substring(ps, pe);
+        var pe = pe < ps ? src.length : src.indexOf( e, ps );
+        return src.substring( ps, pe );
     },
-    getReferer:function(){
+    getReferer: function () {
         let ref = document.referrer.toLowerCase();
         let re = /^[^\?&#]*.swf([\?#])?/;
         // 如果页面 Referer 为空，从 URL 中获取
-        if ((ref === "") || (ref.match(re))) {
-            ref = utils.stringSplice(window.location.href, "ref", "&", "");
-            if (ref !== "") {
-                return encodeURIComponent(ref);
+        if ( ( ref === "" ) || ( ref.match( re ) ) ) {
+            ref = utils.stringSplice( window.location.href, "ref", "&", "" );
+            if ( ref !== "" ) {
+                return encodeURIComponent( ref );
             }
         }
-        return encodeURIComponent(ref);
+        return encodeURIComponent( ref );
     },
     getSystemParams: function () {
         let scr = window.screen;
@@ -130,28 +132,27 @@ var utils = {
             referer: document.referer ? document.referer : ''
         };
     },
-    toArray: function( arr ){
-        return Array.prototype.slice.call(arr);
+    toArray: function ( arr ) {
+        return Array.prototype.slice.call( arr );
     },
-    getCookie: function( key ){
-        let cookieList = document.cookie.split('; ');
+    getCookie: function ( key ) {
+        let cookieList = document.cookie.split( '; ' );
         let str = '';
-        for(var i = 0 ; i < cookieList.length; i++){
-            var item = cookieList[i].split('=');
-            if( item[0] == key ){
-                str = item[1];
+        for ( var i = 0; i < cookieList.length; i++ ) {
+            var item = cookieList[ i ].split( '=' );
+            if ( item[ 0 ] == key ) {
+                str = item[ 1 ];
                 break;
             }
         }
         return str;
     },
-    addCookie: function( name, value ){
+    addCookie: function ( name, value, days ) {
         var times = new Date();
-        times.setDate( times.getDate() + 100 );
-        document.cookie = name + "="+ value +"; expires=" + times.toGMTString();
-        return utils.getCookie(name);
+        times.setDate( times.getDate() + days );
+        document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
-    clearCookie: function( value ){
+    clearCookie: function ( value ) {
         utils.addCookie( value, '', -1 );
     }
 };

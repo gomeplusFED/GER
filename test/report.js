@@ -6,6 +6,7 @@
 
 import report from '../src/lib/report';
 const assert = chai.assert;
+<<<<<<< HEAD
 const expect = chai.expect;
 const Report = new report();
 export default ()=>{
@@ -63,3 +64,15 @@ export default ()=>{
         });
     });
 }
+=======
+export default () => {
+
+    describe( 'my report', () => {
+        describe( 'report info', () => {
+            it( 'should return the Object realy type', () => {
+                assert.equal( true, report.info( 'abc', 'String' ) );
+            } );
+        } );
+    } );
+}
+>>>>>>> 9ec1456281a129e891c810b3c2b72d030a5d1dd6
