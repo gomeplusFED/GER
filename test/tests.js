@@ -1,8 +1,5 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(factory());
-}(this, (function () { 'use strict';
+(function () {
+'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -92,7 +89,7 @@ var possibleConstructorReturn = function (self, call) {
  * @date 2017/02/15
  */
 
-var utils = {
+var utils$1 = {
     typeDecide: function typeDecide(o, type) {
         return Object.prototype.toString.call(o) === "[object " + type + "]";
     },
@@ -201,7 +198,7 @@ var utils = {
         var re = /^[^\?&#]*.swf([\?#])?/;
         // 如果页面 Referer 为空，从 URL 中获取
         if (ref === "" || ref.match(re)) {
-            ref = utils.stringSplice(window.location.href, "ref", "&", "");
+            ref = utils$1.stringSplice(window.location.href, "ref", "&", "");
             if (ref !== "") {
                 return encodeURIComponent(ref);
             }
@@ -211,11 +208,11 @@ var utils = {
     getSystemParams: function getSystemParams() {
         var scr = window.screen;
         return {
-            userAgent: utils.getUserAgent(),
+            userAgent: utils$1.getUserAgent(),
             currentUrl: document.location.href,
             timestamp: +new Date(),
-            projectType: utils.getPlatType(),
-            flashVer: utils.flashVer(),
+            projectType: utils$1.getPlatType(),
+            flashVer: utils$1.flashVer(),
             title: document.title,
             screenSize: scr.width + "x" + scr.height,
             referer: document.referer ? document.referer : ''
@@ -242,9 +239,33 @@ var utils = {
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
     clearCookie: function clearCookie(value) {
-        utils.addCookie(value, '', -1);
+        utils$1.addCookie(value, '', -1);
     }
 };
+
+/**
+ * @author xiaojue
+ * @fileoverview utils tests
+ * @date 20170215
+ */
+
+var assert = chai.assert;
+var utils = (function () {
+
+    describe('lib/utils', function () {
+        describe('utils typeDecide', function () {
+            it('should return the Object realy type', function () {
+                assert.equal(true, utils$1.typeDecide('abc', 'String'));
+                assert.equal(true, utils$1.typeDecide(123, 'Number'));
+                assert.equal(true, utils$1.typeDecide(function () {}, 'Function'));
+                assert.equal(true, utils$1.typeDecide({
+                    a: 1
+                }, 'Object'));
+                assert.equal(true, utils$1.typeDecide([1, 2], 'Array'));
+            });
+        });
+    });
+});
 
 /**
  * @author  zdongh2016
@@ -361,8 +382,8 @@ var Peep = function (_Config) {
                 var _this2 = this;
 
                 var args = [];
-                utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (v = _this2.cat(v));
+                utils$1.toArray(arguments).forEach(function (v) {
+                    utils$1.typeDecide(v, 'Function') && (v = _this2.cat(v));
                     args.push(v);
                 });
                 return func.apply(this, args);
@@ -372,14 +393,14 @@ var Peep = function (_Config) {
         key: 'catTimeout',
         value: function catTimeout(func) {
             return function (cb, timeout) {
-                if (utils.typeDecide(cb, 'String')) {
+                if (utils$1.typeDecide(cb, 'String')) {
                     try {
                         cb = new Function(cb);
                     } catch (err) {
                         throw err;
                     }
                 }
-                var args = utils.toArray(arguments);
+                var args = utils$1.toArray(arguments);
                 cb = this.cat(cb, args.length && args);
                 return func(cb, timeout);
             }.bind(this);
@@ -393,8 +414,8 @@ var Peep = function (_Config) {
                 var tmp = void 0,
                     args = [];
 
-                utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (tmp = _this3.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+                utils$1.toArray(arguments).forEach(function (v) {
+                    utils$1.typeDecide(v, 'Function') && (tmp = _this3.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
 
                     args.push(v);
                 });
@@ -410,7 +431,7 @@ var Peep = function (_Config) {
             for (key in obj) {
                 if (obj.hasOwnProperty(key)) {
                     value = obj[key];
-                    if (utils.typeDecide(value, 'Function')) {
+                    if (utils$1.typeDecide(value, 'Function')) {
                         obj[key] = that.cat(value);
                     }
                 }
@@ -446,8 +467,8 @@ var Peep = function (_Config) {
                 _$.fn.on = this.makeArgsTry(_add);
                 _$.fn.off = function () {
                     var args = [];
-                    utils.toArray(arguments).forEach(function (v) {
-                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                    utils$1.toArray(arguments).forEach(function (v) {
+                        utils$1.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
                         args.push(v);
                     });
                     return _remove.apply(this, args);
@@ -458,8 +479,8 @@ var Peep = function (_Config) {
                 _$.event.add = this.makeArgsTry(_add);
                 _$.event.remove = function () {
                     var args = [];
-                    utils.toArray(arguments).forEach(function (v) {
-                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                    utils$1.toArray(arguments).forEach(function (v) {
+                        utils$1.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
                         args.push(v);
                     });
                     return _remove.apply(this, args);
@@ -498,9 +519,9 @@ var Peep = function (_Config) {
                         _this4.config.mergeReport = mergeReport;
                     });
                 }
-                var msg = utils.toArray(arguments).join(',');
+                var msg = utils$1.toArray(arguments).join(',');
                 this.consoleList[type] = this.consoleList[type] !== undefined ? this.consoleList[type] : [];
-                this.consoleList[type].push(Object.assign(utils.getSystemParams(), {
+                this.consoleList[type].push(Object.assign(utils$1.getSystemParams(), {
                     msg: msg,
                     level: level
                 }));
@@ -533,8 +554,8 @@ var Peep = function (_Config) {
 
                     var arg,
                         args = [];
-                    utils.toArray(arguments).forEach(function (v, i) {
-                        if (utils.typeDecide('v', 'Function')) {
+                    utils$1.toArray(arguments).forEach(function (v, i) {
+                        if (utils$1.typeDecide('v', 'Function')) {
                             v = _this5.cat(v);
                             v.toString = function (orgArg) {
                                 return function () {
@@ -561,12 +582,12 @@ var Peep = function (_Config) {
             var _this7 = this;
 
             this.config.peepCustom.forEach(function (v) {
-                if (utils.typeDecide(v, 'Function')) {
+                if (utils$1.typeDecide(v, 'Function')) {
                     return function () {
                         var _this6 = this;
 
-                        utils.toArray(arguments).forEach(function (f) {
-                            if (utils.typeDecide(f, 'Function')) {
+                        utils$1.toArray(arguments).forEach(function (f) {
+                            if (utils$1.typeDecide(f, 'Function')) {
                                 _this6.cat(f);
                             } else {
                                 _this6.makeObjTry(f);
@@ -603,10 +624,10 @@ var storage = {
 	},
 	//检查是否有效
 	checkData: function checkData(data) {
-		var oData = data === '' ? {} : utils.parse(data);
+		var oData = data === '' ? {} : utils$1.parse(data);
 		var date = +new Date();
 		for (var key in oData) {
-			if (utils.parse(oData[key]).expiresTime <= date) {
+			if (utils$1.parse(oData[key]).expiresTime <= date) {
 				delete oData[key];
 			}
 		}
@@ -626,19 +647,19 @@ var storage = {
 				delete loac[keys[0]];
 			}
 			var expiresTime = storage.setEpires(validTime);
-			loac[storage.setKey(errorObj)] = utils.stringify({
+			loac[storage.setKey(errorObj)] = utils$1.stringify({
 				value: errorObj,
 				expiresTime: expiresTime
 			});
 		}
-		return utils.stringify(loac);
+		return utils$1.stringify(loac);
 	},
 	//设置cookie/localStorage
 	setItem: function () {
 		return hasLocal ? function (key, errorObj, validTime, number) {
 			localStorage.setItem(key, storage.setInfo(key, errorObj, validTime, number));
 		} : function (key, errorObj, validTime, number) {
-			utils.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
+			utils$1.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
 		};
 	}(),
 	//获取cookie/localStorage
@@ -646,7 +667,7 @@ var storage = {
 		return hasLocal ? function (key) {
 			return storage.checkData(localStorage.getItem(key) || '');
 		} : function (key) {
-			return storage.checkData(utils.getCookie(key));
+			return storage.checkData(utils$1.getCookie(key));
 		};
 	}(),
 	//清除cookie/localStorage
@@ -654,7 +675,7 @@ var storage = {
 		return hasLocal ? function (key) {
 			return key ? localStorage.removeItem(key) : localStorage.clear();
 		} : function (key) {
-			return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
+			return key ? utils$1.clearCookie(key) : document.cookie.split('; ').forEach(utils$1.clearCookie);
 		};
 	}()
 
@@ -763,7 +784,7 @@ var Events = function (_Localstorage) {
  * @date 2017/02/15
  */
 
-var Report = function (_Events) {
+var Report$1 = function (_Events) {
     inherits(Report, _Events);
 
     function Report(options) {
@@ -804,14 +825,14 @@ var Report = function (_Events) {
                 // 合并上报
                 parames = queue.map(function (obj) {
                     _this2.setItem(obj);
-                    return utils.serializeObj(obj);
+                    return utils$1.serializeObj(obj);
                 }).join('|');
             } else {
                 // 不合并上报
                 if (queue.length) {
                     var obj = queue[0];
                     this.setItem(obj);
-                    parames = utils.serializeObj(obj);
+                    parames = utils$1.serializeObj(obj);
                 }
             }
             this.url += '?' + parames;
@@ -874,11 +895,11 @@ var Report = function (_Events) {
                 console.warn(type + '方法内 msg 参数为空');
                 return;
             }
-            var errorMsg = !utils.typeDecide(msg, 'Object') ? {
+            var errorMsg = !utils$1.typeDecide(msg, 'Object') ? {
                 msg: msg
             } : msg;
             errorMsg.level = level;
-            errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
+            errorMsg = Object.assign(utils$1.getSystemParams(), errorMsg);
             this.carryError(errorMsg);
             this.send();
             return errorMsg;
@@ -888,64 +909,69 @@ var Report = function (_Events) {
 }(Events);
 
 /**
- * @author  zdongh2016
- * @fileoverview GER
- * @date 2017/02/15
+ * @author suman
+ * @fileoverview report tests
+ * @date 2017/02/21
  */
-var GER = function (_Report) {
-    inherits(GER, _Report);
 
-    function GER(options) {
-        classCallCheck(this, GER);
+var assert$1 = chai.assert;
+var expect = chai.expect;
+var Report = new Report$1();
+var report = (function () {
 
-        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+    describe('lib/report', function () {
+        // 'log', 'debug', 'info', 'warn', 'error' 这些方法 怎么证明?
+        describe('report info', function () {
 
-        _this.rewriteError();
-        return _this;
-    }
+            it('incoming msg(string) should return an error object', function () {
+                expect(Report.info('msgmsg')).to.be.an('object');
+                expect(Report.info('msgmsg')).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
+            });
+            it('incoming msgError(object) return an error object', function () {
+                assert$1.equal();
+            });
+        });
 
-    createClass(GER, [{
-        key: 'rewriteError',
-        value: function rewriteError() {
-            var _this2 = this,
-                _arguments = arguments;
+        // repeat
+        describe('report repeat', function () {
+            it('incoming an errorObject should return true', function () {
+                assert$1.equal(true, Report.repeat());
+            });
 
-            window.onerror = function (msg, url, line, col, error) {
-                if (_this2.trigger('error', _arguments)) {
-                    return false;
-                }
-                var reportMsg = msg;
-                if (error.stack && error) {
-                    reportMsg = _this2.handleErrorStack(error);
-                }
-                if (utils.typeDecide(reportMsg, "Event")) {
-                    reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
-                }
-                _this2.error({
-                    msg: reportMsg,
-                    rolNum: line,
-                    colNum: col,
-                    targetUrl: url
-                });
-            };
-        }
-        // 处理onerror返回的error.stack
+            it('incoming an errorObject should return false', function () {
+                assert$1.equal();
+            });
+        });
 
-    }, {
-        key: 'handleErrorStack',
-        value: function handleErrorStack(error) {
-            var stackMsg = error.stack;
-            var errorMsg = error.toString();
-            if (stackMsg.indexOf(errorMsg) === -1) {
-                stackMsg += '@';
-                stackMsg += errorMsg;
-            }
-            return stackMsg;
-        }
-    }]);
-    return GER;
-}(Report);
+        // report
+        describe('report report', function () {
+            it('incoming an cb ', function () {
+                assert$1.equal();
+            });
+        });
 
-window.Ger = GER;
+        // carryError
+        describe('report carryError', function () {
+            it('incoming an errorObject ', function () {
+                assert$1.equal();
+            });
+        });
 
-})));
+        // handleMsg
+        describe('report handleMsg', function () {
+            it('incoming an errorObject ', function () {
+                assert$1.equal(true, Report$1.handleMsg());
+            });
+        });
+    });
+});
+
+/**
+ * @author suman
+ * @fileoverview report tests
+ * @date 2017/02/21
+ */
+utils();
+report();
+
+}());
