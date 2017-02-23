@@ -6,7 +6,6 @@
 
 import report from '../src/lib/report';
 const assert = chai.assert;
-<<<<<<< HEAD
 const expect = chai.expect;
 const Report = new report();
 export default ()=>{
@@ -20,9 +19,14 @@ export default ()=>{
                 expect( Report.info('msgmsg') ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo');
             });
             it( 'incoming msgError(object) return an error object', () => {
-                //assert.equal();
-                expect( Report.info({'msg' : 'objectmsg', 'targetUrl' : 'aaa.js', 'rowNo' : 1, 'colNo' : 2}) ).to.be.an('object');
-                expect( Report.info({'msg' : 'objectmsg', 'targetUrl' : 'aaa.js', 'rowNo' : 1, 'colNo' : 2}) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo');
+                let errorObj = {
+                    'msg' : 'objectMsg',
+                    'targetUrl' : 'aaa.js',
+                    'rowNo' : 1,
+                    'colNo' : 2
+                };
+                expect( Report.info( errorObj ) ).to.be.an('object');
+                expect( Report.info( errorObj ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo');
             });
 
         });
@@ -30,7 +34,15 @@ export default ()=>{
         // repeat
         describe( 'report repeat', () => {
             it( 'incoming an errorObject should return true', () => {
-                assert.equal(true, Report.repeat());
+                let errorObj = {
+                    'msg' : 'objectMsg',
+                    'targetUrl' : 'bbb.js',
+                    'rowNo' : 10,
+                    'colNo' : 20
+                };
+                expect( Report.repeat( errorObj ) ).to.be.an('object');
+                expect( Report.info( errorObj ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo');
+
             });
 
             it( 'incoming an errorObject should return false', () => {
@@ -64,15 +76,3 @@ export default ()=>{
         });
     });
 }
-=======
-export default () => {
-
-    describe( 'my report', () => {
-        describe( 'report info', () => {
-            it( 'should return the Object realy type', () => {
-                assert.equal( true, report.info( 'abc', 'String' ) );
-            } );
-        } );
-    } );
-}
->>>>>>> 9ec1456281a129e891c810b3c2b72d030a5d1dd6

@@ -677,6 +677,7 @@ var Peep = function (_Config) {
                 if (utils$1.typeDecide(v, 'Function')) {
                     return function () {
                         var _this6 = this;
+
                         utils$1.toArray(arguments).forEach(function (f) {
                             if (utils$1.typeDecide(f, 'Function')) {
                                 _this6.cat(f);
@@ -705,150 +706,6 @@ var Peep = function (_Config) {
  */
 var hasLocal = !!window.localStorage;
 var storage = {
-	//设置cookie内json的key名
-	setKey: function setKey(errorObj) {
-		var keyArr = [];
-		errorObj.msg && keyArr.push(errorObj.msg);
-		errorObj.colNum && keyArr.push(errorObj.colNum);
-		errorObj.rowNum && keyArr.push(errorObj.rowNum);
-		return keyArr.join('@');
-	},
-	//检查是否有效
-	checkData: function checkData(data) {
-		var oData = data === '' ? {} : utils$1.parse(data);
-		var date = +new Date();
-		for (var key in oData) {
-			if (utils$1.parse(oData[key]).expiresTime <= date) {
-				delete oData[key];
-			}
-		}
-		return oData;
-	},
-	//设置失效时间
-	setEpires: function setEpires(validTime) {
-		return +new Date() + 1000 * 60 * 60 * 24 * validTime;
-	},
-	//获取cookie/localStorage内容体
-	setInfo: function setInfo(key, errorObj, validTime, number) {
-
-		var loac = storage.getItem(key);
-		if (errorObj !== undefined) {
-			var keys = Object.keys(loac);
-			if (keys.length >= number) {
-				delete loac[keys[0]];
-			}
-			var expiresTime = storage.setEpires(validTime);
-			loac[storage.setKey(errorObj)] = utils$1.stringify({
-				value: errorObj,
-				expiresTime: expiresTime
-			});
-		}
-		return utils$1.stringify(loac);
-	},
-	//设置cookie/localStorage
-	setItem: function () {
-		return hasLocal ? function (key, errorObj, validTime, number) {
-			localStorage.setItem(key, storage.setInfo(key, errorObj, validTime, number));
-		} : function (key, errorObj, validTime, number) {
-			utils$1.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
-		};
-	}(),
-	//获取cookie/localStorage
-	getItem: function () {
-		return hasLocal ? function (key) {
-			return storage.checkData(localStorage.getItem(key) || '');
-		} : function (key) {
-			return storage.checkData(utils$1.getCookie(key));
-		};
-	}(),
-	//清除cookie/localStorage
-	clear: function () {
-		return hasLocal ? function (key) {
-			return key ? localStorage.removeItem(key) : localStorage.clear();
-		} : function (key) {
-			return key ? utils$1.clearCookie(key) : document.cookie.split('; ').forEach(utils$1.clearCookie);
-		};
-	}()
-
-};
-
-var Localstroage = function (_Peep) {
-	inherits(Localstroage, _Peep);
-
-	function Localstroage(options) {
-		classCallCheck(this, Localstroage);
-
-		var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
-
-		_this.init();
-		return _this;
-	}
-
-	//得到元素值 获取元素值 若不存在则返回''
-
-
-	createClass(Localstroage, [{
-		key: "getItem",
-		value: function getItem(key) {
-			return storage.getItem(key);
-		}
-		// 设置一条localstorage或cookie
-
-	}, {
-		key: "setItem",
-		value: function setItem(errorObj) {
-			/*let _config = this.config;
-   storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );*/
-			var _config = this.config;
-			var fn = storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-			return fn;
-		}
-
-		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
-
-	}, {
-		key: "clear",
-		value: function clear(key) {
-			storage.clear(key);
-		}
-	}, {
-		key: "init",
-		value: function init() {
-			this.setItem();
-		}
-	}]);
-	return Localstroage;
-}(Peep);
-
-/**
- * @author  zdongh2016
- * @fileoverview
- * @date 2017/02/16
- */
-
-var Events = function (_Localstorage) {
-    inherits(Events, _Localstorage);
-
-    function Events(options) {
-        classCallCheck(this, Events);
-
-        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
-
-        _this.handlers = {};
-        return _this;
-    }
-
-    createClass(Events, [{
-        key: "on",
-        value: function on(event, handler) {
-            if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = this.handlers[event] !== undefined ? this.handlers[event] : [];
-                this.handlers[event].push(handler);
-        }, {
-            key: "setItem",
-            value: function setItem( errorObj ) {
-                var _config = this.config;
-                storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );
     //设置cookie内json的key名
     setKey: function setKey(errorObj) {
         var keyArr = [];
@@ -934,6 +791,79 @@ var Localstroage = function (_Peep) {
         key: "getItem",
         value: function getItem(key) {
             return storage.getItem(key);
+        }
+        // 设置一条localstorage或cookie
+
+    }, {
+        key: "setItem",
+        value: function setItem(errorObj) {
+            /*let _config = this.config;
+            storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );*/
+            var _config = this.config;
+            var fn = storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
+            return fn;
+        }
+
+        //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+
+    }, {
+        key: "clear",
+        value: function clear(key) {
+            storage.clear(key);
+        }
+    }, {
+        key: "init",
+        value: function init() {
+            this.setItem();
+        }
+    }]);
+    return Localstroage;
+}(Peep);
+
+/**
+ * @author  zdongh2016
+ * @fileoverview
+ * @date 2017/02/16
+ */
+
+var Events = function (_Localstorage) {
+    inherits(Events, _Localstorage);
+
+    function Events(options) {
+        classCallCheck(this, Events);
+
+        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
+
+        _this.handlers = {};
+        return _this;
+    }
+
+    createClass(Events, [{
+        key: "on",
+        value: function on(event, handler) {
+            if (typeof event === "string" && typeof handler === "function") {
+                this.handlers[event] = this.handlers[event] !== undefined ? this.handlers[event] : [];
+                this.handlers[event].push(handler);
+            }
+        }
+    }, {
+        key: "off",
+        value: function off(event) {
+            if (this.handlers[event]) {
+                delete this.handlers[event];
+            }
+        }
+    }, {
+        key: "trigger",
+        value: function trigger(event, args) {
+            var _this2 = this;
+
+            if (this.handlers[event]) {
+                return this.handlers[event].every(function (v, i) {
+                    var ret = _this2.handlers[event][i].apply(_this2, args);
+                    return ret === false ? false : true;
+                });
+            }
         }
     }]);
     return Events;
@@ -1027,41 +957,7 @@ var Report$1 = function (_Events) {
                 this.mergeTimeout = setTimeout(function () {
                     this.report(callback);
                 }.bind(this), this.config.delay);
-
-        createClass( Events, [ {
-            key: "on",
-            value: function on( event, handler ) {
-                if ( typeof event === "string" && typeof handler === "function" ) {
-                    this.handlers[ event ] = this.handlers[ event ] !== undefined ? this.handlers[ event ] : [];
-                    this.handlers[ event ].push( handler );
-                }
             }
-        }, {
-            key: "off",
-            value: function off( event ) {
-                if ( this.handlers[ event ] ) {
-                    delete this.handlers[ event ];
-                }
-            }
-        }, {
-            key: "trigger",
-            value: function trigger( event, args ) {
-                var _this2 = this;
-        // 设置一条localstorage或cookie
-
-    }, {
-        key: "setItem",
-        value: function setItem(errorObj) {
-            var _config = this.config;
-            storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-        }
-
-        //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
-
-    }, {
-        key: "clear",
-        value: function clear(key) {
-            storage.clear(key);
         }
         // push错误到pool
 
@@ -1076,190 +972,8 @@ var Report$1 = function (_Events) {
             if (rnd >= this.config.random) {
                 return error;
             }
-
             this.repeat(error) && this.errorQueue.push(error);
             return this.repeat(error);
-        }
-
-        createClass( Report, [ {
-            key: "repeat",
-            value: function repeat( error ) {
-                var repeatName = error.rowNum === undefined || error.colNum === undefined ? error.msg : error.msg + error.rowNum + error.colNum;
-                this.repeatList[ repeatName ] = this.repeatList[ repeatName ] === undefined ? 1 : this.repeatList[ repeatName ] + 1;
-                //this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
-                return this.repeatList[ repeatName ] <= this.config.repeat;
-    }, {
-        key: "init",
-        value: function init() {
-            this.setItem();
-        }
-    }]);
-    return Localstroage;
-}(Peep);
-
-/**
- * @author  zdongh2016
- * @fileoverview
- * @date 2017/02/16
- */
-
-var Events = function (_Localstorage) {
-    inherits(Events, _Localstorage);
-
-    function Events(options) {
-        classCallCheck(this, Events);
-
-        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
-
-        _this.handlers = {};
-        return _this;
-    }
-
-    createClass(Events, [{
-        key: "on",
-        value: function on(event, handler) {
-            if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = this.handlers[event] !== undefined ? this.handlers[event] : [];
-                this.handlers[event].push(handler);
-            }
-        }
-    }, {
-        key: "off",
-        value: function off(event) {
-            if (this.handlers[event]) {
-                delete this.handlers[event];
-            }
-        }
-    }, {
-        key: "trigger",
-        value: function trigger(event, args) {
-            var _this2 = this;
-
-            if (this.handlers[event]) {
-                return this.handlers[event].every(function (v, i) {
-                    var ret = _this2.handlers[event][i].apply(_this2, args);
-                    return ret === false ? false : true;
-                });
-            }
-        }
-    }]);
-    return Events;
-}(Localstroage);
-
-/**
- * @author suman
- * @fileoverview report
- * @date 2017/02/15
- */
-
-var Report = function (_Events) {
-    inherits(Report, _Events);
-
-    function Report(options) {
-        classCallCheck(this, Report);
-
-        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
-
-        _this.errorQueue = [];
-        _this.repeatList = {};
-        _this.mergeTimeout = null;
-        _this.url = _this.config.url;
-        _this.srcs = [];
-        ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
-            _this[type] = function (msg) {
-                _this.handleMsg(msg, type, index);
-            };
-        });
-
-        return _this;
-    }
-
-    createClass(Report, [{
-        key: "repeat",
-        value: function repeat(error) {
-            var repeatName = error.rowNum === undefined || error.colNum === undefined ? error.msg : error.msg + error.rowNum + error.colNum;
-            this.repeatList[repeatName] = this.repeatList[repeatName] === undefined ? 1 : this.repeatList[repeatName] + 1;
-            //this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
-            return this.repeatList[repeatName] <= this.config.repeat;
-        }
-    }, {
-        key: "report",
-        value: function report(cb) {
-            var _this2 = this;
-
-            var parames = '';
-            var queue = this.errorQueue;
-            if (this.config.mergeReport) {
-                // 合并上报
-                // console.log( '合并上报' );
-                parames = queue.map(function (obj) {
-                    _this2.setItem(obj);
-                    return utils$1.serializeObj(obj);
-                }).join('|');
-            } else {
-                // 不合并上报
-                //console.log( '不合并上报' );
-                if (queue.length) {
-                    var obj = queue[0];
-                    this.setItem(obj);
-                    parames = utils$1.serializeObj(obj);
-                }
-            }
-            this.url += '?' + parames;
-            var oImg = new Image();
-            oImg.onload = function () {
-                queue.forEach(function (v) {
-                    localStorage.setItem('mes', utils$1.stringify(v)); //errorObj  to string 再存localStorage
-                });
-                queue = [];
-                //utils.stringify({"mes" : error});  //????????????????
-                if (cb) {
-                    cb.call(this);
-                }
-                this.trigger('afterReport');
-            }.bind(this);
-            oImg.src = this.url;
-            this.srcs.push(oImg.src);
-            //console.log( this.srcs );
-        }
-        // 发送
-
-    }, {
-        key: "send",
-        value: function send(isNowReport, cb) {
-            this.trigger('beforeReport');
-            var callback = arguments.length === 1 ? isNowReport : cb;
-            if (isNowReport) {
-                // 现在上报
-                this.report(callback);
-            } else {
-                // 延迟上报
-                this.mergeTimeout = setTimeout(function () {
-                    this.report(callback);
-                }.bind(this), this.config.delay);
-            }
-        }
-        // push错误到pool
-
-    }, {
-        key: "carryError",
-        value: function carryError(error) {
-            if (!error) {
-                //console.warn( 'carryError方法内 error 参数为空' );
-                return;
-            }
-            // 拿到onerror的参数 先判断重复 抽样 再放数组中
-
-            var rnd = Math.random();
-            if (rnd >= this.config.random) {
-                //console.warn( '抽样' + rnd + '|||' + this.config.random );
-                return error;
-            }
-            //console.warn( '不抽样' );
-            //console.log(this.repeat(error))
-
-
-            this.repeat(error) && this.errorQueue.push(error);
         }
 
         // 手动上报 处理方法:全部立即上报 需要延迟吗?
@@ -1304,16 +1018,28 @@ var report = (function () {
                 expect$1(Report.info('msgmsg')).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
             });
             it('incoming msgError(object) return an error object', function () {
-                //assert.equal();
-                expect$1(Report.info({ 'msg': 'objectmsg', 'targetUrl': 'aaa.js', 'rowNo': 1, 'colNo': 2 })).to.be.an('object');
-                expect$1(Report.info({ 'msg': 'objectmsg', 'targetUrl': 'aaa.js', 'rowNo': 1, 'colNo': 2 })).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
+                var errorObj = {
+                    'msg': 'objectMsg',
+                    'targetUrl': 'aaa.js',
+                    'rowNo': 1,
+                    'colNo': 2
+                };
+                expect$1(Report.info(errorObj)).to.be.an('object');
+                expect$1(Report.info(errorObj)).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
             });
         });
 
         // repeat
         describe('report repeat', function () {
             it('incoming an errorObject should return true', function () {
-                assert$1.equal(true, Report.repeat());
+                var errorObj = {
+                    'msg': 'objectMsg',
+                    'targetUrl': 'bbb.js',
+                    'rowNo': 10,
+                    'colNo': 20
+                };
+                expect$1(Report.repeat(errorObj)).to.be.an('object');
+                expect$1(Report.info(errorObj)).to.have.any.keys('userAgent', 'currentUrl', 'msg', 'rowNo');
             });
 
             it('incoming an errorObject should return false', function () {
@@ -1339,12 +1065,6 @@ var report = (function () {
         describe('report handleMsg', function () {
             it('incoming an errorObject ', function () {
                 assert$1.equal(true, Report$1.handleMsg());
-var report = (function () {
-
-    describe('my report', function () {
-        describe('report info', function () {
-            it('should return the Object realy type', function () {
-                assert$1.equal(true, Report.info('abc', 'String'));
             });
         });
     });
@@ -1359,34 +1079,3 @@ utils();
 report();
 
 }());
-        } ] );
-        return Report;
-    }( Events );
-
-    /**
-     * @author suman
-     * @fileoverview report tests
-     * @date 2017/02/21
-     */
-
-    var assert$1 = chai.assert;
-    var report = ( function () {
-
-        describe( 'my report', function () {
-            describe( 'report info', function () {
-                it( 'should return the Object realy type', function () {
-                    assert$1.equal( true, Report.info( 'abc', 'String' ) );
-                } );
-            } );
-        } );
-    } );
-
-    /**
-     * @author suman
-     * @fileoverview report tests
-     * @date 2017/02/21
-     */
-    utils();
-    report();
-
-}() );
