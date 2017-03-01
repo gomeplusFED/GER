@@ -31,23 +31,20 @@ class Peep extends Config {
             this.config.peepCustom && this.peepCustom();
         }
     }
-    onThrow( error ) {
-        this.carryError( error );
-    }
     cat( func, args ) {
         return function () {
             try {
                 return func.apply( this, args || arguments );
             } catch ( error ) {
 
-                this.onThrow( error );
+                this.trigger( 'tryError', [ error ] );
                 if ( error.stack && console && console.error ) {
                     console.error( "[GER]", error.stack );
                 }
                 if ( !this.timeoutkey ) {
                     let orgOnerror = window.onerror;
-                    window.onerror = function () {};
-                    this.timeoutkey = setTimeout( function () {
+                    window.onerror = utils.noop;
+                    this.timeoutkey = setTimeout( () => {
                         window.onerror = orgOnerror;
                         this.timeoutkey = null;
                     }, 50 );

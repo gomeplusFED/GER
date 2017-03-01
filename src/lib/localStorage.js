@@ -7,17 +7,25 @@ import Peep from "./peep";
 import utils from "./utils";
 
 let hasLocal = !!window.localStorage;
+
+function InertLocalFunc( funcA, funcB ) {
+    return hasLocal ? funcA : funcB;
+}
+
+function callByArgs( func, args, global ) {
+    return func.apply( global, utils.toArray( args ) );
+}
+
 let storage = {
     //设置cookie内json的key名
-    setKey: function ( errorObj ) {
-        let keyArr = [];
-        errorObj.msg && keyArr.push( errorObj.msg );
-        errorObj.colNum && keyArr.push( errorObj.colNum );
-        errorObj.rowNum && keyArr.push( errorObj.rowNum );
-        return keyArr.join( '@' );
+    getKey: function ( errorObj ) {
+        let isValid = function ( name ) {
+            return errorObj[ name ];
+        };
+        return [ 'msg', 'colNum', 'rowNum' ].filter( isValid ).map( isValid ).join( '@' );
     },
     //检查是否有效
-    checkData: function ( data ) {
+    deleteExpiresItem: function ( data ) {
         let oData = data === '' ? {} : utils.parse( data );
         let date = +new Date();
         for ( let key in oData ) {
@@ -28,51 +36,48 @@ let storage = {
         return oData;
     },
     //设置失效时间
-    setEpires: function ( validTime ) {
+    getEpires: function ( validTime ) {
         return +new Date() + ( 1000 * 60 * 60 * 24 * validTime );
+    },
+    limitError: function ( source, number ) {
+        let keys = Object.keys( source );
+        if ( keys.length >= number ) {
+            delete source[ keys[ 0 ] ];
+        }
+        return source;
     },
     //获取cookie/localStorage内容体
     setInfo: function ( key, errorObj, validTime, number ) {
-
-        let loac = storage.getItem( key );
-        if ( errorObj !== undefined ) {
-            let keys = Object.keys( loac );
-            if ( keys.length >= number ) {
-                delete loac[ keys[ 0 ] ];
-            }
-            let expiresTime = storage.setEpires( validTime );
-            loac[ storage.setKey( errorObj ) ] = utils.stringify( {
-                value: errorObj,
-                expiresTime: expiresTime
-            } );
-
+        let source = storage.getItem( key );
+        if ( errorObj ) {
+            let errorItem = {
+                expiresTime: storage.getEpires( validTime ),
+                value: errorObj.msg,
+            };
+            let key = storage.getKey( errorObj );
+            source = this.limitError( source, number );
+            source[ key ] = utils.stringify( errorItem );
         }
-        return utils.stringify( loac );
+        return utils.stringify( source );
     },
     //设置cookie/localStorage
-    setItem: function () {
-        return hasLocal ? function ( key, errorObj, validTime, number ) {
-            localStorage.setItem( key, storage.setInfo( key, errorObj, validTime, number ) );
-        } : function ( key, errorObj, validTime, number ) {
-            utils.addCookie( key, storage.setInfo( key, errorObj, validTime, number ) );
-        };
-    }(),
+    setItem: InertLocalFunc( ( key ) => {
+        localStorage.setItem( key, callByArgs( storage.setInfo, arguments, storage ) );
+    }, ( key ) => {
+        utils.addCookie( key, callByArgs( storage.setInfo, arguments, storage ) );
+    } ),
     //获取cookie/localStorage
-    getItem: function () {
-        return hasLocal ? function ( key ) {
-            return storage.checkData( localStorage.getItem( key ) || '' );
-        } : function ( key ) {
-            return storage.checkData( utils.getCookie( key ) );
-        };
-    }(),
+    getItem: InertLocalFunc( ( key ) => {
+        return storage.deleteExpiresItem( localStorage.getItem( key ) || '' );
+    }, ( key ) => {
+        return storage.deleteExpiresItem( utils.getCookie( key ) );
+    } ),
     //清除cookie/localStorage
-    clear: function () {
-        return hasLocal ? function ( key ) {
-            return key ? localStorage.removeItem( key ) : localStorage.clear();
-        } : function ( key ) {
-            return key ? utils.clearCookie( key ) : document.cookie.split( '; ' ).forEach( utils.clearCookie );
-        };
-    }()
+    clear: InertLocalFunc( ( key ) => {
+        return key ? localStorage.removeItem( key ) : localStorage.clear();
+    }, ( key ) => {
+        return key ? utils.clearCookie( key ) : document.cookie.split( '; ' ).forEach( utils.clearCookie );
+    } )
 };
 
 
@@ -81,7 +86,7 @@ let storage = {
 class Localstroage extends Peep {
     constructor( options ) {
         super( options );
-        this.init();
+        this.setItem();
     }
 
     //得到元素值 获取元素值 若不存在则返回''
@@ -97,9 +102,6 @@ class Localstroage extends Peep {
     //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
     clear( key ) {
         storage.clear( key );
-    }
-    init() {
-        this.setItem();
     }
 }
 

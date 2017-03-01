@@ -80,7 +80,7 @@ var utils = {
         } else if ( window.ActiveXObject ) {
             for ( ii = 10; ii >= 2; ii-- ) {
                 try {
-                    var fl = eval( "new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');" );
+                    var fl = new Function( "return new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');" )();
                     if ( fl ) {
                         f = ii + '.0';
                         break;
@@ -149,12 +149,13 @@ var utils = {
     },
     addCookie: function ( name, value, days ) {
         var times = new Date();
-        times.setDate( times.getDate() + (days || 100) );
+        times.setDate( times.getDate() + ( days || 365 ) );
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
     clearCookie: function ( value ) {
         utils.addCookie( value, '', -1 );
-    }
+    },
+    noop: function () {}
 };
 
 export default utils;

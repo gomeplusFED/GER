@@ -11,10 +11,8 @@ class Events extends Localstorage {
         this.handlers = {};
     }
     on( event, handler ) {
-        if ( typeof event === "string" && typeof handler === "function" ) {
-            this.handlers[ event ] = this.handlers[ event ] !== undefined ? this.handlers[ event ] : [];
-            this.handlers[ event ].push( handler );
-        }
+        this.handlers[ event ] = this.handlers[ event ] || [];
+        this.handlers[ event ].push( handler );
     }
     off( event ) {
         if ( this.handlers[ event ] ) {
@@ -22,12 +20,14 @@ class Events extends Localstorage {
         }
     }
     trigger( event, args ) {
-        if ( this.handlers[ event ] ) {
-            return this.handlers[ event ].every( ( v, i ) => {
-                var ret = this.handlers[ event ][ i ].apply( this, args );
+        let funcs = this.handlers[ event ];
+        if ( funcs ) {
+            return funcs.every( ( f ) => {
+                var ret = f.apply( this, args );
                 return ret === false ? false : true;
             } );
         }
+        return false;
     }
 
 }

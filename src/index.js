@@ -1,3 +1,3 @@
 import core from './lib/core';
 
-window.Ger = core;
+export default core;

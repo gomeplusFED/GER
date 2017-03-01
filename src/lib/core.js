@@ -14,12 +14,28 @@ class GER extends Report {
     }
     rewriteError() {
         window.onerror = ( msg, url, line, col, error ) => {
-            if ( this.trigger( 'error', arguments ) ) {
+            //有些浏览器没有col
+            col = col || ( window.event && window.event.errorCharacter ) || 0;
+            if ( this.trigger( 'error', utils.toArray( arguments ) ) ) {
                 return false;
             }
             var reportMsg = msg;
             if ( error.stack && error ) {
                 reportMsg = this.handleErrorStack( error );
+            } else {
+                //不存stack的话，对reportMsg做下处理 
+                var ext = [];
+                var f = arguments.callee.caller, // jshint ignore:line
+                    c = 3;
+                //这里只拿三层堆栈信息
+                while ( f && ( --c > 0 ) ) {
+                    ext.push( f.toString() );
+                    if ( f === f.caller ) {
+                        break; //如果有环
+                    }
+                    f = f.caller;
+                }
+                reportMsg += '@' + ext.join( ',' );
             }
             if ( utils.typeDecide( reportMsg, "Event" ) ) {
                 reportMsg += reportMsg.type ?
@@ -39,14 +55,11 @@ class GER extends Report {
         let stackMsg = error.stack;
         let errorMsg = error.toString();
         if ( stackMsg.indexOf( errorMsg ) === -1 ) {
-            stackMsg += '@';
-            stackMsg += errorMsg;
+            stackMsg += '@' + errorMsg;
         }
         return stackMsg;
     }
 
 }
-
-
 
 export default GER;

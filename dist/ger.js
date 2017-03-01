@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
-	(factory());
+	(global.GER = factory());
 }(this, (function () { 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
@@ -169,7 +169,7 @@ var utils = {
         } else if (window.ActiveXObject) {
             for (ii = 10; ii >= 2; ii--) {
                 try {
-                    var fl = eval("new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');");
+                    var fl = new Function("return new ActiveXObject('ShockwaveFlash.ShockwaveFlash." + ii + "');")();
                     if (fl) {
                         f = ii + '.0';
                         break;
@@ -236,14 +236,15 @@ var utils = {
         }
         return str;
     },
-    addCookie: function addCookie(name, value) {
+    addCookie: function addCookie(name, value, days) {
         var times = new Date();
-        times.setDate(times.getDate() + 100);
+        times.setDate(times.getDate() + (days || 365));
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
     },
     clearCookie: function clearCookie(value) {
         utils.addCookie(value, '', -1);
-    }
+    },
+    noop: function noop() {}
 };
 
 /**
@@ -257,6 +258,7 @@ var Config = function () {
 
         this.config = {
             mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+            delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
             url: "ewewe", // 指定错误上报地址
             except: [/Script error/i], // 忽略某个错误
@@ -326,29 +328,28 @@ var Peep = function (_Config) {
             }
         }
     }, {
-        key: 'onThrow',
-        value: function onThrow(error) {
-            this.carryError(error);
-        }
-    }, {
         key: 'cat',
         value: function cat(func, args) {
             return function () {
+                var _this2 = this;
+
                 try {
                     return func.apply(this, args || arguments);
                 } catch (error) {
 
-                    this.onThrow(error);
+                    this.trigger('tryError', [error]);
                     if (error.stack && console && console.error) {
                         console.error("[GER]", error.stack);
                     }
                     if (!this.timeoutkey) {
-                        var orgOnerror = window.onerror;
-                        window.onerror = function () {};
-                        this.timeoutkey = setTimeout(function () {
-                            window.onerror = orgOnerror;
-                            this.timeoutkey = null;
-                        }, 50);
+                        (function () {
+                            var orgOnerror = window.onerror;
+                            window.onerror = utils.noop;
+                            _this2.timeoutkey = setTimeout(function () {
+                                window.onerror = orgOnerror;
+                                _this2.timeoutkey = null;
+                            }, 50);
+                        })();
                     }
                     throw error;
                 }
@@ -358,11 +359,11 @@ var Peep = function (_Config) {
         key: 'catArgs',
         value: function catArgs(func) {
             return function () {
-                var _this2 = this;
+                var _this3 = this;
 
                 var args = [];
                 utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (v = _this2.cat(v));
+                    utils.typeDecide(v, 'Function') && (v = _this3.cat(v));
                     args.push(v);
                 });
                 return func.apply(this, args);
@@ -388,13 +389,13 @@ var Peep = function (_Config) {
         key: 'makeArgsTry',
         value: function makeArgsTry(func, self) {
             return function () {
-                var _this3 = this;
+                var _this4 = this;
 
                 var tmp = void 0,
                     args = [];
 
                 utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (tmp = _this3.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+                    utils.typeDecide(v, 'Function') && (tmp = _this4.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
 
                     args.push(v);
                 });
@@ -487,15 +488,15 @@ var Peep = function (_Config) {
         key: 'peepConsole',
         value: function peepConsole(func, type, level) {
             return function () {
-                var _this4 = this;
+                var _this5 = this;
 
                 var mergeReport = this.config.mergeReport;
                 if (!mergeReport) {
                     this.on('beforeReport', function () {
-                        _this4.config.mergeReport = true;
+                        _this5.config.mergeReport = true;
                     });
                     this.on('afterReport', function () {
-                        _this4.config.mergeReport = mergeReport;
+                        _this5.config.mergeReport = mergeReport;
                     });
                 }
                 var msg = utils.toArray(arguments).join(',');
@@ -528,14 +529,14 @@ var Peep = function (_Config) {
 
             if (window.seajs && _define) {
                 window.define = function () {
-                    var _this5 = this,
+                    var _this6 = this,
                         _arguments = arguments;
 
                     var arg,
                         args = [];
                     utils.toArray(arguments).forEach(function (v, i) {
                         if (utils.typeDecide('v', 'Function')) {
-                            v = _this5.cat(v);
+                            v = _this6.cat(v);
                             v.toString = function (orgArg) {
                                 return function () {
                                     return orgArg.toString();
@@ -558,23 +559,23 @@ var Peep = function (_Config) {
     }, {
         key: 'peepCustom',
         value: function peepCustom() {
-            var _this7 = this;
+            var _this8 = this;
 
             this.config.peepCustom.forEach(function (v) {
                 if (utils.typeDecide(v, 'Function')) {
                     return function () {
-                        var _this6 = this;
+                        var _this7 = this;
 
                         utils.toArray(arguments).forEach(function (f) {
                             if (utils.typeDecide(f, 'Function')) {
-                                _this6.cat(f);
+                                _this7.cat(f);
                             } else {
-                                _this6.makeObjTry(f);
+                                _this7.makeObjTry(f);
                             }
                         });
                     };
                 } else {
-                    _this7.error({
+                    _this8.error({
                         msg: '自定义方法类型必须为function',
                         level: 4
                     });
@@ -586,123 +587,124 @@ var Peep = function (_Config) {
     return Peep;
 }(Config);
 
+var _arguments = arguments;
 /**
  * @author suman
  * @fileoverview localStorage
  * @date 2017/02/16
  */
 var hasLocal = !!window.localStorage;
+
+function InertLocalFunc(funcA, funcB) {
+    return hasLocal ? funcA : funcB;
+}
+
+function callByArgs(func, args, global) {
+    return func.apply(global, utils.toArray(args));
+}
+
 var storage = {
-	//设置cookie内json的key名
-	setKey: function setKey(errorObj) {
-		var keyArr = [];
-		errorObj.msg && keyArr.push(errorObj.msg);
-		errorObj.colNum && keyArr.push(errorObj.colNum);
-		errorObj.rowNum && keyArr.push(errorObj.rowNum);
-		return keyArr.join('@');
-	},
-	//检查是否有效
-	checkData: function checkData(data) {
-		var oData = data === '' ? {} : utils.parse(data);
-		var date = +new Date();
-		for (var key in oData) {
-			if (utils.parse(oData[key]).expiresTime <= date) {
-				delete oData[key];
-			}
-		}
-		return oData;
-	},
-	//设置失效时间
-	setEpires: function setEpires(validTime) {
-		return +new Date() + 1000 * 60 * 60 * 24 * validTime;
-	},
-	//获取cookie/localStorage内容体
-	setInfo: function setInfo(key, errorObj, validTime, number) {
-
-		var loac = storage.getItem(key);
-		if (errorObj !== undefined) {
-			var keys = Object.keys(loac);
-			if (keys.length >= number) {
-				delete loac[keys[0]];
-			}
-			var expiresTime = storage.setEpires(validTime);
-			loac[storage.setKey(errorObj)] = utils.stringify({
-				value: errorObj,
-				expiresTime: expiresTime
-			});
-		}
-		return utils.stringify(loac);
-	},
-	//设置cookie/localStorage
-	setItem: function () {
-		return hasLocal ? function (key, errorObj, validTime, number) {
-			localStorage.setItem(key, storage.setInfo(key, errorObj, validTime, number));
-		} : function (key, errorObj, validTime, number) {
-			utils.addCookie(key, storage.setInfo(key, errorObj, validTime, number));
-		};
-	}(),
-	//获取cookie/localStorage
-	getItem: function () {
-		return hasLocal ? function (key) {
-			return storage.checkData(localStorage.getItem(key) || '');
-		} : function (key) {
-			return storage.checkData(utils.getCookie(key));
-		};
-	}(),
-	//清除cookie/localStorage
-	clear: function () {
-		return hasLocal ? function (key) {
-			return key ? localStorage.removeItem(key) : localStorage.clear();
-		} : function (key) {
-			return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
-		};
-	}()
-
+    //设置cookie内json的key名
+    getKey: function getKey(errorObj) {
+        var isValid = function isValid(name) {
+            return errorObj[name];
+        };
+        return ['msg', 'colNum', 'rowNum'].filter(isValid).map(isValid).join('@');
+    },
+    //检查是否有效
+    deleteExpiresItem: function deleteExpiresItem(data) {
+        var oData = data === '' ? {} : utils.parse(data);
+        var date = +new Date();
+        for (var key in oData) {
+            if (utils.parse(oData[key]).expiresTime <= date) {
+                delete oData[key];
+            }
+        }
+        return oData;
+    },
+    //设置失效时间
+    getEpires: function getEpires(validTime) {
+        return +new Date() + 1000 * 60 * 60 * 24 * validTime;
+    },
+    limitError: function limitError(source, number) {
+        var keys = Object.keys(source);
+        if (keys.length >= number) {
+            delete source[keys[0]];
+        }
+        return source;
+    },
+    //获取cookie/localStorage内容体
+    setInfo: function setInfo(key, errorObj, validTime, number) {
+        var source = storage.getItem(key);
+        if (errorObj) {
+            var errorItem = {
+                expiresTime: storage.getEpires(validTime),
+                value: errorObj.msg
+            };
+            var _key = storage.getKey(errorObj);
+            source = this.limitError(source, number);
+            source[_key] = utils.stringify(errorItem);
+        }
+        return utils.stringify(source);
+    },
+    //设置cookie/localStorage
+    setItem: InertLocalFunc(function (key) {
+        localStorage.setItem(key, callByArgs(storage.setInfo, _arguments, storage));
+    }, function (key) {
+        utils.addCookie(key, callByArgs(storage.setInfo, _arguments, storage));
+    }),
+    //获取cookie/localStorage
+    getItem: InertLocalFunc(function (key) {
+        return storage.deleteExpiresItem(localStorage.getItem(key) || '');
+    }, function (key) {
+        return storage.deleteExpiresItem(utils.getCookie(key));
+    }),
+    //清除cookie/localStorage
+    clear: InertLocalFunc(function (key) {
+        return key ? localStorage.removeItem(key) : localStorage.clear();
+    }, function (key) {
+        return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
+    })
 };
 
 var Localstroage = function (_Peep) {
-	inherits(Localstroage, _Peep);
+    inherits(Localstroage, _Peep);
 
-	function Localstroage(options) {
-		classCallCheck(this, Localstroage);
+    function Localstroage(options) {
+        classCallCheck(this, Localstroage);
 
-		var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+        var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
 
-		_this.init();
-		return _this;
-	}
+        _this.setItem();
+        return _this;
+    }
 
-	//得到元素值 获取元素值 若不存在则返回''
+    //得到元素值 获取元素值 若不存在则返回''
 
 
-	createClass(Localstroage, [{
-		key: "getItem",
-		value: function getItem(key) {
-			return storage.getItem(key);
-		}
-		// 设置一条localstorage或cookie
+    createClass(Localstroage, [{
+        key: "getItem",
+        value: function getItem(key) {
+            return storage.getItem(key);
+        }
+        // 设置一条localstorage或cookie
 
-	}, {
-		key: "setItem",
-		value: function setItem(errorObj) {
-			var _config = this.config;
-			storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-		}
+    }, {
+        key: "setItem",
+        value: function setItem(errorObj) {
+            var _config = this.config;
+            storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
+        }
 
-		//清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+        //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
-	}, {
-		key: "clear",
-		value: function clear(key) {
-			storage.clear(key);
-		}
-	}, {
-		key: "init",
-		value: function init() {
-			this.setItem();
-		}
-	}]);
-	return Localstroage;
+    }, {
+        key: "clear",
+        value: function clear(key) {
+            storage.clear(key);
+        }
+    }]);
+    return Localstroage;
 }(Peep);
 
 /**
@@ -724,31 +726,31 @@ var Events = function (_Localstorage) {
     }
 
     createClass(Events, [{
-        key: "on",
+        key: 'on',
         value: function on(event, handler) {
-            if (typeof event === "string" && typeof handler === "function") {
-                this.handlers[event] = this.handlers[event] !== undefined ? this.handlers[event] : [];
-                this.handlers[event].push(handler);
-            }
+            this.handlers[event] = this.handlers[event] || [];
+            this.handlers[event].push(handler);
         }
     }, {
-        key: "off",
+        key: 'off',
         value: function off(event) {
             if (this.handlers[event]) {
                 delete this.handlers[event];
             }
         }
     }, {
-        key: "trigger",
+        key: 'trigger',
         value: function trigger(event, args) {
             var _this2 = this;
 
-            if (this.handlers[event]) {
-                return this.handlers[event].every(function (v, i) {
-                    var ret = _this2.handlers[event][i].apply(_this2, args);
+            var funcs = this.handlers[event];
+            if (funcs) {
+                return funcs.every(function (f) {
+                    var ret = f.apply(_this2, args);
                     return ret === false ? false : true;
                 });
             }
+            return false;
         }
     }]);
     return Events;
@@ -770,9 +772,7 @@ var Report = function (_Events) {
 
         _this.errorQueue = [];
         _this.repeatList = {};
-        _this.mergeTimeout = null;
         _this.url = _this.config.url;
-        _this.srcs = [];
         ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
             _this[type] = function (msg) {
                 _this.handleMsg(msg, type, index);
@@ -785,89 +785,73 @@ var Report = function (_Events) {
     createClass(Report, [{
         key: "repeat",
         value: function repeat(error) {
-            var repeatName = error.rowNum === undefined || error.colNum === undefined ? error.msg : error.msg + error.rowNum + error.colNum;
-            this.repeatList[repeatName] = this.repeatList[repeatName] === undefined ? 1 : this.repeatList[repeatName] + 1;
-            //this.repeatList[repeatName] = this.repeatList[repeatName] > this.config.repeat ? this.config.repeat : this.repeatList[repeatName];
-            return this.repeatList[repeatName] <= this.config.repeat;
+            var rowNum = error.rowNum || '';
+            var colNum = error.colNum || '';
+            var repeatName = error.msg + rowNum + colNum;
+            this.repeatList[repeatName] = this.repeatList[repeatName] ? 1 : this.repeatList[repeatName] + 1;
+            return this.repeatList[repeatName] > this.config.repeat;
+        }
+    }, {
+        key: "request",
+        value: function request(url, cb) {
+            var img = new Image();
+            img.onload = cb;
+            img.src = url;
         }
     }, {
         key: "report",
         value: function report(cb) {
             var _this2 = this;
 
-            var parames = '';
+            var mergeReport = this.config.mergeReport;
             var queue = this.errorQueue;
-            if (this.config.mergeReport) {
-                // 合并上报
-                // console.log( '合并上报' );
-                parames = queue.map(function (obj) {
-                    _this2.setItem(obj);
-                    return utils.serializeObj(obj);
-                }).join('|');
-            } else {
-                // 不合并上报
-                //console.log( '不合并上报' );
-                if (queue.length) {
-                    var obj = queue[0];
-                    this.setItem(obj);
-                    parames = utils.serializeObj(obj);
-                }
-            }
+            var curQueue = mergeReport ? queue : [queue.shift()];
+            // 合并上报
+            var parames = curQueue.map(function (obj) {
+                _this2.setItem(obj);
+                return utils.serializeObj(obj);
+            }).join('|');
             this.url += '?' + parames;
-            var oImg = new Image();
-            oImg.onload = function () {
-                queue.forEach(function (v) {
-                    localStorage.setItem('mes', utils.stringify(v)); //errorObj  to string 再存localStorage
-                });
-                queue = [];
-                //utils.stringify({"mes" : error});  //????????????????
-                if (cb) {
-                    cb.call(this);
+            this.request(this.url, function () {
+                if (mergeReport) {
+                    queue = [];
                 }
-                this.trigger('afterReport');
-            }.bind(this);
-            oImg.src = this.url;
-            this.srcs.push(oImg.src);
-            //console.log( this.srcs );
+                if (cb) {
+                    cb.call(_this2);
+                }
+                _this2.trigger('afterReport');
+            });
         }
         // 发送
 
     }, {
         key: "send",
         value: function send(isNowReport, cb) {
+            var _this3 = this;
+
             this.trigger('beforeReport');
-            var callback = arguments.length === 1 ? isNowReport : cb;
-            if (isNowReport) {
-                // 现在上报
-                this.report(callback);
-            } else {
-                // 延迟上报
-                this.mergeTimeout = setTimeout(function () {
-                    this.report(callback);
-                }.bind(this), this.config.delay);
-            }
+            var callback = cb || utils.noop;
+            var delay = isNowReport ? 0 : this.config.delay;
+            setTimeout(function () {
+                _this3.report(callback);
+            }, delay);
         }
         // push错误到pool
 
     }, {
         key: "carryError",
         value: function carryError(error) {
-            if (!error) {
-                //console.warn( 'carryError方法内 error 参数为空' );
-                return;
-            }
-            // 拿到onerror的参数 先判断重复 抽样 再放数组中
-
             var rnd = Math.random();
-            if (rnd >= this.config.random) {
-                //console.warn( '抽样' + rnd + '|||' + this.config.random );
-                return error;
+            if (rnd < this.config.random) {
+                return false;
             }
             //console.warn( '不抽样' );
             //console.log(this.repeat(error))
-
-
-            this.repeat(error) && this.errorQueue.push(error);
+            if (this.repeat(error)) {
+                return false;
+            }
+            this.errorQueue.push(error);
+            return true;
         }
 
         // 手动上报 处理方法:全部立即上报 需要延迟吗?
@@ -879,13 +863,14 @@ var Report = function (_Events) {
                 console.warn(type + '方法内 msg 参数为空');
                 return;
             }
-            var errorMsg = !utils.typeDecide(msg, 'Object') ? {
+            var errorMsg = utils.typeDecide(msg, 'Object') ? msg : {
                 msg: msg
-            } : msg;
+            };
             errorMsg.level = level;
             errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
-            this.carryError(errorMsg);
-            this.send();
+            if (this.carryError(errorMsg)) {
+                this.send(this.config.delayReport);
+            }
             return errorMsg;
         }
     }]);
@@ -916,12 +901,29 @@ var GER = function (_Report) {
                 _arguments = arguments;
 
             window.onerror = function (msg, url, line, col, error) {
-                if (_this2.trigger('error', _arguments)) {
+                //有些浏览器没有col
+                col = col || window.event && window.event.errorCharacter || 0;
+                if (_this2.trigger('error', utils.toArray(_arguments))) {
                     return false;
                 }
                 var reportMsg = msg;
                 if (error.stack && error) {
                     reportMsg = _this2.handleErrorStack(error);
+                } else {
+                    //不存stack的话，对reportMsg做下处理 
+                    var ext = [];
+                    var f = _arguments.callee.caller,
+                        // jshint ignore:line
+                    c = 3;
+                    //这里只拿三层堆栈信息
+                    while (f && --c > 0) {
+                        ext.push(f.toString());
+                        if (f === f.caller) {
+                            break; //如果有环
+                        }
+                        f = f.caller;
+                    }
+                    reportMsg += '@' + ext.join(',');
                 }
                 if (utils.typeDecide(reportMsg, "Event")) {
                     reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
@@ -942,8 +944,7 @@ var GER = function (_Report) {
             var stackMsg = error.stack;
             var errorMsg = error.toString();
             if (stackMsg.indexOf(errorMsg) === -1) {
-                stackMsg += '@';
-                stackMsg += errorMsg;
+                stackMsg += '@' + errorMsg;
             }
             return stackMsg;
         }
@@ -951,6 +952,6 @@ var GER = function (_Report) {
     return GER;
 }(Report);
 
-window.Ger = GER;
+return GER;
 
 })));
