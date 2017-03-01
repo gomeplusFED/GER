@@ -3,8 +3,9 @@
  * @fileoverview config
  * @date 2017/02/16
  */
-class Config {
+let Config = ( supperclass ) => class extends supperclass {
     constructor( options ) {
+        super( options );
         this.config = {
             mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
@@ -30,6 +31,6 @@ class Config {
         this.config[ name ] = value;
     }
 
-}
+};
 
 export default Config;

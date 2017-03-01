@@ -4,8 +4,7 @@
  * @date 2017/02/16
  */
 
-import Localstorage from './localStorage';
-class Events extends Localstorage {
+let Events = ( supperclass ) => class extends supperclass {
     constructor( options ) {
         super( options );
         this.handlers = {};
@@ -30,6 +29,6 @@ class Events extends Localstorage {
         return false;
     }
 
-}
+};
 
 export default Events;

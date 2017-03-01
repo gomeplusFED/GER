@@ -3,11 +3,14 @@
  * @fileoverview GER
  * @date 2017/02/15
  */
-import Report from './Report';
 import utils from './utils';
+import events from './events';
+import config from './config';
+import localStorage from './localStorage';
+import report from './report';
+import proxy from './proxy';
 
-
-class GER extends Report {
+class GER extends config( events( localStorage( report( proxy ) ) ) ) {
     constructor( options ) {
         super( options );
         this.rewriteError();

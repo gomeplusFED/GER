@@ -9,17 +9,17 @@
     "test": "test"
   },
   "scripts": {
-    "pretest": "jshint -c .jshintrc src", 
+    "pretest": "jshint -c .jshintrc src",
     "testmocha": "mocha --compilers js:babel-core/register",
     "devbuild": "rollup -c rollup.config.js",
-    "build": "rollup -c rollup.config.js",  
-    "beautify": "node ./scripts/beatufyjs.js src test", 
+    "build": "rollup -c rollup.config.js",
+    "beautify": "node ./scripts/beatufyjs.js src test",
     "devwatch": "rollup -c  rollup.config.js -w",
     "testwatch": "rollup -c  rollup.test.config.js -w ",
-    "server": "http-server -a 0.0.0.0 -p 8080 -s", 
-    "dev": "npm-run-all --parallel server devwatch", 
+    "server": "http-server -a 0.0.0.0 -p 8080 -s",
+    "dev": "npm-run-all --parallel server devwatch",
     "testbuild": "rollup -c rollup.test.config.js",
-    "phantomjs":"mocha-phantomjs test/index.html", 
+    "phantomjs": "mocha-phantomjs test/index.html",
     "test": "npm-run-all --parallel server testwatch"
   },
   "config": {
@@ -66,6 +66,7 @@
     "rollup-watch": "^2.5.0"
   },
   "dependencies": {
+    "mixin": "^0.2.0",
     "raven-js": "^3.10.0"
   }
 }

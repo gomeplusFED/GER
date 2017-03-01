@@ -3,7 +3,6 @@
  * @fileoverview localStorage
  * @date 2017/02/16
  */
-import Peep from "./peep";
 import utils from "./utils";
 
 let hasLocal = !!window.localStorage;
@@ -83,7 +82,7 @@ let storage = {
 
 
 
-class Localstroage extends Peep {
+let Localstroage = ( supperclass ) => class extends supperclass {
     constructor( options ) {
         super( options );
         this.setItem();
@@ -105,6 +104,6 @@ class Localstroage extends Peep {
     clear( key ) {
         storage.clear( key );
     }
-}
+};
 
 export default Localstroage;

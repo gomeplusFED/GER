@@ -92,9 +92,17 @@ var possibleConstructorReturn = function (self, call) {
  * @date 2017/02/15
  */
 
+var timeoutkey;
+
 var utils = {
     typeDecide: function typeDecide(o, type) {
         return Object.prototype.toString.call(o) === "[object " + type + "]";
+    },
+    isFunction: function isFunction(f) {
+        return utils.typeDecide(f, 'Function');
+    },
+    isString: function isString(f) {
+        return utils.typeDecide(f, 'String');
     },
     serializeObj: function serializeObj(obj) {
         var parames = '';
@@ -240,11 +248,138 @@ var utils = {
         var times = new Date();
         times.setDate(times.getDate() + (days || 365));
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+        return utils.getCookie(name);
     },
-    clearCookie: function clearCookie(value) {
-        utils.addCookie(value, '', -1);
+    noop: function noop() {},
+    clearCookie: function clearCookie(name) {
+        utils.addCookie(name, '', -1);
+        return utils.getCookie(name);
     },
-    noop: function noop() {}
+    cat: function cat(func, args) {
+        return function () {
+            try {
+                args = args || utils.toArray(arguments);
+                return func.apply(this, args);
+            } catch (error) {
+                this.trigger('tryError', [error]);
+                if (error.stack && console && console.error) {
+                    console.error("[GER]", error.stack);
+                }
+                if (!timeoutkey) {
+                    (function () {
+                        var orgOnerror = window.onerror;
+                        window.onerror = utils.noop;
+                        timeoutkey = setTimeout(function () {
+                            window.onerror = orgOnerror;
+                            timeoutkey = null;
+                        }, 50);
+                    })();
+                }
+                throw error;
+            }
+        };
+    },
+    catArgs: function catArgs(func) {
+        return function () {
+            var args = [];
+            utils.toArray(arguments).forEach(function (v) {
+                utils.isFunction(v) && (v = utils.cat(v));
+                args.push(v);
+            });
+            return func.apply(this, args);
+        };
+    },
+    catTimeout: function catTimeout(func) {
+        var _arguments = arguments;
+
+        return function (cb, timeout) {
+            if (utils.isString(cb)) {
+                try {
+                    cb = new Function(cb);
+                } catch (err) {
+                    throw err;
+                }
+            }
+            var args = utils.toArray(_arguments);
+            cb = utils.cat(cb, args.length && args);
+            return func(cb, timeout);
+        };
+    },
+    makeArgsTry: function makeArgsTry(func, self) {
+        return function () {
+            var tmp = void 0,
+                args = [];
+            utils.toArray(arguments).forEach(function (v) {
+                utils.isFunction(v) && (tmp = utils.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
+                args.push(v);
+            });
+            return func.apply(self || this, args);
+        };
+    },
+    makeObjTry: function makeObjTry(obj) {
+        var key = void 0;
+        var value = void 0;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                value = obj[key];
+                if (utils.isFunction(value)) {
+                    obj[key] = utils.cat(value);
+                }
+            }
+        }
+        return obj;
+    }
+};
+
+/**
+ * @author  zdongh2016
+ * @fileoverview
+ * @date 2017/02/16
+ */
+
+var Events$1 = function Events(supperclass) {
+    return function (_supperclass) {
+        inherits(_class, _supperclass);
+
+        function _class(options) {
+            classCallCheck(this, _class);
+
+            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
+
+            _this.handlers = {};
+            return _this;
+        }
+
+        createClass(_class, [{
+            key: "on",
+            value: function on(event, handler) {
+                this.handlers[event] = this.handlers[event] || [];
+                this.handlers[event].push(handler);
+            }
+        }, {
+            key: "off",
+            value: function off(event) {
+                if (this.handlers[event]) {
+                    delete this.handlers[event];
+                }
+            }
+        }, {
+            key: "trigger",
+            value: function trigger(event, args) {
+                var _this2 = this;
+
+                var funcs = this.handlers[event];
+                if (funcs) {
+                    return funcs.every(function (f) {
+                        var ret = f.apply(_this2, args);
+                        return ret === false ? false : true;
+                    });
+                }
+                return false;
+            }
+        }]);
+        return _class;
+    }(supperclass);
 };
 
 /**
@@ -252,340 +387,49 @@ var utils = {
  * @fileoverview config
  * @date 2017/02/16
  */
-var Config = function () {
-    function Config(options) {
-        classCallCheck(this, Config);
+var Config$1 = function Config(supperclass) {
+    return function (_supperclass) {
+        inherits(_class, _supperclass);
 
-        this.config = {
-            mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
-            delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
-            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
-            url: "ewewe", // 指定错误上报地址
-            except: [/Script error/i], // 忽略某个错误
-            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
-            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-            errorLSSign: 'mx-error', // error错误数自增 0
-            maxErrorCookieNo: 20, // error错误数自增 最大的错
-            tryPeep: false,
-            peepSystem: false,
-            peepJquery: false,
-            peepConsole: false,
-            validTime: 7
-        };
-        this.config = Object.assign(this.config, options);
-    }
+        function _class(options) {
+            classCallCheck(this, _class);
 
-    createClass(Config, [{
-        key: "get",
-        value: function get$$1(name) {
-            return this.config[name];
-        }
-    }, {
-        key: "set",
-        value: function set$$1(name, value) {
-            this.config[name] = value;
-        }
-    }]);
-    return Config;
-}();
+            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
 
-/**
- * @author  zdongh2016
- * @fileoverview  Peep
- * @date 2017/02/16
- */
-
-var Peep = function (_Config) {
-    inherits(Peep, _Config);
-
-    function Peep(options) {
-        classCallCheck(this, Peep);
-
-        var _this = possibleConstructorReturn(this, (Peep.__proto__ || Object.getPrototypeOf(Peep)).call(this, options));
-
-        _this.timeoutkey = null;
-        _this.consoleList = {};
-        window.onload = function () {
-            _this.peep();
-        };
-        _this.config.peepSystem && _this.peepSystem();
-        if (_this.config.peepConsole) {
-            ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
-                window.console[type] = _this.peepConsole(window.console[type], type, index);
-            });
-        }
-
-        return _this;
-    }
-
-    createClass(Peep, [{
-        key: 'peep',
-        value: function peep() {
-            if (this.config.tryPeep) {
-                this.config.peepJquery && this.peepJquery();
-                this.config.peepModule && this.peepModule();
-                this.config.peepCustom && this.peepCustom();
-            }
-        }
-    }, {
-        key: 'cat',
-        value: function cat(func, args) {
-            return function () {
-                var _this2 = this;
-
-                try {
-                    return func.apply(this, args || arguments);
-                } catch (error) {
-
-                    this.trigger('tryError', [error]);
-                    if (error.stack && console && console.error) {
-                        console.error("[GER]", error.stack);
-                    }
-                    if (!this.timeoutkey) {
-                        (function () {
-                            var orgOnerror = window.onerror;
-                            window.onerror = utils.noop;
-                            _this2.timeoutkey = setTimeout(function () {
-                                window.onerror = orgOnerror;
-                                _this2.timeoutkey = null;
-                            }, 50);
-                        })();
-                    }
-                    throw error;
-                }
+            _this.config = {
+                mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+                delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
+                delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
+                url: "ewewe", // 指定错误上报地址
+                except: [/Script error/i], // 忽略某个错误
+                random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
+                repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
+                errorLSSign: 'mx-error', // error错误数自增 0
+                maxErrorCookieNo: 20, // error错误数自增 最大的错
+                tryPeep: false,
+                peepSystem: false,
+                peepJquery: false,
+                peepConsole: false,
+                validTime: 7
             };
+            _this.config = Object.assign(_this.config, options);
+            return _this;
         }
-    }, {
-        key: 'catArgs',
-        value: function catArgs(func) {
-            return function () {
-                var _this3 = this;
 
-                var args = [];
-                utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (v = _this3.cat(v));
-                    args.push(v);
-                });
-                return func.apply(this, args);
-            }.bind(this);
-        }
-    }, {
-        key: 'catTimeout',
-        value: function catTimeout(func) {
-            return function (cb, timeout) {
-                if (utils.typeDecide(cb, 'String')) {
-                    try {
-                        cb = new Function(cb);
-                    } catch (err) {
-                        throw err;
-                    }
-                }
-                var args = utils.toArray(arguments);
-                cb = this.cat(cb, args.length && args);
-                return func(cb, timeout);
-            }.bind(this);
-        }
-    }, {
-        key: 'makeArgsTry',
-        value: function makeArgsTry(func, self) {
-            return function () {
-                var _this4 = this;
-
-                var tmp = void 0,
-                    args = [];
-
-                utils.toArray(arguments).forEach(function (v) {
-                    utils.typeDecide(v, 'Function') && (tmp = _this4.cat(v)) && (v.tryWrap = tmp) && (v = tmp);
-
-                    args.push(v);
-                });
-                return func.apply(self || this, args);
-            }.bind(this);
-        }
-    }, {
-        key: 'makeObjTry',
-        value: function makeObjTry(obj) {
-            var key = void 0;
-            var value = void 0;
-            var that = this;
-            for (key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    value = obj[key];
-                    if (utils.typeDecide(value, 'Function')) {
-                        obj[key] = that.cat(value);
-                    }
-                }
+        createClass(_class, [{
+            key: "get",
+            value: function get$$1(name) {
+                return this.config[name];
             }
-            return obj;
-        }
-
-        // 劫持原生js
-
-    }, {
-        key: 'peepSystem',
-        value: function peepSystem() {
-            window.setTimeout = this.catTimeout(setTimeout);
-            window.setInterval = this.catTimeout(setInterval);
-        }
-
-        // 劫持jquery
-
-    }, {
-        key: 'peepJquery',
-        value: function peepJquery() {
-            var _$ = window.$;
-
-            if (!_$ || !_$.event) {
-                return this;
+        }, {
+            key: "set",
+            value: function set$$1(name, value) {
+                this.config[name] = value;
             }
-
-            var _add = void 0,
-                _remove = void 0;
-            if (_$.zepto) {
-                _add = _$.fn.on, _remove = _$.fn.off;
-
-                _$.fn.on = this.makeArgsTry(_add);
-                _$.fn.off = function () {
-                    var args = [];
-                    utils.toArray(arguments).forEach(function (v) {
-                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
-                        args.push(v);
-                    });
-                    return _remove.apply(this, args);
-                };
-            } else if (window.jQuery) {
-                _add = _$.event.add, _remove = _$.event.remove;
-
-                _$.event.add = this.makeArgsTry(_add);
-                _$.event.remove = function () {
-                    var args = [];
-                    utils.toArray(arguments).forEach(function (v) {
-                        utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
-                        args.push(v);
-                    });
-                    return _remove.apply(this, args);
-                };
-            }
-
-            var _ajax = _$.ajax;
-
-            if (_ajax) {
-                _$.ajax = function (url, setting) {
-                    if (!setting) {
-                        setting = url;
-                        url = undefined;
-                    }
-                    this.makeObjTry(setting);
-                    if (url) return _ajax.call(_$, url, setting);
-                    return _ajax.call(_$, setting);
-                };
-            }
-        }
-    }, {
-        key: 'carryConsole',
-        value: function carryConsole() {}
-    }, {
-        key: 'peepConsole',
-        value: function peepConsole(func, type, level) {
-            return function () {
-                var _this5 = this;
-
-                var mergeReport = this.config.mergeReport;
-                if (!mergeReport) {
-                    this.on('beforeReport', function () {
-                        _this5.config.mergeReport = true;
-                    });
-                    this.on('afterReport', function () {
-                        _this5.config.mergeReport = mergeReport;
-                    });
-                }
-                var msg = utils.toArray(arguments).join(',');
-                this.consoleList[type] = this.consoleList[type] !== undefined ? this.consoleList[type] : [];
-                this.consoleList[type].push(Object.assign(utils.getSystemParams(), {
-                    msg: msg,
-                    level: level
-                }));
-                if (this.consoleList[type].length > 10) {
-                    this.errorQueue = this.errorQueue.concat(this.consoleList[type]);
-                    this.send(true);
-                    this.consoleList[type] = [];
-                }
-                return func.apply(this, arguments);
-            }.bind(this);
-        }
-        // 劫持seajs
-
-    }, {
-        key: 'peepModules',
-        value: function peepModules() {
-            var _require = window.require,
-                _define = window.define;
-            if (_define && _define.amd && _require) {
-                window.require = this.catArgs(_require);
-                Object.assign(window.require, _require);
-                window.define = this.catArgs(_define);
-                Object.assign(window.define, _define);
-            }
-
-            if (window.seajs && _define) {
-                window.define = function () {
-                    var _this6 = this,
-                        _arguments = arguments;
-
-                    var arg,
-                        args = [];
-                    utils.toArray(arguments).forEach(function (v, i) {
-                        if (utils.typeDecide('v', 'Function')) {
-                            v = _this6.cat(v);
-                            v.toString = function (orgArg) {
-                                return function () {
-                                    return orgArg.toString();
-                                };
-                            }(_arguments[i]);
-                        }
-                        args.push(arg);
-                    });
-                    return _define.apply(this, args);
-                };
-
-                window.seajs.use = this.catArgs(window.seajs.use);
-
-                Object.assign(window.define, _define);
-            }
-        }
-
-        // 劫持自定义方法
-
-    }, {
-        key: 'peepCustom',
-        value: function peepCustom() {
-            var _this8 = this;
-
-            this.config.peepCustom.forEach(function (v) {
-                if (utils.typeDecide(v, 'Function')) {
-                    return function () {
-                        var _this7 = this;
-
-                        utils.toArray(arguments).forEach(function (f) {
-                            if (utils.typeDecide(f, 'Function')) {
-                                _this7.cat(f);
-                            } else {
-                                _this7.makeObjTry(f);
-                            }
-                        });
-                    };
-                } else {
-                    _this8.error({
-                        msg: '自定义方法类型必须为function',
-                        level: 4
-                    });
-                    //console.error('自定义方法类型必须为function');
-                }
-            });
-        }
-    }]);
-    return Peep;
-}(Config);
+        }]);
+        return _class;
+    }(supperclass);
+};
 
 var _arguments = arguments;
 /**
@@ -667,94 +511,49 @@ var storage = {
     })
 };
 
-var Localstroage = function (_Peep) {
-    inherits(Localstroage, _Peep);
+var Localstroage$1 = function Localstroage(supperclass) {
+    return function (_supperclass) {
+        inherits(_class, _supperclass);
 
-    function Localstroage(options) {
-        classCallCheck(this, Localstroage);
+        function _class(options) {
+            classCallCheck(this, _class);
 
-        var _this = possibleConstructorReturn(this, (Localstroage.__proto__ || Object.getPrototypeOf(Localstroage)).call(this, options));
+            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
 
-        _this.setItem();
-        return _this;
-    }
-
-    //得到元素值 获取元素值 若不存在则返回''
-
-
-    createClass(Localstroage, [{
-        key: "getItem",
-        value: function getItem(key) {
-            return storage.getItem(key);
+            _this.setItem();
+            return _this;
         }
-        // 设置一条localstorage或cookie
+        //得到元素值 获取元素值 若不存在则返回''
 
-    }, {
-        key: "setItem",
-        value: function setItem(errorObj) {
-            var _config = this.config;
-            storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-        }
 
-        //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
-
-    }, {
-        key: "clear",
-        value: function clear(key) {
-            storage.clear(key);
-        }
-    }]);
-    return Localstroage;
-}(Peep);
-
-/**
- * @author  zdongh2016
- * @fileoverview
- * @date 2017/02/16
- */
-
-var Events = function (_Localstorage) {
-    inherits(Events, _Localstorage);
-
-    function Events(options) {
-        classCallCheck(this, Events);
-
-        var _this = possibleConstructorReturn(this, (Events.__proto__ || Object.getPrototypeOf(Events)).call(this, options));
-
-        _this.handlers = {};
-        return _this;
-    }
-
-    createClass(Events, [{
-        key: 'on',
-        value: function on(event, handler) {
-            this.handlers[event] = this.handlers[event] || [];
-            this.handlers[event].push(handler);
-        }
-    }, {
-        key: 'off',
-        value: function off(event) {
-            if (this.handlers[event]) {
-                delete this.handlers[event];
+        createClass(_class, [{
+            key: 'getItem',
+            value: function getItem(key) {
+                return storage.getItem(key);
             }
-        }
-    }, {
-        key: 'trigger',
-        value: function trigger(event, args) {
-            var _this2 = this;
+            // 设置一条localstorage或cookie
 
-            var funcs = this.handlers[event];
-            if (funcs) {
-                return funcs.every(function (f) {
-                    var ret = f.apply(_this2, args);
-                    return ret === false ? false : true;
-                });
+        }, {
+            key: 'setItem',
+            value: function setItem(errorObj) {
+                /*let _config = this.config;
+                storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );*/
+                var _config = this.config;
+                var fn = storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
+                return fn;
             }
-            return false;
-        }
-    }]);
-    return Events;
-}(Localstroage);
+
+            //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+
+        }, {
+            key: 'clear',
+            value: function clear(key) {
+                storage.clear(key);
+            }
+        }]);
+        return _class;
+    }(supperclass);
+};
 
 /**
  * @author suman
@@ -762,128 +561,335 @@ var Events = function (_Localstorage) {
  * @date 2017/02/15
  */
 
-var Report = function (_Events) {
-    inherits(Report, _Events);
+var Report$1 = function Report(supperclass) {
+    return function (_supperclass) {
+        inherits(_class, _supperclass);
 
-    function Report(options) {
-        classCallCheck(this, Report);
+        function _class(options) {
+            classCallCheck(this, _class);
 
-        var _this = possibleConstructorReturn(this, (Report.__proto__ || Object.getPrototypeOf(Report)).call(this, options));
+            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
 
-        _this.errorQueue = [];
-        _this.repeatList = {};
-        _this.url = _this.config.url;
-        ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
-            _this[type] = function (msg) {
-                _this.handleMsg(msg, type, index);
-            };
-        });
-
-        return _this;
-    }
-
-    createClass(Report, [{
-        key: "repeat",
-        value: function repeat(error) {
-            var rowNum = error.rowNum || '';
-            var colNum = error.colNum || '';
-            var repeatName = error.msg + rowNum + colNum;
-            this.repeatList[repeatName] = this.repeatList[repeatName] ? 1 : this.repeatList[repeatName] + 1;
-            return this.repeatList[repeatName] > this.config.repeat;
-        }
-    }, {
-        key: "request",
-        value: function request(url, cb) {
-            var img = new Image();
-            img.onload = cb;
-            img.src = url;
-        }
-    }, {
-        key: "report",
-        value: function report(cb) {
-            var _this2 = this;
-
-            var mergeReport = this.config.mergeReport;
-            var queue = this.errorQueue;
-            var curQueue = mergeReport ? queue : [queue.shift()];
-            // 合并上报
-            var parames = curQueue.map(function (obj) {
-                _this2.setItem(obj);
-                return utils.serializeObj(obj);
-            }).join('|');
-            this.url += '?' + parames;
-            this.request(this.url, function () {
-                if (mergeReport) {
-                    queue = [];
-                }
-                if (cb) {
-                    cb.call(_this2);
-                }
-                _this2.trigger('afterReport');
+            _this.errorQueue = [];
+            _this.repeatList = {};
+            _this.url = _this.config.url;
+            ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
+                _this[type] = function (msg) {
+                    _this.handleMsg(msg, type, index);
+                    return _this.handleMsg(msg, type, index);
+                };
             });
-        }
-        // 发送
 
-    }, {
-        key: "send",
-        value: function send(isNowReport, cb) {
-            var _this3 = this;
-
-            this.trigger('beforeReport');
-            var callback = cb || utils.noop;
-            var delay = isNowReport ? 0 : this.config.delay;
-            setTimeout(function () {
-                _this3.report(callback);
-            }, delay);
-        }
-        // push错误到pool
-
-    }, {
-        key: "carryError",
-        value: function carryError(error) {
-            var rnd = Math.random();
-            if (rnd < this.config.random) {
-                return false;
-            }
-            //console.warn( '不抽样' );
-            //console.log(this.repeat(error))
-            if (this.repeat(error)) {
-                return false;
-            }
-            this.errorQueue.push(error);
-            return true;
+            return _this;
         }
 
-        // 手动上报 处理方法:全部立即上报 需要延迟吗?
-
-    }, {
-        key: "handleMsg",
-        value: function handleMsg(msg, type, level) {
-            if (!msg) {
-                console.warn(type + '方法内 msg 参数为空');
-                return;
+        createClass(_class, [{
+            key: 'repeat',
+            value: function repeat(error) {
+                var rowNum = error.rowNum || '';
+                var colNum = error.colNum || '';
+                var repeatName = error.msg + rowNum + colNum;
+                this.repeatList[repeatName] = this.repeatList[repeatName] ? 1 : this.repeatList[repeatName] + 1;
+                return this.repeatList[repeatName] > this.config.repeat;
             }
-            var errorMsg = utils.typeDecide(msg, 'Object') ? msg : {
-                msg: msg
+        }, {
+            key: 'request',
+            value: function request(url, cb) {
+                var img = new Image();
+                img.onload = cb;
+                img.src = url;
+            }
+        }, {
+            key: 'report',
+            value: function report(cb) {
+                var _this2 = this;
+
+                var mergeReport = this.config.mergeReport;
+                var queue = this.errorQueue;
+                var curQueue = mergeReport ? queue : [queue.shift()];
+                // 合并上报
+                var parames = curQueue.map(function (obj) {
+                    _this2.setItem(obj);
+                    return utils.serializeObj(obj);
+                }).join('|');
+                this.url += '?' + parames;
+                this.request(this.url, function () {
+                    if (mergeReport) {
+                        queue = [];
+                    }
+                    if (cb) {
+                        cb.call(_this2);
+                    }
+                    _this2.trigger('afterReport');
+                });
+            }
+            // 发送
+
+        }, {
+            key: 'send',
+            value: function send(isNowReport, cb) {
+                var _this3 = this;
+
+                this.trigger('beforeReport');
+                var callback = cb || utils.noop;
+                var delay = isNowReport ? 0 : this.config.delay;
+                setTimeout(function () {
+                    _this3.report(callback);
+                }, delay);
+            }
+            // push错误到pool
+
+        }, {
+            key: 'carryError',
+            value: function carryError(error) {
+                var rnd = Math.random();
+                if (rnd < this.config.random) {
+                    return false;
+                }
+                //console.warn( '不抽样' );
+                //console.log(this.repeat(error))
+                if (this.repeat(error)) {
+                    return false;
+                }
+                this.errorQueue.push(error);
+                return true;
+            }
+            // 手动上报 处理方法:全部立即上报 需要延迟吗?
+
+        }, {
+            key: 'handleMsg',
+            value: function handleMsg(msg, type, level) {
+                if (!msg) {
+                    console.warn(type + '方法内 msg 参数为空');
+                    return;
+                }
+                var errorMsg = utils.typeDecide(msg, 'Object') ? msg : {
+                    msg: msg
+                };
+                errorMsg.level = level;
+                errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
+                if (this.carryError(errorMsg)) {
+                    this.send(this.config.delayReport);
+                }
+                return errorMsg;
+            }
+        }]);
+        return _class;
+    }(supperclass);
+};
+
+/**
+ * @author  zdongh2016
+ * @fileoverview  Peep
+ * @date 2017/02/16
+ */
+
+var proxy = function proxy(supperclass) {
+    return function (_supperclass) {
+        inherits(_class, _supperclass);
+
+        function _class(options) {
+            classCallCheck(this, _class);
+
+            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
+
+            _this.consoleList = {};
+            window.onload = function () {
+                _this.proxy();
             };
-            errorMsg.level = level;
-            errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
-            if (this.carryError(errorMsg)) {
-                this.send(this.config.delayReport);
-            }
-            return errorMsg;
+            return _this;
         }
-    }]);
-    return Report;
-}(Events);
+
+        createClass(_class, [{
+            key: 'proxy',
+            value: function proxy() {
+                if (this.config.proxyAll) {
+                    this.proxyJquery().proxyModule().proxyTimer().proxyConsole();
+                }
+            }
+        }, {
+            key: 'proxyConsole',
+            value: function proxyConsole() {
+                var _this2 = this;
+
+                ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
+                    window.console[type] = _this2.reportConsole(window.console[type], type, index);
+                });
+                return this;
+            }
+            // 劫持原生js
+
+        }, {
+            key: 'proxyTimer',
+            value: function proxyTimer() {
+                window.setTimeout = utils.catTimeout(setTimeout);
+                window.setInterval = utils.catTimeout(setInterval);
+                return this;
+            }
+            // 劫持jquery
+
+        }, {
+            key: 'proxyJquery',
+            value: function proxyJquery($) {
+                var _arguments = arguments,
+                    _this3 = this;
+
+                var _$ = $ || window.$;
+
+                if (!_$ || !_$.event) {
+                    return this;
+                }
+
+                var _add = void 0,
+                    _remove = void 0;
+                if (_$.zepto) {
+                    _add = _$.fn.on, _remove = _$.fn.off;
+
+                    _$.fn.on = utils.makeArgsTry(_add);
+                    _$.fn.off = function () {
+                        var args = [];
+                        utils.toArray(arguments).forEach(function (v) {
+                            utils.isFunction(v) && v.tryWrap && (v = v.tryWrap);
+                            args.push(v);
+                        });
+                        return _remove.apply(this, args);
+                    };
+                } else if ($.fn.jquery) {
+                    _add = _$.event.add, _remove = _$.event.remove;
+
+                    _$.event.add = utils.makeArgsTry(_add);
+                    _$.event.remove = function () {
+                        var args = [];
+                        utils.toArray(_arguments).forEach(function (v) {
+                            utils.typeDecide(v, 'Function') && v.tryWrap && (v = v.tryWrap);
+                            args.push(v);
+                        });
+                        return _remove.apply(_this3, args);
+                    };
+                }
+
+                var _ajax = _$.ajax;
+
+                if (_ajax) {
+                    _$.ajax = function (url, setting) {
+                        if (!setting) {
+                            setting = url;
+                            url = undefined;
+                        }
+                        utils.makeObjTry(setting);
+                        if (url) return _ajax.call(_$, url, setting);
+                        return _ajax.call(_$, setting);
+                    };
+                }
+                return this;
+            }
+        }, {
+            key: 'reportConsole',
+            value: function reportConsole(func, type, level) {
+                var _this4 = this,
+                    _arguments2 = arguments;
+
+                return function () {
+                    _this4.on('beforeReport', function () {
+                        //启用console，强制merge
+                        _this4.config.mergeReport = true;
+                    });
+                    var msg = utils.toArray(_arguments2).join(',');
+                    var typeList = _this4.consoleList[type];
+                    typeList = typeList || [];
+                    typeList.push(Object.assign(utils.getSystemParams(), {
+                        msg: msg,
+                        level: level
+                    }));
+                    if (typeList.length > 10) {
+                        _this4.errorQueue = _this4.errorQueue.concat(typeList);
+                        _this4.send(true, function () {
+                            typeList = [];
+                        });
+                    }
+                    return func.apply(_this4, _arguments2);
+                };
+            }
+            // 劫持seajs
+
+        }, {
+            key: 'proxyModules',
+            value: function proxyModules() {
+                var _require = window.require,
+                    _define = window.define;
+                if (_define && _define.amd && _require) {
+                    window.require = utils.catArgs(_require);
+                    Object.assign(window.require, _require);
+                    window.define = utils.catArgs(_define);
+                    Object.assign(window.define, _define);
+                }
+
+                if (window.seajs && _define) {
+                    window.define = function () {
+                        var _arguments3 = arguments;
+
+                        var arg,
+                            args = [];
+                        utils.toArray(arguments).forEach(function (v, i) {
+                            if (utils.isFunction(v)) {
+                                v = utils.cat(v);
+                                v.toString = function (orgArg) {
+                                    return function () {
+                                        return orgArg.toString();
+                                    };
+                                }(_arguments3[i]);
+                            }
+                            args.push(arg);
+                        });
+                        return _define.apply(this, args);
+                    };
+
+                    window.seajs.use = utils.catArgs(window.seajs.use);
+
+                    Object.assign(window.define, _define);
+                }
+                return this;
+            }
+
+            // 劫持自定义方法
+
+        }, {
+            key: 'proxyCustom',
+            value: function proxyCustom() {
+                var _this5 = this;
+
+                this.config.proxyCustom.forEach(function (v) {
+                    if (utils.isFunction(v)) {
+                        return function () {
+                            utils.toArray(arguments).forEach(function (f) {
+                                if (utils.isFunction(f)) {
+                                    utils.cat(f);
+                                } else {
+                                    utils.makeObjTry(f);
+                                }
+                            });
+                        };
+                    } else {
+                        _this5.error({
+                            msg: '自定义方法类型必须为function',
+                            level: 4
+                        });
+                    }
+                });
+                return this;
+            }
+        }]);
+        return _class;
+    }(supperclass);
+};
 
 /**
  * @author  zdongh2016
  * @fileoverview GER
  * @date 2017/02/15
  */
-var GER = function (_Report) {
-    inherits(GER, _Report);
+var GER = function (_config) {
+    inherits(GER, _config);
 
     function GER(options) {
         classCallCheck(this, GER);
@@ -950,7 +956,12 @@ var GER = function (_Report) {
         }
     }]);
     return GER;
-}(Report);
+}(Config$1(Events$1(Localstroage$1(Report$1(proxy)))));
+
+/**
+ * @author xiaojue
+ * @fileoverview mutil class inherit
+ */
 
 return GER;
 

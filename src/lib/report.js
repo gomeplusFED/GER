@@ -5,10 +5,8 @@
  */
 
 import utils from "./utils";
-import Events from "./events";
 
-class Report extends Events {
-
+let Report = ( supperclass ) => class extends supperclass {
     constructor( options ) {
         super( options );
         this.errorQueue = [];
@@ -93,6 +91,6 @@ class Report extends Events {
         }
         return errorMsg;
     }
-}
+};
 
 export default Report;
