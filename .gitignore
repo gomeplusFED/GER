@@ -4,3 +4,7 @@
 .gitCOMMIT_EDITMSG
 *.svn
 node_modules/*
+dist/ger.js
+dist/ger.min.js
+test/tests.js
+
