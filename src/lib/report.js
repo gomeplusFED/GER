@@ -17,6 +17,7 @@ class Report extends Events {
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
                 this.handleMsg( msg, type, index );
+                return this.handleMsg( msg, type, index );
             };
         } );
 
@@ -76,7 +77,6 @@ class Report extends Events {
         this.errorQueue.push( error );
         return true;
     }
-
     // 手动上报 处理方法:全部立即上报 需要延迟吗?
     handleMsg( msg, type, level ) {
         if ( !msg ) {

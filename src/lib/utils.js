@@ -151,11 +151,13 @@ var utils = {
         var times = new Date();
         times.setDate( times.getDate() + ( days || 365 ) );
         document.cookie = name + "=" + value + "; expires=" + times.toGMTString();
+        return utils.getCookie( name );
     },
-    clearCookie: function ( value ) {
-        utils.addCookie( value, '', -1 );
-    },
-    noop: function () {}
+    noop: function () {},
+    clearCookie: function ( name ) {
+        utils.addCookie( name, '', -1 );
+        return utils.getCookie( name );
+    }
 };
 
 export default utils;
