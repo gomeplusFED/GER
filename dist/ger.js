@@ -266,14 +266,12 @@ var utils = {
                     console.error("[GER]", error.stack);
                 }
                 if (!timeoutkey) {
-                    (function () {
-                        var orgOnerror = window.onerror;
-                        window.onerror = utils.noop;
-                        timeoutkey = setTimeout(function () {
-                            window.onerror = orgOnerror;
-                            timeoutkey = null;
-                        }, 50);
-                    })();
+                    var orgOnerror = window.onerror;
+                    window.onerror = utils.noop;
+                    timeoutkey = setTimeout(function () {
+                        window.onerror = orgOnerror;
+                        timeoutkey = null;
+                    }, 50);
                 }
                 throw error;
             }
