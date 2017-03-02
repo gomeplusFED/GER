@@ -2,22 +2,17 @@ function test(callback){
     callback.call(this);
 }
 
-new window.GER({
-    url:'xxxxx',
+var error_report = new GER({
+    url:'sdsadada',
     failTime : 3,
     tryPeep: true,
     peepSystem: true,
-    repeat:10000,
+    repeat:5,
     peepConsole: true,
-    validTime : 3,
-    peepCustom: [test]
+    validTime : 3
 });
 
-test(function(){
-    throw new Error('test error');
-});
-
-//error_report.info('111111111');
+wewe
 
 //error_report.on();
 /*error_report.on('error',function(){
