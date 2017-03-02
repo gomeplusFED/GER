@@ -385,49 +385,39 @@ var Events$1 = function Events(supperclass) {
  * @fileoverview config
  * @date 2017/02/16
  */
-var Config$1 = function Config(supperclass) {
-    return function (_supperclass) {
-        inherits(_class, _supperclass);
+var Config = function () {
+    function Config(options) {
+        classCallCheck(this, Config);
 
-        function _class(options) {
-            classCallCheck(this, _class);
+        this.config = {
+            proxyAll: true,
+            mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+            delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
+            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
+            url: "ewewe", // 指定错误上报地址
+            except: [/Script error/i], // 忽略某个错误
+            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
+            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
+            errorLSSign: 'mx-error', // error错误数自增 0
+            maxErrorCookieNo: 20, // error错误数自增 最大的错
+            validTime: 7
+        };
+        this.config = Object.assign(this.config, options);
+    }
 
-            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
-
-            _this.config = {
-                mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
-                delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
-                delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
-                url: "ewewe", // 指定错误上报地址
-                except: [/Script error/i], // 忽略某个错误
-                random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
-                repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-                errorLSSign: 'mx-error', // error错误数自增 0
-                maxErrorCookieNo: 20, // error错误数自增 最大的错
-                tryPeep: false,
-                peepSystem: false,
-                peepJquery: false,
-                peepConsole: false,
-                validTime: 7
-            };
-            _this.config = Object.assign(_this.config, options);
-            return _this;
+    createClass(Config, [{
+        key: "get",
+        value: function get$$1(name) {
+            return this.config[name];
         }
-
-        createClass(_class, [{
-            key: "get",
-            value: function get$$1(name) {
-                return this.config[name];
-            }
-        }, {
-            key: "set",
-            value: function set$$1(name, value) {
-                this.config[name] = value;
-            }
-        }]);
-        return _class;
-    }(supperclass);
-};
+    }, {
+        key: "set",
+        value: function set$$1(name, value) {
+            this.config[name] = value;
+        }
+    }]);
+    return Config;
+}();
 
 var _arguments = arguments;
 /**
@@ -702,7 +692,7 @@ var proxy = function proxy(supperclass) {
             key: 'proxy',
             value: function proxy() {
                 if (this.config.proxyAll) {
-                    this.proxyJquery().proxyModule().proxyTimer().proxyConsole();
+                    this.proxyJquery().proxyModules().proxyTimer().proxyConsole();
                 }
             }
         }, {
@@ -752,7 +742,7 @@ var proxy = function proxy(supperclass) {
                         });
                         return _remove.apply(this, args);
                     };
-                } else if ($.fn.jquery) {
+                } else if (_$.fn.jquery) {
                     _add = _$.event.add, _remove = _$.event.remove;
 
                     _$.event.add = utils.makeArgsTry(_add);
@@ -886,8 +876,8 @@ var proxy = function proxy(supperclass) {
  * @fileoverview GER
  * @date 2017/02/15
  */
-var GER = function (_config) {
-    inherits(GER, _config);
+var GER = function (_events) {
+    inherits(GER, _events);
 
     function GER(options) {
         classCallCheck(this, GER);
@@ -954,7 +944,7 @@ var GER = function (_config) {
         }
     }]);
     return GER;
-}(Config$1(Events$1(Localstroage$1(Report$1(proxy)))));
+}(Events$1(Localstroage$1(Report$1(proxy(Config)))));
 
 /**
  * @author xiaojue

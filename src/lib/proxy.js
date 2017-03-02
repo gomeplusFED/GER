@@ -16,7 +16,7 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
     proxy() {
         if ( this.config.proxyAll ) {
-            this.proxyJquery().proxyModule().proxyTimer().proxyConsole();
+            this.proxyJquery().proxyModules().proxyTimer().proxyConsole();
         }
     }
     proxyConsole() {
@@ -53,7 +53,7 @@ let proxy = ( supperclass ) => class extends supperclass {
                 return _remove.apply( this, args );
             };
 
-        } else if ( $.fn.jquery ) {
+        } else if ( _$.fn.jquery ) {
             _add = _$.event.add, _remove = _$.event.remove;
 
             _$.event.add = utils.makeArgsTry( _add );

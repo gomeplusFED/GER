@@ -3,10 +3,10 @@
  * @fileoverview config
  * @date 2017/02/16
  */
-let Config = ( supperclass ) => class extends supperclass {
+class Config {
     constructor( options ) {
-        super( options );
         this.config = {
+            proxyAll: true,
             mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
@@ -16,10 +16,6 @@ let Config = ( supperclass ) => class extends supperclass {
             repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
             errorLSSign: 'mx-error', // error错误数自增 0
             maxErrorCookieNo: 20, // error错误数自增 最大的错
-            tryPeep: false,
-            peepSystem: false,
-            peepJquery: false,
-            peepConsole: false,
             validTime: 7
         };
         this.config = Object.assign( this.config, options );
@@ -31,6 +27,6 @@ let Config = ( supperclass ) => class extends supperclass {
         this.config[ name ] = value;
     }
 
-};
+}
 
 export default Config;

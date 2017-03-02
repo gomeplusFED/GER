@@ -10,7 +10,7 @@ import localStorage from './localStorage';
 import report from './report';
 import proxy from './proxy';
 
-class GER extends config( events( localStorage( report( proxy ) ) ) ) {
+class GER extends events( localStorage( report( proxy( config ) ) ) ) {
     constructor( options ) {
         super( options );
         this.rewriteError();
