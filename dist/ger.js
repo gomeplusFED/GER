@@ -266,14 +266,12 @@ var utils = {
                     console.error("[GER]", error.stack);
                 }
                 if (!timeoutkey) {
-                    (function () {
-                        var orgOnerror = window.onerror;
-                        window.onerror = utils.noop;
-                        timeoutkey = setTimeout(function () {
-                            window.onerror = orgOnerror;
-                            timeoutkey = null;
-                        }, 50);
-                    })();
+                    var orgOnerror = window.onerror;
+                    window.onerror = utils.noop;
+                    timeoutkey = setTimeout(function () {
+                        window.onerror = orgOnerror;
+                        timeoutkey = null;
+                    }, 50);
                 }
                 throw error;
             }
@@ -633,11 +631,9 @@ var Report$1 = function Report(supperclass) {
             key: 'carryError',
             value: function carryError(error) {
                 var rnd = Math.random();
-                if (rnd < this.config.random) {
+                if (rnd >= this.config.random) {
                     return false;
                 }
-                //console.warn( '不抽样' );
-                //console.log(this.repeat(error))
                 if (this.repeat(error)) {
                     return false;
                 }
