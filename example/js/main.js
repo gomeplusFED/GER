@@ -2,7 +2,7 @@ function test(callback){
     callback.call(this);
 }
 
-new window.Ger({
+new window.GER({
     url:'xxxxx',
     failTime : 3,
     tryPeep: true,

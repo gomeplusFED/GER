@@ -3,9 +3,8 @@
  * @fileoverview config
  * @date 2017/02/16
  */
-let Config = ( supperclass ) => class extends supperclass {
+class Config {
     constructor( options ) {
-        super( options );
         this.config = {
             proxyAll: true,
             mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
@@ -28,6 +27,6 @@ let Config = ( supperclass ) => class extends supperclass {
         this.config[ name ] = value;
     }
 
-};
+}
 
 export default Config;
