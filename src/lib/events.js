@@ -12,6 +12,7 @@ let Events = ( supperclass ) => class extends supperclass {
     on( event, handler ) {
         this.handlers[ event ] = this.handlers[ event ] || [];
         this.handlers[ event ].push( handler );
+        return this.handlers[event];
     }
     off( event ) {
         if ( this.handlers[ event ] ) {
