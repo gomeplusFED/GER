@@ -14,7 +14,6 @@ let Report = ( supperclass ) => class extends supperclass {
         this.url = this.config.url;
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
-                this.handleMsg( msg, type, index );
                 return this.handleMsg( msg, type, index );
             };
         } );
