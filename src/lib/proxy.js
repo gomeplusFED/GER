@@ -101,7 +101,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         let typeList = this.consoleList[ type ];
         typeList = typeList || [];
         typeList.push(
-            Object.assign( utils.getSystemParams(), {
+            utils.assignObject( utils.getSystemParams(), {
                 msg: msg,
                 level: level
             } )
@@ -120,9 +120,10 @@ let proxy = ( supperclass ) => class extends supperclass {
             _define = window.define;
         if ( _define && _define.amd && _require ) {
             window.require = utils.catArgs( _require );
-            Object.assign( window.require, _require );
+            utils.assignObject( window.require, _require );
+
             window.define = utils.catArgs( _define );
-            Object.assign( window.define, _define );
+            utils.assignObject( window.define, _define );
         }
 
         if ( window.seajs && _define ) {
@@ -145,7 +146,7 @@ let proxy = ( supperclass ) => class extends supperclass {
 
             window.seajs.use = utils.catArgs( window.seajs.use );
 
-            Object.assign( window.define, _define );
+            utils.assignObject( window.define, _define );
         }
         return this;
 

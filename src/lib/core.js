@@ -3,13 +3,14 @@
  * @fileoverview GER
  * @date 2017/02/15
  */
+//import 'babel-polyfill';
 import utils from './utils';
 import events from './events';
 import config from './config';
 import localStorage from './localStorage';
 import report from './report';
 import proxy from './proxy';
-
+// utils.fixedObjDefined();
 class GER extends events( localStorage( report( proxy( config ) ) ) ) {
     constructor( options ) {
         super( options );

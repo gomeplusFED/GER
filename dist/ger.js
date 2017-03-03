@@ -326,6 +326,30 @@ var utils = {
             }
         }
         return obj;
+    },
+    fixedObjDefined: function fixedObjDefined() {
+        -[1] || function () {
+            var i,
+                o,
+                s = ["Unknown", "UList", "Title", "TextArea", "TableSection", "TableRow", "Table", "TableCol", "TableCell", "TableCaption", "Style", "Span", "Select", "Script", "Param", "Paragraph", "Option", "Object", "OList", "Meta", "Marquee", "Map", "Link", "Legend", "Label", "LI", "Input", "Image", "IFrame", "Html", "Heading", "Head", "HR", "FrameSet", "Frame", "Form", "Font", "FieldSet", "Embed", "Div", "DList", "Button", "Body", "Base", "BR", "Area", "Anchor"];
+            for (i = 0; i < s.length; i++) {
+                var o = window["HTML" + s[i] + "Element"];
+                Object.defineProperty(o.prototype, "textContent", {
+                    get: function get$$1() {
+                        return this.innerText;
+                    },
+                    set: function set$$1(e) {
+                        this.innerText = e;
+                    }
+                });
+            }
+        }();
+    },
+    assignObject: function assignObject(obj1, obj2) {
+        for (var name in obj2) {
+            obj1[name] = obj2[name];
+        }
+        return obj1;
     }
 };
 
@@ -385,6 +409,7 @@ var Events$1 = function Events(supperclass) {
  * @fileoverview config
  * @date 2017/02/16
  */
+
 var Config = function () {
     function Config(options) {
         classCallCheck(this, Config);
@@ -402,16 +427,16 @@ var Config = function () {
             maxErrorCookieNo: 20, // error错误数自增 最大的错
             validTime: 7
         };
-        this.config = Object.assign(this.config, options);
+        this.config = utils.assignObject(this.config, options);
     }
 
     createClass(Config, [{
-        key: "get",
+        key: 'get',
         value: function get$$1(name) {
             return this.config[name];
         }
     }, {
-        key: "set",
+        key: 'set',
         value: function set$$1(name, value) {
             this.config[name] = value;
         }
@@ -563,7 +588,6 @@ var Report$1 = function Report(supperclass) {
             _this.url = _this.config.url;
             ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
                 _this[type] = function (msg) {
-                    _this.handleMsg(msg, type, index);
                     return _this.handleMsg(msg, type, index);
                 };
             });
@@ -653,7 +677,7 @@ var Report$1 = function Report(supperclass) {
                     msg: msg
                 };
                 errorMsg.level = level;
-                errorMsg = Object.assign(utils.getSystemParams(), errorMsg);
+                errorMsg = utils.assignObject(utils.getSystemParams(), errorMsg);
                 if (this.carryError(errorMsg)) {
                     this.send(this.config.delayReport);
                 }
@@ -698,8 +722,18 @@ var proxy = function proxy(supperclass) {
             value: function proxyConsole() {
                 var _this2 = this;
 
+                /*var _consoleLog = window.console.log;
+                window.console.log = function(){
+                  
+                        _consoleLog.apply(this, utils.toArray(arguments));
+                    
+                }*/
                 ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
-                    window.console[type] = _this2.reportConsole(window.console[type], type, index);
+                    var _console = window.console[type];
+                    window.console[type] = function () {
+                        this.reportConsole(_console, type, index, utils.toArray(arguments));
+                    }.bind(_this2);
+                    ///this.reportConsole( window.console[ type ], type, index );
                 });
                 return this;
             }
@@ -771,30 +805,27 @@ var proxy = function proxy(supperclass) {
             }
         }, {
             key: 'reportConsole',
-            value: function reportConsole(func, type, level) {
-                var _this4 = this,
-                    _arguments2 = arguments;
+            value: function reportConsole(func, type, level, args) {
+                var _this4 = this;
 
-                return function () {
-                    _this4.on('beforeReport', function () {
-                        //启用console，强制merge
-                        _this4.config.mergeReport = true;
+                this.on('beforeReport', function () {
+                    //启用console，强制merge
+                    _this4.config.mergeReport = true;
+                });
+                var msg = args.join(',');
+                var typeList = this.consoleList[type];
+                typeList = typeList || [];
+                typeList.push(utils.assignObject(utils.getSystemParams(), {
+                    msg: msg,
+                    level: level
+                }));
+                if (typeList.length > 10) {
+                    this.errorQueue = this.errorQueue.concat(typeList);
+                    this.send(true, function () {
+                        typeList = [];
                     });
-                    var msg = utils.toArray(_arguments2).join(',');
-                    var typeList = _this4.consoleList[type];
-                    typeList = typeList || [];
-                    typeList.push(Object.assign(utils.getSystemParams(), {
-                        msg: msg,
-                        level: level
-                    }));
-                    if (typeList.length > 10) {
-                        _this4.errorQueue = _this4.errorQueue.concat(typeList);
-                        _this4.send(true, function () {
-                            typeList = [];
-                        });
-                    }
-                    return func.apply(_this4, _arguments2);
-                };
+                }
+                return func.apply(this, args);
             }
             // 劫持seajs
 
@@ -805,14 +836,15 @@ var proxy = function proxy(supperclass) {
                     _define = window.define;
                 if (_define && _define.amd && _require) {
                     window.require = utils.catArgs(_require);
-                    Object.assign(window.require, _require);
+                    utils.assignObject(window.require, _require);
+
                     window.define = utils.catArgs(_define);
-                    Object.assign(window.define, _define);
+                    utils.assignObject(window.define, _define);
                 }
 
                 if (window.seajs && _define) {
                     window.define = function () {
-                        var _arguments3 = arguments;
+                        var _arguments2 = arguments;
 
                         var arg,
                             args = [];
@@ -823,7 +855,7 @@ var proxy = function proxy(supperclass) {
                                     return function () {
                                         return orgArg.toString();
                                     };
-                                }(_arguments3[i]);
+                                }(_arguments2[i]);
                             }
                             args.push(arg);
                         });
@@ -832,7 +864,7 @@ var proxy = function proxy(supperclass) {
 
                     window.seajs.use = utils.catArgs(window.seajs.use);
 
-                    Object.assign(window.define, _define);
+                    utils.assignObject(window.define, _define);
                 }
                 return this;
             }
@@ -874,6 +906,7 @@ var proxy = function proxy(supperclass) {
  * @fileoverview GER
  * @date 2017/02/15
  */
+//import 'babel-polyfill';
 var GER = function (_events) {
     inherits(GER, _events);
 
