@@ -82,7 +82,7 @@ let Report = ( supperclass ) => class extends supperclass {
             msg: msg
         };
         errorMsg.level = level;
-        errorMsg = Object.assign( utils.getSystemParams(), errorMsg );
+        errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
         if ( this.carryError( errorMsg ) ) {
             this.send( this.config.delayReport );
         }
