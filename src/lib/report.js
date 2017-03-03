@@ -14,7 +14,6 @@ let Report = ( supperclass ) => class extends supperclass {
         this.url = this.config.url;
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
-                this.handleMsg( msg, type, index );
                 return this.handleMsg( msg, type, index );
             };
         } );
@@ -64,11 +63,9 @@ let Report = ( supperclass ) => class extends supperclass {
     // push错误到pool
     carryError( error ) {
         var rnd = Math.random();
-        if ( rnd < this.config.random ) {
+        if ( rnd >= this.config.random ) {
             return false;
         }
-        //console.warn( '不抽样' );
-        //console.log(this.repeat(error))
         if ( this.repeat( error ) ) {
             return false;
         }

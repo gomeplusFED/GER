@@ -631,11 +631,9 @@ var Report$1 = function Report(supperclass) {
             key: 'carryError',
             value: function carryError(error) {
                 var rnd = Math.random();
-                if (rnd < this.config.random) {
+                if (rnd >= this.config.random) {
                     return false;
                 }
-                //console.warn( '不抽样' );
-                //console.log(this.repeat(error))
                 if (this.repeat(error)) {
                     return false;
                 }

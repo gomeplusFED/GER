@@ -20,8 +20,18 @@ let proxy = ( supperclass ) => class extends supperclass {
         }
     }
     proxyConsole() {
+        /*var _consoleLog = window.console.log;
+        window.console.log = function(){
+          
+                _consoleLog.apply(this, utils.toArray(arguments));
+            
+        }*/
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
-            window.console[ type ] = this.reportConsole( window.console[ type ], type, index );
+            let _console = window.console[ type ];
+            window.console[ type ] = function(){
+                this.reportConsole( _console, type, index, utils.toArray(arguments) );
+            }.bind(this);
+            ///this.reportConsole( window.console[ type ], type, index );
         } );
         return this;
     }
@@ -82,29 +92,27 @@ let proxy = ( supperclass ) => class extends supperclass {
         }
         return this;
     }
-    reportConsole( func, type, level ) {
-        return () => {
-            this.on( 'beforeReport', () => {
-                //启用console，强制merge
-                this.config.mergeReport = true;
+    reportConsole( func, type, level, args ) {
+        this.on( 'beforeReport', () => {
+            //启用console，强制merge
+            this.config.mergeReport = true;
+        } );
+        let msg = args.join( ',' );
+        let typeList = this.consoleList[ type ];
+        typeList = typeList || [];
+        typeList.push(
+            Object.assign( utils.getSystemParams(), {
+                msg: msg,
+                level: level
+            } )
+        );
+        if ( typeList.length > 10 ) {
+            this.errorQueue = this.errorQueue.concat( typeList );
+            this.send( true, () => {
+                typeList = [];
             } );
-            let msg = utils.toArray( arguments ).join( ',' );
-            let typeList = this.consoleList[ type ];
-            typeList = typeList || [];
-            typeList.push(
-                Object.assign( utils.getSystemParams(), {
-                    msg: msg,
-                    level: level
-                } )
-            );
-            if ( typeList.length > 10 ) {
-                this.errorQueue = this.errorQueue.concat( typeList );
-                this.send( true, () => {
-                    typeList = [];
-                } );
-            }
-            return func.apply( this, arguments );
-        };
+        }
+        return func.apply( this, args );
     }
     // 劫持seajs
     proxyModules() {
