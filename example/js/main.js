@@ -1,8 +1,8 @@
 function test(callback){
     callback.call(this);
 }
-
-new window.GER({
+aaa;
+var error_report = new window.GER({
     url:'xxxxx',
     failTime : 3,
     tryPeep: true,
@@ -13,16 +13,16 @@ new window.GER({
     peepCustom: [test]
 });
 
-test(function(){
+/*test(function(){
     throw new Error('test error');
-});
+});*/
 
-//error_report.info('111111111');
+error_report.info('111111111');
 
 //error_report.on();
-/*error_report.on('error',function(){
+error_report.on('error',function(){
     console.log(234546576879)
-});*/
+});
 
 //localStorage.setItem('a', '123245678');
 /*setTimeout(function(){
