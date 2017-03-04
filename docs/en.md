@@ -6,7 +6,6 @@ options is a set of key/value pairs configured with GER requests;
     url: "http://www.gome.com.cn/report",   // Specify the error to report the address
     mergeReport: true,                      // Whether to merge and report, false shut down， true start（default）
     delay: 1000,                            // if mergeReport is true, how many milliseconds was delayed, and reported in the merge buffer（default）
-    //except: [/Script error/i],            // ignore some eror(temporarily no this options)
     random: 1,                              // sampling reported, 1 to 0 between the value of 1 to 100% reported（default 1）
     repeat: 5,                              // for the same error more than how many times not reported
     errorLSSign:'mx-error'                  // errors increases 0
@@ -20,14 +19,16 @@ errorReport.get('delay');                   // get GER parameters form config
 
 ##### receive params list
 ```javascript
+
+    useragent                               // useragent
+    currentUrl                              // error page url
+    timestamp                               // error occurred timestamp
+    projectType                             // Pc/Mobile
     colNum                                  // error cols
     rowNum                                  // error rows
     msg                                     // error message
     targetUrl                               // error file address
-    useragent                               // useragent
-    currentUrl                              // error page url
-    timestamp                               // error occurred timestamp
-    ext                                     // extended attribute Object object, upload some unconventional parameters
+    ext                                     // extended attribute Object object, upload some unconventional
 ```
 the GER rewrites the window.onerror for escalation without writing any code that captures the error
 
@@ -38,7 +39,7 @@ errorReport.error("error msg");
 
 errorReport.error({
     msg: "xx load error",                   // error message
-    targetUrl: "a.js",                      // js wrong source
+    targetUrl: "a.js",                      // js wrong file source
     rowNo: 100,                             // error rows
     colNo: 100                              // error cols
 });
