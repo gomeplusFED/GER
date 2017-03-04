@@ -15,8 +15,15 @@ let proxy = ( supperclass ) => class extends supperclass {
         };
     }
     proxy() {
-        if ( this.config.proxyAll ) {
+        let _config  = this.config;
+        if ( _config.proxyAll ) {
             this.proxyJquery().proxyModules().proxyTimer().proxyConsole();
+        }else{
+            _config.proxyJquery&&_config.proxyJquery();
+            _config.proxyModules&&_config.proxyModules();
+            _config.proxyTimer&&_config.proxyTimer();
+            _config.proxyConsole&&_config.proxyConsole();
+            _config.proxyCustom&&_config.proxyCustom();
         }
     }
     proxyConsole() {
