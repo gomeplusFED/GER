@@ -54,5 +54,81 @@ export default () => {
                 assert.equal( error_report.trigger( 'test2' ), false );
             } );
         } );
+        describe( 'GER setItem', () => {
+            it( 'should return string like {"msg":"1111"}', () => {
+                assert.equal( error_report.setItem({msg:'1111'}), '{"msg":"1111"}' );
+            } );
+            it( 'should return the Object realy type  is  string', () => {
+                expect( error_report.setItem( {msg:'1111'}) ).to.be.an( 'string' );
+            } );
+        } );
+        describe( 'GER clear', () => {
+            it( 'should return undefined', () => {
+                assert.equal( error_report.clear(), undefined );
+            } );
+        } );
+
+        describe( 'GER info', () => {
+            it( 'incoming msg(string) should return an error object', () => {
+                expect( error_report.info( 'msgmsg' ) ).to.be.an( 'object' );
+                expect( error_report.info( 'msgmsg' ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo' );
+            } );
+            it( 'incoming msgError(object) return an error object', () => {
+                let errorObj = {
+                    'msg': 'objectMsg',
+                    'targetUrl': 'aaa.js',
+                    'rowNo': 1,
+                    'colNo': 2
+                };
+                expect( error_report.info( errorObj ) ).to.be.an( 'object' );
+                expect( error_report.info( errorObj ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg', 'rowNo' );
+            } );
+        } );
+        describe( 'GER repeat', () => {
+            it( 'should return repeat number equal 2', () => {
+                error_report.set('repeat', 2);
+                assert.equal( true, error_report.repeat({
+                    msg:'msgmsg',
+                    level:2
+                }) );
+            } );
+            it( 'should return repeat number not equal 2', () => {
+                error_report.repeat({
+                    msg:'msgmsg',
+                    level:2
+                })
+                error_report.set('repeat', 2);
+                assert.equal( true, error_report.repeat({
+                    msg:'msgmsg',
+                    level:2
+                }) );
+            } );
+        } );
+        describe( 'GER report', () => {
+            it( 'should return an string', () => {
+                expect( error_report.report() ).to.be.an( 'string' );
+            } );
+        } );
+        describe( 'GER carryError', () => {
+            it( 'should return an array', () => {
+                expect( error_report.carryError({
+                    msg: 'msg'
+                }) ).to.be.an( 'array' );
+            } );
+            it( 'should return an array', () => {
+                var len = error_report.errorQueue.length;
+                expect( error_report.carryError({
+                    msg: 'msg'
+                })).to.have.length.above( len );
+            } );
+        } );
+        describe( 'GER handleMsg', () => {
+            it( 'should return an object', () => {
+                expect( error_report.handleMsg('sss', 'error', 4) ).to.be.an( 'object' );
+            } );
+            it( 'should return well have any keys', () => {
+                expect( error_report.handleMsg('sss', 'error', 4) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg');
+            } );
+        } );
     } );
 }

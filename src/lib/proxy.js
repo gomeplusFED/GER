@@ -27,18 +27,11 @@ let proxy = ( supperclass ) => class extends supperclass {
         }
     }
     proxyConsole() {
-        /*var _consoleLog = window.console.log;
-        window.console.log = function(){
-          
-                _consoleLog.apply(this, utils.toArray(arguments));
-            
-        }*/
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             let _console = window.console[ type ];
             window.console[ type ] = function(){
                 this.reportConsole( _console, type, index, utils.toArray(arguments) );
             }.bind(this);
-            ///this.reportConsole( window.console[ type ], type, index );
         } );
         return this;
     }
@@ -158,7 +151,6 @@ let proxy = ( supperclass ) => class extends supperclass {
         return this;
 
     }
-
     // 劫持自定义方法
     proxyCustom() {
         this.config.proxyCustom.forEach( ( v ) => {
