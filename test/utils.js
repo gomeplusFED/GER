@@ -110,6 +110,14 @@ export default () => {
                 assert.equal( utils.clearCookie( 'testMocha3' ), '' );
             } );
         } );
+        describe( 'utils assignObject', () => {
+            it( 'should return the object', () => {
+                expect( utils.assignObject( {a:1},{b:1} ) ).to.be.a( 'object' );
+                expect( utils.assignObject( {a:1},{b:1} ) ).to.have.all.keys( 'a', 'b' );
+                expect( utils.assignObject( {a:1,b:2},{b:1} ) ).to.have.all.keys( 'a', 'b' );
+                assert.equal( utils.assignObject( {a:1,b:2},{b:1} ).b, 1 );
+            } );
+        } );
 
     } );
 
