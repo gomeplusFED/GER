@@ -327,27 +327,11 @@ var utils = {
         }
         return obj;
     },
-    fixedObjDefined: function fixedObjDefined() {
-        -[1] || function () {
-            var i,
-                o,
-                s = ["Unknown", "UList", "Title", "TextArea", "TableSection", "TableRow", "Table", "TableCol", "TableCell", "TableCaption", "Style", "Span", "Select", "Script", "Param", "Paragraph", "Option", "Object", "OList", "Meta", "Marquee", "Map", "Link", "Legend", "Label", "LI", "Input", "Image", "IFrame", "Html", "Heading", "Head", "HR", "FrameSet", "Frame", "Form", "Font", "FieldSet", "Embed", "Div", "DList", "Button", "Body", "Base", "BR", "Area", "Anchor"];
-            for (i = 0; i < s.length; i++) {
-                var o = window["HTML" + s[i] + "Element"];
-                Object.defineProperty(o.prototype, "textContent", {
-                    get: function get$$1() {
-                        return this.innerText;
-                    },
-                    set: function set$$1(e) {
-                        this.innerText = e;
-                    }
-                });
-            }
-        }();
-    },
     assignObject: function assignObject(obj1, obj2) {
         for (var name in obj2) {
-            obj1[name] = obj2[name];
+            if (obj2.hasOwnProperty(name)) {
+                obj1[name] = obj2[name];
+            }
         }
         return obj1;
     }
@@ -907,6 +891,8 @@ var proxy = function proxy(supperclass) {
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
+// utils.fixedObjDefined();
+
 var GER = function (_events) {
     inherits(GER, _events);
 

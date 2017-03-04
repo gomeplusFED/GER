@@ -6,7 +6,6 @@ options是一组配置 GER 请求的 键/值对;
     url: "http://www.gome.com.cn/report",   // 指定错误上报地址
     mergeReport: true,                      // mergeReport 是否合并上报， false 关闭， true 启动（默认）
     delay: 1000,                            // 当 mergeReport 为 true 时才可用，延迟多少毫秒，合并缓冲区中的上报（默认）
-    //except: [/Script error/i],            // 忽略某个错误(暂无)
     random: 1,                              // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
     repeat: 5,                              // 对于同一个错误超过多少次不上报
     errorLSSign:'mx-error'                  // error错误数自增 0
@@ -20,14 +19,16 @@ errorReport.get('delay');                   // 获取 GER 实例参数
 
 ##### 接口接收参数字段说明
 ```javascript
-    colNum                                  //错误列数
-    rowNum                                  //错误行数
-    msg                                     //错误信息
-    targetUrl                               //错误文件地址
-    useragent                               //useragent
-    currentUrl                              //错误页面url
-    timestamp                               //错误发生时间戳
-    ext                                     //扩展属性 Object object 上传一些非常规参数
+
+    useragent                               // useragent
+    currentUrl                              // 错误页面url
+    timestamp                               // 错误发生时间戳
+    projectType                             // 客户端类型 Pc/Mobile
+    colNum                                  // 错误列数
+    rowNum                                  // 错误行数
+    msg                                     // 错误信息
+    targetUrl                               // 错误文件地址
+    ext                                     // 扩展属性 Object object 上传一些非常规参数
 ```
 GER重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码
 
