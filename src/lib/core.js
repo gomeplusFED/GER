@@ -24,7 +24,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                 return false;
             }
             var reportMsg = msg;
-            if ( error.stack && error ) {
+            if ( error && error.stack ) {
                 reportMsg = this.handleErrorStack( error );
             } else {
                 //不存stack的话，对reportMsg做下处理 
