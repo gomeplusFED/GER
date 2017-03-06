@@ -443,7 +443,7 @@ function InertLocalFunc(funcA, funcB) {
 }
 
 function callByArgs(func, args, global) {
-    return func.apply(global, utils.toArray(args));
+    return func.apply(global, args);
 }
 
 var storage = {
@@ -491,8 +491,8 @@ var storage = {
         return utils.stringify(source);
     },
     //设置cookie/localStorage
-    setItem: InertLocalFunc(function (key) {
-        localStorage.setItem(key, callByArgs(storage.setInfo, _arguments, storage));
+    setItem: InertLocalFunc(function (key, errorObj, validTime, maxErrorCookieNo) {
+        localStorage.setItem(key, callByArgs(storage.setInfo, [key, errorObj, validTime, maxErrorCookieNo], storage));
     }, function (key) {
         utils.addCookie(key, callByArgs(storage.setInfo, _arguments, storage));
     }),
@@ -535,11 +535,9 @@ var Localstroage$1 = function Localstroage(supperclass) {
         }, {
             key: 'setItem',
             value: function setItem(errorObj) {
-                /*let _config = this.config;
-                storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );*/
                 var _config = this.config;
-                var fn = storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-                return fn;
+                storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
+                return utils.stringify(errorObj);
             }
 
             //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
@@ -587,7 +585,7 @@ var Report$1 = function Report(supperclass) {
                 var rowNum = error.rowNum || '';
                 var colNum = error.colNum || '';
                 var repeatName = error.msg + rowNum + colNum;
-                this.repeatList[repeatName] = this.repeatList[repeatName] ? 1 : this.repeatList[repeatName] + 1;
+                this.repeatList[repeatName] = this.repeatList[repeatName] ? this.repeatList[repeatName] + 1 : 1;
                 return this.repeatList[repeatName] > this.config.repeat;
             }
         }, {
@@ -620,6 +618,7 @@ var Report$1 = function Report(supperclass) {
                     }
                     _this2.trigger('afterReport');
                 });
+                return this.url;
             }
             // 发送
 
@@ -631,6 +630,7 @@ var Report$1 = function Report(supperclass) {
                 this.trigger('beforeReport');
                 var callback = cb || utils.noop;
                 var delay = isNowReport ? 0 : this.config.delay;
+
                 setTimeout(function () {
                     _this3.report(callback);
                 }, delay);
@@ -648,7 +648,7 @@ var Report$1 = function Report(supperclass) {
                     return false;
                 }
                 this.errorQueue.push(error);
-                return true;
+                return this.errorQueue;
             }
             // 手动上报 处理方法:全部立即上报 需要延迟吗?
 
@@ -715,18 +715,11 @@ var proxy = function proxy(supperclass) {
             value: function proxyConsole() {
                 var _this2 = this;
 
-                /*var _consoleLog = window.console.log;
-                window.console.log = function(){
-                  
-                        _consoleLog.apply(this, utils.toArray(arguments));
-                    
-                }*/
                 ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
                     var _console = window.console[type];
                     window.console[type] = function () {
                         this.reportConsole(_console, type, index, utils.toArray(arguments));
                     }.bind(_this2);
-                    ///this.reportConsole( window.console[ type ], type, index );
                 });
                 return this;
             }
@@ -861,7 +854,6 @@ var proxy = function proxy(supperclass) {
                 }
                 return this;
             }
-
             // 劫持自定义方法
 
         }, {
