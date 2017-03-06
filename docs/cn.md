@@ -20,15 +20,21 @@ errorReport.get('delay');                   // 获取 GER 实例参数
 ##### 接口接收参数字段说明
 ```javascript
 
-    useragent                               // useragent
+    userAgent                               // userAgent
     currentUrl                              // 错误页面url
     timestamp                               // 错误发生时间戳
     projectType                             // 客户端类型 Pc/Mobile
+    flashVer                                // flash 版本号
+    title                                   // 页面名称
+    screenSize                              // 屏幕尺寸
+    referer                                 // 上一个页面的url
     colNum                                  // 错误列数
     rowNum                                  // 错误行数
     msg                                     // 错误信息
     targetUrl                               // 错误文件地址
     ext                                     // 扩展属性 Object object 上传一些非常规参数
+
+
 ```
 GER重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码
 
@@ -44,7 +50,7 @@ errorReport.error({
     colNo: 100                              // 错误的列数
 });
 
-//errorReport.info/log/warn/error/debug; 都可手动上报
+//errorReport.log/debug/info/warn/error; 都可手动上报
 
 try{
     // something throw error ...
@@ -53,16 +59,16 @@ try{
 }
 ```
 
-#####  延迟上报
+#####  error上报
 ```javascript
-errorReport.delayReport("error msg");
+<!-- errorReport.delayReport("error msg");
 
 errorReport.delayReport({
     msg: "xx load error",                   // 错误信息
     targetUrl: "a.js",                      // 错误的来源js
     rowNo: 100,                             // 错误的行数
     colNo: 100                              // 错误的列数
-});
+}); -->
 
 errorReport.report();
 
@@ -70,57 +76,14 @@ errorReport.report();
 当 mergeReport = false 时候的， 调用 report ，根据缓冲池中的数据一条条上报;<br/>
 当 mergeReport = true 时候的， 会延迟 delay 毫秒，再合并上报
 
-
-#####  设置cookie/localStorage  低版本浏览器设置cookie  高级浏览器设置localStorage
-```javascript
-errorReport.setItem("error msg");           // 返回当前key对应的一条错误信息
-errorReport.getItem();                      // push一条错误信息到cookie/localStorage
-errorReport.clear();                        // 清除所有错误信息
-
-```
-
-
-### 高级用法
-
-#### 包裹jquery
-```javascript
-new GER({
-    proxyJquery:true
-});
-```
-
-包裹 jquery 的 event.add , event.remove , event.ajax 这几个异步方法。
-
-#### 包裹 define , require
-```javascript
-new GER({
-    proxyModules:true
-});
-```
-包裹 模块化框架 的 define , require 方法
-
-#### 包裹  js 默认的方法
-```javascript
-new GER({
-   proxyTimer:true 
-});
-```
-包裹 js 的 setTimeout , setInterval 方法
-
-#### 包裹 自定义的方法
-```javascript
-var customFn = function (){};
-customFn  = new GER({
-    proxyCustom:[customFn]
-});
-```
-
 ### 上报前后的处理
 ```javascript
 var myGER = new GER();
+上报前
 myGER.on('beforeReport',function(err){
     return false;
 });
+上报后
 myGER.on('afterReport',function(err){
     
 });
@@ -128,17 +91,62 @@ myGER.on('error',function(err){
     return false;
 });
 ```
+
+#####  设置cookie/localStorage  低版本浏览器设置cookie  高级浏览器设置localStorage
+```javascript
+errorReport.setItem( object );              // push一条错误信息到cookie/localStorage 存储的key为初始化时 errorLSSign 的值 条数限制为初始化时传入 maxErrorCookieNo 的数量,
+eg:{
+    msgName : {
+        value: errorMsg.msg,
+        expiresTime: expiresTime
+    }
+}
+errorReport.getItem( 'key' );               // 返回当前key对应的一条错误信息
+errorReport.clear();                        // 清除 cookie/loacalStorage 所有错误信息
+
+```
+
+
+### 高级用法
+
+#### 包裹jquery
+
+包裹 jquery 的 event.add , event.remove , event.ajax 这几个异步方法。
+```javascript
+new GER({
+    proxyJquery:true
+});
+```
+
+#### 包裹 define , require
+
+包裹 模块化框架 的 define , require 方法
+```javascript
+new GER({
+    proxyModules:true
+});
+```
+
+#### 包裹  js 默认的方法
+
+包裹 js 的 setTimeout , setInterval 方法
+```javascript
+new GER({
+   proxyTimer:true 
+});
+```
+
+#### 包裹 自定义的方法
+```javascript
+var customFn = function (){};
+customFn  = new GER({
+    proxyCustom:[ customFn1, customFn2, customFn3 ]
+});
+```
+
 ### 包裹console
 ```javascript
 new GER({
-    url:'xxx',
-    proxyConsole:{
-        error:{
-            url:'xxx'
-        },
-        log:{
-            url:'xxx'
-       }
-    }
+    proxyConsole: true
 });
 ```
