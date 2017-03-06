@@ -24,6 +24,10 @@ errorReport.get('delay');                   // get GER parameters form config
     currentUrl                              // error page url
     timestamp                               // error occurred timestamp
     projectType                             // Pc/Mobile
+    flashVer                                // flash version
+    title                                   // error page title
+    screenSize                              // size of screen
+    referer                                 // prepage url
     colNum                                  // error cols
     rowNum                                  // error rows
     msg                                     // error message
@@ -44,7 +48,7 @@ errorReport.error({
     colNo: 100                              // error cols
 });
 
-//errorReport.info/log/warn/error/debug;   also can be reported manually
+//errorReport.log/debug/info/warn/error;   also can be reported manually
 
 try{
     // something throw error ...
@@ -53,16 +57,16 @@ try{
 }
 ```
 
-#####  delay report
+#####  error report
 ```javascript
-errorReport.delayReport("error msg");
+<!-- errorReport.delayReport("error msg");
 
 errorReport.delayReport({
     msg: "xx load error",                   // error message
     targetUrl: "a.js",                      // js wrong source
     rowNo: 100,                             // error rows
     colNo: 100                              // error cols
-});
+}); -->
 
 errorReport.report();
 
@@ -70,57 +74,15 @@ errorReport.report();
 if mergeReport = false, use report according to the data in the buffer pool a report<br/>
 if mergeReport = true, will delay milliseconds, and then merge reported
 
-
-#####  set cookie/localStorage low version of the browser set cookie, advanced browser set localStorage
-```javascript
-errorReport.setItem("error msg");           // return the error item
-errorReport.getItem();                      // push an error item cookie/localStorage
-errorReport.clear();                        // clear all cookie/localStorage
-
-```
-
-
-### advanced usage
-
-#### proxy jquery
-```javascript
-new GER({
-    proxyJquery:true
-});
-```
-
-proxy jquery event.add, event.remove, event.ajax these several asynchronous methods.
-
-#### proxy  define , require
-```javascript
-new GER({
-    proxyModules:true
-});
-```
-proxy modular framework of the define, require method
-
-#### proxy js default method
-```javascript
-new GER({
-   proxyTimer:true 
-});
-```
-proxy js setTimeout, setInterval method
-
-#### proxy custom method
-```javascript
-var customFn = function (){};
-customFn  = new GER({
-    proxyCustom:[customFn]
-});
-```
-
 ### before and after the report
+
 ```javascript
 var myGER = new GER();
+beforeReport
 myGER.on('beforeReport',function(err){
     return false;
 });
+afterReport
 myGER.on('afterReport',function(err){
     
 });
@@ -128,17 +90,65 @@ myGER.on('error',function(err){
     return false;
 });
 ```
+
+
+#####  set cookie/localStorage low version of the browser set cookie, advanced browser set localStorage
+```javascript
+errorReport.setItem( object );              // push the object to cookie/localStorage, the value of the value of the errorLSSign when the stored key is initialized is limited to the number of incoming maxErrorCookieNo at initialization
+eg:{
+    msgName : {
+        value: errorMsg.msg,
+        expiresTime: expiresTime
+    }
+}
+errorReport.getItem( 'key');                // return the error item
+errorReport.clear();                        // clear all cookie or localStorage message
+
+```
+
+
+### advanced usage
+
+#### proxy jquery
+
+proxy jquery event.add, event.remove, event.ajax these several asynchronous methods.
+```javascript
+new GER({
+    proxyJquery:true
+});
+```
+
+
+#### proxy  define , require
+
+proxy modular framework of the define, require method
+```javascript
+new GER({
+    proxyModules:true
+});
+```
+
+#### proxy js default method
+
+proxy js setTimeout, setInterval method
+```javascript
+new GER({
+   proxyTimer:true 
+});
+```
+
+#### proxy custom method
+
+```javascript
+var customFn = function (){};
+customFn  = new GER({
+    proxyCustom:[ customFn1, customFn2, customFn3 ]
+});
+```
+
 ### proxy console
 ```javascript
 new GER({
-    url:'xxx',
-    proxyConsole:{
-        error:{
-            url:'xxx'
-        },
-        log:{
-            url:'xxx'
-       }
-    }
+    proxyConsole: true
 });
 ```
