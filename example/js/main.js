@@ -12,21 +12,22 @@ var error_report = new GER({
     peepConsole: true,
     validTime : 3
 });
+console.log(error_report);
 
 /*test(function(){
     throw new Error('test error');
 });*/
 
-error_report.info('111111111');
-dfsfsd
+//error_report.info('111111111');
+//dfsfsd
 /*
 console.log(111);
 console.log(22222222);*/
 
 //error_report.on();
-error_report.on('error',function(){
+/*error_report.on('error',function(){
     console.log(234546576879)
-});
+});*/
 
 //localStorage.setItem('a', '123245678');
 /*setTimeout(function(){
