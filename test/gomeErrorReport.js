@@ -7,24 +7,22 @@
 import GER from '../src';
 const assert = chai.assert;
 const expect = chai.expect;
+const should = chai.should();
 const error_report = new GER({
-    url:'xxxx',
-    delay: 5000,
-    proxyCustom:[]
+    url:'http://127.0.0.1:8888/report/add',
+    delay: 1000,
+    proxyModules: true
 });
 export default () => {
     describe( 'GER', () => {
         describe( 'GER get', () => {
             it( 'should return the Object realy type  is string', () => {
                 expect( error_report.get( 'url' ) ).to.be.an( 'string' );
-                assert.equal( error_report.get('url'), 'xxxx' );
+                assert.equal( error_report.get('url'), 'http://127.0.0.1:8888/report/add' );
             } );
             it( 'should return the Object realy type  is number', () => {
                 expect( error_report.get( 'delay' ) ).to.be.an( 'number' );
-                assert.equal( error_report.get('delay'), 5000 );
-            } );
-            it( 'should return the Object realy type  is array', () => {
-                expect( error_report.get( 'proxyCustom' ) ).to.be.an( 'array' );
+                assert.equal( error_report.get('delay'), 1000 );
             } );
         } );
         describe( 'GER set', () => {
@@ -33,7 +31,7 @@ export default () => {
                 assert.equal( error_report.set('url', 'xxxx'), 'xxxx' );
             } );it( 'should return the Object realy type  is number', () => {
                 expect( error_report.set( 'delay', 10000 ) ).to.be.an( 'number' );
-                assert.equal( error_report.set('delay', 5000 ), 5000 );
+                assert.equal( error_report.set('delay', 1000 ), 1000 );
             } );
         } );
         describe( 'GER on', () => {
@@ -128,6 +126,49 @@ export default () => {
             } );
             it( 'should return well have any keys', () => {
                 expect( error_report.handleMsg('sss', 'error', 4) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg');
+            } );
+        } );
+        describe( 'GER handleMsg', () => {
+            it( 'should return an object', () => {
+                expect( error_report.handleMsg('sss', 'error', 4) ).to.be.an( 'object' );
+            } );
+            it( 'should return well have any keys', () => {
+                expect( error_report.handleMsg('sss', 'error', 4) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg');
+            } );
+        } );
+        describe( 'GER proxy', () => {
+            it( 'proxyCustomFn', () => {
+                const spyCustomFun = function() {
+                    throw "errorTest1";
+                };
+                proxyCustomFun = error_report.proxyCustomFn(spyCustomFun)
+                expect( proxyCustomFun ).to.be.an( 'function' );
+            } );
+            it( 'proxyCustomObj', () => {
+                const spyCustomFn1 = function() {
+                    throw "errorTest1";
+                };
+                const proxyCustomFns = error_report.proxyCustomObj({
+                    proxyCustomFn: spyCustomFn1
+                })
+                expect( proxyCustomFns ).to.be.an( 'object' );
+                expect( proxyCustomFns.proxyCustomFn ).to.be.an( 'function' );
+            } );
+            it( 'proxyModules', () => {
+                var _cb;
+                window.define = function(name, cb) {
+                    if (_cb) {
+                        _cb();
+                    } else {
+                        _cb = cb;
+                    }
+                };
+                window.define.amd = true;
+
+                define("testDefine", function() {
+                    throw "testDefine";
+                });
+                expect( define ).to.be.an( 'function' );
             } );
         } );
     } );
