@@ -4,7 +4,6 @@
  * @date 2017/02/15
  */
 
-var timeoutkey;
 
 var utils = {
     typeDecide: function ( o, type ) {
@@ -165,76 +164,6 @@ var utils = {
     clearCookie: function ( name ) {
         utils.addCookie( name, '', -1 );
         return utils.getCookie( name );
-    },
-    cat: function ( func, args ) {
-        return function () {
-            try {
-                args = args || utils.toArray( arguments );
-                return func.apply( this, args );
-            } catch ( error ) {
-                this.trigger( 'tryError', [ error ] );
-                if ( error.stack && console && console.error ) {
-                    console.error( "[GER]", error.stack );
-                }
-                if ( !timeoutkey ) {
-                    let orgOnerror = window.onerror;
-                    window.onerror = utils.noop;
-                    timeoutkey = setTimeout( () => {
-                        window.onerror = orgOnerror;
-                        timeoutkey = null;
-                    }, 50 );
-                }
-                throw error;
-            }
-        };
-    },
-    catArgs: function ( func ) {
-        return function () {
-            let args = [];
-            utils.toArray( arguments ).forEach( ( v ) => {
-                utils.isFunction( v ) && ( v = utils.cat( v ) );
-                args.push( v );
-            } );
-            return func.apply( this, args );
-        };
-    },
-    catTimeout: function ( func ) {
-        return ( cb, timeout ) => {
-            if ( utils.isString( cb ) ) {
-                try {
-                    cb = new Function( cb );
-                } catch ( err ) {
-                    throw err;
-                }
-            }
-            let args = utils.toArray( arguments );
-            cb = utils.cat( cb, args.length && args );
-            return func( cb, timeout );
-        };
-    },
-    makeArgsTry: function ( func, self ) {
-        return function () {
-            let tmp, args = [];
-            utils.toArray( arguments ).forEach( v => {
-                utils.isFunction( v ) && ( tmp = utils.cat( v ) ) &&
-                    ( v.tryWrap = tmp ) && ( v = tmp );
-                args.push( v );
-            } );
-            return func.apply( self || this, args );
-        };
-    },
-    makeObjTry: function ( obj ) {
-        let key;
-        let value;
-        for ( key in obj ) {
-            if ( obj.hasOwnProperty( key ) ) {
-                value = obj[ key ];
-                if ( utils.isFunction( value ) ) {
-                    obj[ key ] = utils.cat( value );
-                }
-            }
-        }
-        return obj;
     },
     assignObject: function (obj1, obj2){
         for(let name in obj2){
