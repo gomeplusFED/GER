@@ -179,7 +179,7 @@ let proxy = ( supperclass ) => class extends supperclass {
                 }
                 throw error;
             }
-        };
+        }.bind(this);
     }
     catArgs ( func ) {
         return function () {

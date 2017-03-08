@@ -143,6 +143,7 @@ export default () => {
                 };
                 proxyCustomFun = error_report.proxyCustomFn(spyCustomFun)
                 expect( proxyCustomFun ).to.be.an( 'function' );
+                
             } );
             it( 'proxyCustomObj', () => {
                 const spyCustomFn1 = function() {
