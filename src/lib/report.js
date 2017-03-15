@@ -14,7 +14,6 @@ let Report = ( supperclass ) => class extends supperclass {
         this.url = this.config.url;
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
-                this.handleMsg( msg, type, index );
                 return this.handleMsg( msg, type, index );
             };
         } );
@@ -24,7 +23,7 @@ let Report = ( supperclass ) => class extends supperclass {
         let rowNum = error.rowNum || '';
         let colNum = error.colNum || '';
         let repeatName = error.msg + rowNum + colNum;
-        this.repeatList[ repeatName ] = this.repeatList[ repeatName ] ? 1 : this.repeatList[ repeatName ] + 1;
+        this.repeatList[ repeatName ] = this.repeatList[ repeatName ] ? this.repeatList[ repeatName ] + 1 : 1;
         return this.repeatList[ repeatName ] > this.config.repeat;
     }
     request( url, cb ) {
@@ -51,29 +50,30 @@ let Report = ( supperclass ) => class extends supperclass {
             }
             this.trigger( 'afterReport' );
         } );
+        return this.url;
     }
     // 发送
     send( isNowReport, cb ) {
         this.trigger( 'beforeReport' );
         let callback = cb || utils.noop;
         let delay = isNowReport ? 0 : this.config.delay;
+
         setTimeout( () => {
             this.report( callback );
         }, delay );
+
     }
     // push错误到pool
     carryError( error ) {
         var rnd = Math.random();
-        if ( rnd < this.config.random ) {
+        if ( rnd >= this.config.random ) {
             return false;
         }
-        //console.warn( '不抽样' );
-        //console.log(this.repeat(error))
         if ( this.repeat( error ) ) {
             return false;
         }
         this.errorQueue.push( error );
-        return true;
+        return this.errorQueue;
     }
     // 手动上报 处理方法:全部立即上报 需要延迟吗?
     handleMsg( msg, type, level ) {
@@ -85,7 +85,7 @@ let Report = ( supperclass ) => class extends supperclass {
             msg: msg
         };
         errorMsg.level = level;
-        errorMsg = Object.assign( utils.getSystemParams(), errorMsg );
+        errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
         if ( this.carryError( errorMsg ) ) {
             this.send( this.config.delayReport );
         }

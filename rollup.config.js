@@ -7,6 +7,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 export default {
     entry: 'src/index.js',
     format: 'umd',
+    useStrict: false,
     moduleName: 'GER',
     plugins: [
         commonjs(),

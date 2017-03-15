@@ -10,25 +10,36 @@ let proxy = ( supperclass ) => class extends supperclass {
     constructor( options ) {
         super( options );
         this.consoleList = {};
+
+        this.timeoutkey = null;
         window.onload = () => {
             this.proxy();
         };
     }
     proxy() {
-        if ( this.config.proxyAll ) {
-            this.proxyJquery().proxyModules().proxyTimer().proxyConsole();
+        let _config = this.config;
+        if ( _config.proxyAll ) {
+            this.proxyJquery().proxyModules().proxyTimer(); //.proxyConsole();
+        } else {
+            _config.proxyJquery && this.proxyJquery();
+            _config.proxyModules && this.proxyModules();
+            _config.proxyTimer && this.proxyTimer();
+            _config.proxyConsole && this.proxyConsole();
         }
     }
     proxyConsole() {
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
-            window.console[ type ] = this.reportConsole( window.console[ type ], type, index );
+            let _console = window.console[ type ];
+            window.console[ type ] = function () {
+                this.reportConsole( _console, type, index, utils.toArray( arguments ) );
+            }.bind( this );
         } );
         return this;
     }
     // 劫持原生js
     proxyTimer() {
-        window.setTimeout = utils.catTimeout( setTimeout );
-        window.setInterval = utils.catTimeout( setInterval );
+        window.setTimeout = this.catTimeout( setTimeout );
+        window.setInterval = this.catTimeout( setInterval );
         return this;
     }
     // 劫持jquery
@@ -75,46 +86,45 @@ let proxy = ( supperclass ) => class extends supperclass {
                     setting = url;
                     url = undefined;
                 }
-                utils.makeObjTry( setting );
+                this.makeObjTry( setting );
                 if ( url ) return _ajax.call( _$, url, setting );
                 return _ajax.call( _$, setting );
             };
         }
         return this;
     }
-    reportConsole( func, type, level ) {
-        return () => {
-            this.on( 'beforeReport', () => {
-                //启用console，强制merge
-                this.config.mergeReport = true;
+    reportConsole( func, type, level, args ) {
+        this.on( 'beforeReport', () => {
+            //启用console，强制merge
+            this.config.mergeReport = true;
+        } );
+        let msg = args.join( ',' );
+        let typeList = this.consoleList[ type ];
+        typeList = typeList || [];
+        typeList.push(
+            utils.assignObject( utils.getSystemParams(), {
+                msg: msg,
+                level: level
+            } )
+        );
+        if ( typeList.length > 10 ) {
+            this.errorQueue = this.errorQueue.concat( typeList );
+            this.send( true, () => {
+                typeList = [];
             } );
-            let msg = utils.toArray( arguments ).join( ',' );
-            let typeList = this.consoleList[ type ];
-            typeList = typeList || [];
-            typeList.push(
-                Object.assign( utils.getSystemParams(), {
-                    msg: msg,
-                    level: level
-                } )
-            );
-            if ( typeList.length > 10 ) {
-                this.errorQueue = this.errorQueue.concat( typeList );
-                this.send( true, () => {
-                    typeList = [];
-                } );
-            }
-            return func.apply( this, arguments );
-        };
+        }
+        return func.apply( this, args );
     }
     // 劫持seajs
     proxyModules() {
         var _require = window.require,
             _define = window.define;
         if ( _define && _define.amd && _require ) {
-            window.require = utils.catArgs( _require );
-            Object.assign( window.require, _require );
-            window.define = utils.catArgs( _define );
-            Object.assign( window.define, _define );
+            window.require = this.catArgs( _require );
+            utils.assignObject( window.require, _require );
+
+            window.define = this.catArgs( _define );
+            utils.assignObject( window.define, _define );
         }
 
         if ( window.seajs && _define ) {
@@ -122,7 +132,7 @@ let proxy = ( supperclass ) => class extends supperclass {
                 var arg, args = [];
                 utils.toArray( arguments ).forEach( ( v, i ) => {
                     if ( utils.isFunction( v ) ) {
-                        v = utils.cat( v );
+                        v = this.cat( v );
                         v.toString = ( function ( orgArg ) {
                             return function () {
                                 return orgArg.toString();
@@ -135,35 +145,90 @@ let proxy = ( supperclass ) => class extends supperclass {
 
             };
 
-            window.seajs.use = utils.catArgs( window.seajs.use );
+            window.seajs.use = this.catArgs( window.seajs.use );
 
-            Object.assign( window.define, _define );
+            utils.assignObject( window.define, _define );
         }
         return this;
 
     }
-
     // 劫持自定义方法
-    proxyCustom() {
-        this.config.proxyCustom.forEach( ( v ) => {
-            if ( utils.isFunction( v ) ) {
-                return function () {
-                    utils.toArray( arguments ).forEach( ( f ) => {
-                        if ( utils.isFunction( f ) ) {
-                            utils.cat( f );
-                        } else {
-                            utils.makeObjTry( f );
-                        }
-                    } );
-                };
-            } else {
-                this.error( {
-                    msg: '自定义方法类型必须为function',
-                    level: 4
-                } );
+    proxyCustomFn( func ) {
+        return this.cat( func );
+
+    }
+    proxyCustomObj( obj ) {
+        return this.makeObjTry( obj );
+    }
+
+    cat( func, args ) {
+        return function () {
+            try {
+                args = args || utils.toArray( arguments );
+                return func.apply( this, args );
+            } catch ( error ) {
+                this.trigger( 'tryError', [ error ] );
+                this.error( error );
+                if ( !this.timeoutkey ) {
+                    let orgOnerror = window.onerror;
+                    window.onerror = utils.noop;
+                    this.timeoutkey = setTimeout( () => {
+                        window.onerror = orgOnerror;
+                        this.timeoutkey = null;
+                    }, 50 );
+                }
+                throw error;
             }
-        } );
-        return this;
+        }.bind( this );
+    }
+    catArgs( func ) {
+        return function () {
+            let args = [];
+            utils.toArray( arguments ).forEach( ( v ) => {
+                utils.isFunction( v ) && ( v = this.cat( v ) );
+                args.push( v );
+            } );
+            return func.apply( this, args );
+        };
+    }
+
+    catTimeout( func ) {
+        return ( cb, timeout ) => {
+            if ( utils.isString( cb ) ) {
+                try {
+                    cb = new Function( cb );
+                } catch ( err ) {
+                    throw err;
+                }
+            }
+            let args = utils.toArray( arguments );
+            cb = this.cat( cb, args.length && args );
+            return func( cb, timeout );
+        };
+    }
+    makeArgsTry( func, self ) {
+        return function () {
+            let tmp, args = [];
+            utils.toArray( arguments ).forEach( v => {
+                utils.isFunction( v ) && ( tmp = this.cat( v ) ) &&
+                    ( v.tryWrap = tmp ) && ( v = tmp );
+                args.push( v );
+            } );
+            return func.apply( self || this, args );
+        };
+    }
+    makeObjTry( obj ) {
+        let key;
+        let value;
+        for ( key in obj ) {
+            if ( obj.hasOwnProperty( key ) ) {
+                value = obj[ key ];
+                if ( utils.isFunction( value ) ) {
+                    obj[ key ] = this.cat( value );
+                }
+            }
+        }
+        return obj;
     }
 };
 export default proxy;

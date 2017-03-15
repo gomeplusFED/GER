@@ -1,23 +1,42 @@
-function test(callback){
-    callback.call(this);
-}
 
-new window.GER({
-    url:'xxxxx',
+var error_report = new GER({
+    url:'http://127.0.0.1:8888/report/add',
     failTime : 3,
     tryPeep: true,
     peepSystem: true,
-    repeat:10000,
+    repeat:5,
+    delay: 1000,
     peepConsole: true,
     validTime : 3,
-    peepCustom: [test]
+    proxyCustom:[test]
 });
 
+error_report.on('beforeReport',function(){
+    console.log(1111111);
+})
+error_report.on('afterReport',function(){
+    //console.log(this.url.indexOf('aa'));
+})
+
+function test(callback){
+    callback.call(this);
+}
 test(function(){
-    throw new Error('test error');
+    aa
 });
+/*setTimeout(function(){
+    aaaa
+},1000);*/
+
+/*test(function(){
+    throw new Error('test error');
+});*/
 
 //error_report.info('111111111');
+//dfsfsd
+/*
+console.log(111);
+console.log(22222222);*/
 
 //error_report.on();
 /*error_report.on('error',function(){
@@ -58,7 +77,7 @@ console.log(1)
 
 console.log(1)*/
 
-console.log(1);
+//console.log(1);
 
 //localStorage.setItem('a', '123245678');
 /*setTimeout(function(){

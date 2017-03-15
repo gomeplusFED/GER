@@ -3,6 +3,9 @@
  * @fileoverview config
  * @date 2017/02/16
  */
+
+import utils from './utils';
+
 class Config {
     constructor( options ) {
         this.config = {
@@ -18,13 +21,14 @@ class Config {
             maxErrorCookieNo: 20, // error错误数自增 最大的错
             validTime: 7
         };
-        this.config = Object.assign( this.config, options );
+        this.config = utils.assignObject( this.config, options );
     }
     get( name ) {
         return this.config[ name ];
     }
     set( name, value ) {
         this.config[ name ] = value;
+        return this.config[ name ];
     }
 
 }

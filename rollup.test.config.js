@@ -7,6 +7,7 @@ export default {
     entry: 'test/index.js',
     format: 'iife',
     moduleName: 'GER',
+    useStrict: false,
     plugins: [
         commonjs(),
         babel({
