@@ -54,7 +54,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         if ( _$.zepto ) {
             _add = _$.fn.on, _remove = _$.fn.off;
 
-            _$.fn.on = utils.makeArgsTry( _add );
+            _$.fn.on = this.makeArgsTry( _add );
             _$.fn.off = function () {
                 let args = [];
                 utils.toArray( arguments ).forEach( v => {
@@ -67,7 +67,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         } else if ( _$.fn.jquery ) {
             _add = _$.event.add, _remove = _$.event.remove;
 
-            _$.event.add = utils.makeArgsTry( _add );
+            _$.event.add = this.makeArgsTry( _add );
             _$.event.remove = () => {
                 let args = [];
                 utils.toArray( arguments ).forEach( v => {
