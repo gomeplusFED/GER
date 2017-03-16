@@ -20,10 +20,11 @@ let Events = ( supperclass ) => class extends supperclass {
         }
     }
     trigger( event, args ) {
+        let arg = args || [];
         let funcs = this.handlers[ event ];
         if ( funcs ) {
             return funcs.every( ( f ) => {
-                var ret = f.apply( this, args );
+                var ret = f.apply( this, arg );
                 return ret === false ? false : true;
             } );
         }
