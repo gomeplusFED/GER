@@ -5,6 +5,7 @@
  */
 
 import GER from '../src';
+import chai from 'chai';
 const assert = chai.assert;
 const expect = chai.expect;
 const should = chai.should();
@@ -146,7 +147,7 @@ export default () => {
                 const spyCustomFun = function () {
                     throw "errorTest1";
                 };
-                proxyCustomFun = error_report.proxyCustomFn( spyCustomFun )
+                var proxyCustomFun = error_report.proxyCustomFn( spyCustomFun )
                 expect( proxyCustomFun ).to.be.an( 'function' );
 
             } );
@@ -171,10 +172,10 @@ export default () => {
                 };
                 window.define.amd = true;
 
-                define( "testDefine", function () {
+                window.define( "testDefine", function () {
                     throw "testDefine";
                 } );
-                expect( define ).to.be.an( 'function' );
+                expect( window.define ).to.be.an( 'function' );
             } );
         } );
     } );

@@ -5,6 +5,7 @@
  */
 
 import utils from '../src/lib/utils';
+import chai from 'chai';
 const assert = chai.assert;
 const expect = chai.expect;
 export default () => {
@@ -139,4 +140,4 @@ export default () => {
 
     } );
 
-}
+};

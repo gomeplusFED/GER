@@ -27,7 +27,7 @@ let Report = ( supperclass ) => class extends supperclass {
         return this.repeatList[ repeatName ] > this.config.repeat;
     }
     request( url, cb ) {
-        let img = new Image();
+        let img = new window.Image();
         img.onload = cb;
         img.src = url;
     }
