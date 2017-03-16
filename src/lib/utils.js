@@ -23,7 +23,7 @@ var utils = {
         return parames;
     },
     stringify: function ( obj ) {
-        if ( window.JSON ) {
+        if ( window.JSON && window.JSON.stringify ) {
             return JSON.stringify( obj );
         }
         var t = typeof ( obj );
@@ -57,7 +57,7 @@ var utils = {
         }
     },
     parse: function ( str ) {
-        return JSON.parse ? JSON.parse( str ) : new Function( 'return ' + str )();
+        return window.JSON && window.JSON.parse  ? JSON.parse( str ) : new Function( 'return ' + str )();
     },
     getServerPort: function () {
         return window.location.port === '' ? ( window.location.protocol === 'http:' ? '80' : '443' ) : window.location.port;
