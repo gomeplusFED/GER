@@ -3,8 +3,30 @@
     <head></head>
     <body>
     	<a href="javascript:;">fdgfgfdgfdfd</a>
-    	<script type="text/javascript" src="http://cdn.bootcss.com/jquery/1.4.4/jquery.js"></script>
+    	<script src="../node_modules/babel-polyfill/dist/polyfill.min.js"></script>
         <script src="../dist/ger.js"></script>
         <script src="./js/main.js"></script>
+        <script>
+        	//重写onerror
+        	//忽略错误的API
+        	function whiteList(){
+        		//非移动的版本
+        		//*.gomeplus.com 域名下的
+        		//&&
+        	}
+        	function getIEversion(){
+
+        	}
+        	function getscript(url,cb){
+
+        	}
+        	function insertGER(){
+        		if(getIEversion <= 10 && whiteList()){
+        			getscript('polyfill.min.js',function(){
+        				getscript('get.min.js');
+        			})
+        		}
+        	}
+        </script>
     </body>
 </html>
