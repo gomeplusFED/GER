@@ -17,6 +17,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         this.rewriteError();
     }
     rewriteError() {
+        let defaultOnerror = window.onerror || utils.noop;
         window.onerror = ( msg, url, line, col, error ) => {
             //有些浏览器没有col
             col = col || ( window.event && window.event.errorCharacter ) || 0;
@@ -52,6 +53,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                 colNum: col,
                 targetUrl: url
             } );
+            defaultOnerror.call(null, msg, url, line, col, error);
         };
     }
     // 处理onerror返回的error.stack
