@@ -10,35 +10,36 @@ let proxy = ( supperclass ) => class extends supperclass {
     constructor( options ) {
         super( options );
         this.consoleList = {};
+
+        this.timeoutkey = null;
         window.onload = () => {
             this.proxy();
         };
     }
     proxy() {
-        let _config  = this.config;
+        let _config = this.config;
         if ( _config.proxyAll ) {
-            this.proxyJquery().proxyModules().proxyTimer().proxyConsole();
-        }else{
-            _config.proxyJquery&&_config.proxyJquery();
-            _config.proxyModules&&_config.proxyModules();
-            _config.proxyTimer&&_config.proxyTimer();
-            _config.proxyConsole&&_config.proxyConsole();
-            _config.proxyCustom&&_config.proxyCustom();
+            this.proxyJquery().proxyModules().proxyTimer(); //.proxyConsole();
+        } else {
+            _config.proxyJquery && this.proxyJquery();
+            _config.proxyModules && this.proxyModules();
+            _config.proxyTimer && this.proxyTimer();
+            _config.proxyConsole && this.proxyConsole();
         }
     }
     proxyConsole() {
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             let _console = window.console[ type ];
-            window.console[ type ] = function(){
-                this.reportConsole( _console, type, index, utils.toArray(arguments) );
-            }.bind(this);
+            window.console[ type ] = function () {
+                this.reportConsole( _console, type, index, utils.toArray( arguments ) );
+            }.bind( this );
         } );
         return this;
     }
     // 劫持原生js
     proxyTimer() {
-        window.setTimeout = utils.catTimeout( setTimeout );
-        window.setInterval = utils.catTimeout( setInterval );
+        window.setTimeout = this.catTimeout( setTimeout );
+        window.setInterval = this.catTimeout( setInterval );
         return this;
     }
     // 劫持jquery
@@ -53,7 +54,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         if ( _$.zepto ) {
             _add = _$.fn.on, _remove = _$.fn.off;
 
-            _$.fn.on = utils.makeArgsTry( _add );
+            _$.fn.on = this.makeArgsTry( _add );
             _$.fn.off = function () {
                 let args = [];
                 utils.toArray( arguments ).forEach( v => {
@@ -66,7 +67,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         } else if ( _$.fn.jquery ) {
             _add = _$.event.add, _remove = _$.event.remove;
 
-            _$.event.add = utils.makeArgsTry( _add );
+            _$.event.add = this.makeArgsTry( _add );
             _$.event.remove = () => {
                 let args = [];
                 utils.toArray( arguments ).forEach( v => {
@@ -85,7 +86,7 @@ let proxy = ( supperclass ) => class extends supperclass {
                     setting = url;
                     url = undefined;
                 }
-                utils.makeObjTry( setting );
+                this.makeObjTry( setting );
                 if ( url ) return _ajax.call( _$, url, setting );
                 return _ajax.call( _$, setting );
             };
@@ -119,10 +120,10 @@ let proxy = ( supperclass ) => class extends supperclass {
         var _require = window.require,
             _define = window.define;
         if ( _define && _define.amd && _require ) {
-            window.require = utils.catArgs( _require );
+            window.require = this.catArgs( _require );
             utils.assignObject( window.require, _require );
 
-            window.define = utils.catArgs( _define );
+            window.define = this.catArgs( _define );
             utils.assignObject( window.define, _define );
         }
 
@@ -131,7 +132,7 @@ let proxy = ( supperclass ) => class extends supperclass {
                 var arg, args = [];
                 utils.toArray( arguments ).forEach( ( v, i ) => {
                     if ( utils.isFunction( v ) ) {
-                        v = utils.cat( v );
+                        v = this.cat( v );
                         v.toString = ( function ( orgArg ) {
                             return function () {
                                 return orgArg.toString();
@@ -144,7 +145,7 @@ let proxy = ( supperclass ) => class extends supperclass {
 
             };
 
-            window.seajs.use = utils.catArgs( window.seajs.use );
+            window.seajs.use = this.catArgs( window.seajs.use );
 
             utils.assignObject( window.define, _define );
         }
@@ -152,26 +153,82 @@ let proxy = ( supperclass ) => class extends supperclass {
 
     }
     // 劫持自定义方法
-    proxyCustom() {
-        this.config.proxyCustom.forEach( ( v ) => {
-            if ( utils.isFunction( v ) ) {
-                return function () {
-                    utils.toArray( arguments ).forEach( ( f ) => {
-                        if ( utils.isFunction( f ) ) {
-                            utils.cat( f );
-                        } else {
-                            utils.makeObjTry( f );
-                        }
-                    } );
-                };
-            } else {
-                this.error( {
-                    msg: '自定义方法类型必须为function',
-                    level: 4
-                } );
+    proxyCustomFn( func ) {
+        return this.cat( func );
+
+    }
+    proxyCustomObj( obj ) {
+        return this.makeObjTry( obj );
+    }
+
+    cat( func, args ) {
+        return function () {
+            try {
+                args = args || utils.toArray( arguments );
+                return func.apply( this, args );
+            } catch ( error ) {
+                this.trigger( 'tryError', [ error ] );
+                this.error( error );
+                if ( !this.timeoutkey ) {
+                    let orgOnerror = window.onerror;
+                    window.onerror = utils.noop;
+                    this.timeoutkey = setTimeout( () => {
+                        window.onerror = orgOnerror;
+                        this.timeoutkey = null;
+                    }, 50 );
+                }
+                throw error;
             }
-        } );
-        return this;
+        }.bind( this );
+    }
+    catArgs( func ) {
+        return function () {
+            let args = [];
+            utils.toArray( arguments ).forEach( ( v ) => {
+                utils.isFunction( v ) && ( v = this.cat( v ) );
+                args.push( v );
+            } );
+            return func.apply( this, args );
+        };
+    }
+
+    catTimeout( func ) {
+        return ( cb, timeout ) => {
+            if ( utils.isString( cb ) ) {
+                try {
+                    cb = new Function( cb );
+                } catch ( err ) {
+                    throw err;
+                }
+            }
+            let args = utils.toArray( arguments );
+            cb = this.cat( cb, args.length && args );
+            return func( cb, timeout );
+        };
+    }
+    makeArgsTry( func, self ) {
+        return function () {
+            let tmp, args = [];
+            utils.toArray( arguments ).forEach( v => {
+                utils.isFunction( v ) && ( tmp = this.cat( v ) ) &&
+                    ( v.tryWrap = tmp ) && ( v = tmp );
+                args.push( v );
+            } );
+            return func.apply( self || this, args );
+        };
+    }
+    makeObjTry( obj ) {
+        let key;
+        let value;
+        for ( key in obj ) {
+            if ( obj.hasOwnProperty( key ) ) {
+                value = obj[ key ];
+                if ( utils.isFunction( value ) ) {
+                    obj[ key ] = this.cat( value );
+                }
+            }
+        }
+        return obj;
     }
 };
 export default proxy;

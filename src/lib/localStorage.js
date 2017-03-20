@@ -25,7 +25,7 @@ let storage = {
     },
     //检查是否有效
     deleteExpiresItem: function ( data ) {
-        let oData = data === '' ? {} : utils.parse( data );
+        let oData = !!data ? {} : utils.parse( data );
         let date = +new Date();
         for ( let key in oData ) {
             if ( utils.parse( oData[ key ] ).expiresTime <= date ) {
@@ -61,7 +61,7 @@ let storage = {
     },
     //设置cookie/localStorage
     setItem: InertLocalFunc( ( key, errorObj, validTime, maxErrorCookieNo ) => {
-        localStorage.setItem( key, callByArgs( storage.setInfo, [key, errorObj, validTime, maxErrorCookieNo], storage ) );
+        localStorage.setItem( key, callByArgs( storage.setInfo, [ key, errorObj, validTime, maxErrorCookieNo ], storage ) );
     }, ( key ) => {
         utils.addCookie( key, callByArgs( storage.setInfo, arguments, storage ) );
     } ),
@@ -95,7 +95,7 @@ let Localstroage = ( supperclass ) => class extends supperclass {
     setItem( errorObj ) {
         let _config = this.config;
         storage.setItem( this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo );
-        return utils.stringify(errorObj);
+        return utils.stringify( errorObj );
     }
 
     //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie

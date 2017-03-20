@@ -1,6 +1,3 @@
-function test(callback){
-    callback.call(this);
-}
 
 var error_report = new GER({
     url:'http://127.0.0.1:8888/report/add',
@@ -10,9 +7,26 @@ var error_report = new GER({
     repeat:5,
     delay: 1000,
     peepConsole: true,
-    validTime : 3
+    validTime : 3,
+    proxyCustom:[test]
 });
-console.log(error_report);
+
+error_report.on('beforeReport',function(){
+    console.log(1111111);
+})
+error_report.on('afterReport',function(){
+    //console.log(this.url.indexOf('aa'));
+})
+
+function test(callback){
+    callback.call(this);
+}
+test(function(){
+    aa
+});
+/*setTimeout(function(){
+    aaaa
+},1000);*/
 
 /*test(function(){
     throw new Error('test error');

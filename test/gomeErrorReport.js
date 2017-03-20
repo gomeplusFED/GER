@@ -5,42 +5,42 @@
  */
 
 import GER from '../src';
+import chai from 'chai';
 const assert = chai.assert;
 const expect = chai.expect;
-const error_report = new GER({
-    url:'xxxx',
-    delay: 5000,
-    proxyCustom:[]
-});
+const should = chai.should();
+const error_report = new GER( {
+    url: 'http://127.0.0.1:8888/report/add',
+    delay: 1000,
+    proxyModules: true
+} );
 export default () => {
     describe( 'GER', () => {
         describe( 'GER get', () => {
             it( 'should return the Object realy type  is string', () => {
                 expect( error_report.get( 'url' ) ).to.be.an( 'string' );
-                assert.equal( error_report.get('url'), 'xxxx' );
+                assert.equal( error_report.get( 'url' ), 'http://127.0.0.1:8888/report/add' );
             } );
             it( 'should return the Object realy type  is number', () => {
                 expect( error_report.get( 'delay' ) ).to.be.an( 'number' );
-                assert.equal( error_report.get('delay'), 5000 );
-            } );
-            it( 'should return the Object realy type  is array', () => {
-                expect( error_report.get( 'proxyCustom' ) ).to.be.an( 'array' );
+                assert.equal( error_report.get( 'delay' ), 1000 );
             } );
         } );
         describe( 'GER set', () => {
             it( 'should return the Object realy type  is  string', () => {
                 expect( error_report.set( 'url', 'yyyyyyy' ) ).to.be.an( 'string' );
-                assert.equal( error_report.set('url', 'xxxx'), 'xxxx' );
-            } );it( 'should return the Object realy type  is number', () => {
+                assert.equal( error_report.set( 'url', 'xxxx' ), 'xxxx' );
+            } );
+            it( 'should return the Object realy type  is number', () => {
                 expect( error_report.set( 'delay', 10000 ) ).to.be.an( 'number' );
-                assert.equal( error_report.set('delay', 5000 ), 5000 );
+                assert.equal( error_report.set( 'delay', 1000 ), 1000 );
             } );
         } );
         describe( 'GER on', () => {
             it( 'should return the Object realy type  is  array', () => {
-                expect( error_report.on( 'test', function(){} ) ).to.be.an( 'array' );
-                expect( error_report.on( 'test', function(){} ) ).to.have.length.above( 1 );
-                expect( error_report.on( 'test', function(){} ) ).to.have.length.within( 0, 3 );
+                expect( error_report.on( 'test', function () {} ) ).to.be.an( 'array' );
+                expect( error_report.on( 'test', function () {} ) ).to.have.length.above( 1 );
+                expect( error_report.on( 'test', function () {} ) ).to.have.length.within( 0, 3 );
             } );
         } );
         describe( 'GER off', () => {
@@ -56,10 +56,14 @@ export default () => {
         } );
         describe( 'GER setItem', () => {
             it( 'should return string like {"msg":"1111"}', () => {
-                assert.equal( error_report.setItem({msg:'1111'}), '{"msg":"1111"}' );
+                assert.equal( error_report.setItem( {
+                    msg: '1111'
+                } ), '{"msg":"1111"}' );
             } );
             it( 'should return the Object realy type  is  string', () => {
-                expect( error_report.setItem( {msg:'1111'}) ).to.be.an( 'string' );
+                expect( error_report.setItem( {
+                    msg: '1111'
+                } ) ).to.be.an( 'string' );
             } );
         } );
         describe( 'GER clear', () => {
@@ -86,22 +90,22 @@ export default () => {
         } );
         describe( 'GER repeat', () => {
             it( 'should return repeat number equal 2', () => {
-                error_report.set('repeat', 2);
-                assert.equal( true, error_report.repeat({
-                    msg:'msgmsg',
-                    level:2
-                }) );
+                error_report.set( 'repeat', 2 );
+                assert.equal( true, error_report.repeat( {
+                    msg: 'msgmsg',
+                    level: 2
+                } ) );
             } );
             it( 'should return repeat number not equal 2', () => {
-                error_report.repeat({
-                    msg:'msgmsg',
-                    level:2
-                })
-                error_report.set('repeat', 2);
-                assert.equal( true, error_report.repeat({
-                    msg:'msgmsg',
-                    level:2
-                }) );
+                error_report.repeat( {
+                    msg: 'msgmsg',
+                    level: 2
+                } )
+                error_report.set( 'repeat', 2 );
+                assert.equal( true, error_report.repeat( {
+                    msg: 'msgmsg',
+                    level: 2
+                } ) );
             } );
         } );
         describe( 'GER report', () => {
@@ -111,23 +115,67 @@ export default () => {
         } );
         describe( 'GER carryError', () => {
             it( 'should return an array', () => {
-                expect( error_report.carryError({
+                expect( error_report.carryError( {
                     msg: 'msg'
-                }) ).to.be.an( 'array' );
+                } ) ).to.be.an( 'array' );
             } );
             it( 'should return an array', () => {
                 var len = error_report.errorQueue.length;
-                expect( error_report.carryError({
+                expect( error_report.carryError( {
                     msg: 'msg'
-                })).to.have.length.above( len );
+                } ) ).to.have.length.above( len );
             } );
         } );
         describe( 'GER handleMsg', () => {
             it( 'should return an object', () => {
-                expect( error_report.handleMsg('sss', 'error', 4) ).to.be.an( 'object' );
+                expect( error_report.handleMsg( 'sss', 'error', 4 ) ).to.be.an( 'object' );
             } );
             it( 'should return well have any keys', () => {
-                expect( error_report.handleMsg('sss', 'error', 4) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg');
+                expect( error_report.handleMsg( 'sss', 'error', 4 ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg' );
+            } );
+        } );
+        describe( 'GER handleMsg', () => {
+            it( 'should return an object', () => {
+                expect( error_report.handleMsg( 'sss', 'error', 4 ) ).to.be.an( 'object' );
+            } );
+            it( 'should return well have any keys', () => {
+                expect( error_report.handleMsg( 'sss', 'error', 4 ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg' );
+            } );
+        } );
+        describe( 'GER proxy', () => {
+            it( 'proxyCustomFn', () => {
+                const spyCustomFun = function () {
+                    throw "errorTest1";
+                };
+                var proxyCustomFun = error_report.proxyCustomFn( spyCustomFun )
+                expect( proxyCustomFun ).to.be.an( 'function' );
+
+            } );
+            it( 'proxyCustomObj', () => {
+                const spyCustomFn1 = function () {
+                    throw "errorTest1";
+                };
+                const proxyCustomFns = error_report.proxyCustomObj( {
+                    proxyCustomFn: spyCustomFn1
+                } )
+                expect( proxyCustomFns ).to.be.an( 'object' );
+                expect( proxyCustomFns.proxyCustomFn ).to.be.an( 'function' );
+            } );
+            it( 'proxyModules', () => {
+                var _cb;
+                window.define = function ( name, cb ) {
+                    if ( _cb ) {
+                        _cb();
+                    } else {
+                        _cb = cb;
+                    }
+                };
+                window.define.amd = true;
+
+                window.define( "testDefine", function () {
+                    throw "testDefine";
+                } );
+                expect( window.define ).to.be.an( 'function' );
             } );
         } );
     } );

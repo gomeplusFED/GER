@@ -28,7 +28,7 @@ class Config {
     }
     set( name, value ) {
         this.config[ name ] = value;
-        return this.config[name];
+        return this.config[ name ];
     }
 
 }

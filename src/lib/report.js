@@ -22,12 +22,12 @@ let Report = ( supperclass ) => class extends supperclass {
     repeat( error ) {
         let rowNum = error.rowNum || '';
         let colNum = error.colNum || '';
-        let repeatName = error.msg + rowNum + colNum;  
+        let repeatName = error.msg + rowNum + colNum;
         this.repeatList[ repeatName ] = this.repeatList[ repeatName ] ? this.repeatList[ repeatName ] + 1 : 1;
         return this.repeatList[ repeatName ] > this.config.repeat;
     }
     request( url, cb ) {
-        let img = new Image();
+        let img = new window.Image();
         img.onload = cb;
         img.src = url;
     }
@@ -57,11 +57,11 @@ let Report = ( supperclass ) => class extends supperclass {
         this.trigger( 'beforeReport' );
         let callback = cb || utils.noop;
         let delay = isNowReport ? 0 : this.config.delay;
-        
+
         setTimeout( () => {
             this.report( callback );
         }, delay );
-        
+
     }
     // push错误到pool
     carryError( error ) {

@@ -5,6 +5,7 @@
  */
 
 import utils from '../src/lib/utils';
+import chai from 'chai';
 const assert = chai.assert;
 const expect = chai.expect;
 export default () => {
@@ -112,13 +113,31 @@ export default () => {
         } );
         describe( 'utils assignObject', () => {
             it( 'should return the object', () => {
-                expect( utils.assignObject( {a:1},{b:1} ) ).to.be.a( 'object' );
-                expect( utils.assignObject( {a:1},{b:1} ) ).to.have.all.keys( 'a', 'b' );
-                expect( utils.assignObject( {a:1,b:2},{b:1} ) ).to.have.all.keys( 'a', 'b' );
-                assert.equal( utils.assignObject( {a:1,b:2},{b:1} ).b, 1 );
+                expect( utils.assignObject( {
+                    a: 1
+                }, {
+                    b: 1
+                } ) ).to.be.a( 'object' );
+                expect( utils.assignObject( {
+                    a: 1
+                }, {
+                    b: 1
+                } ) ).to.have.all.keys( 'a', 'b' );
+                expect( utils.assignObject( {
+                    a: 1,
+                    b: 2
+                }, {
+                    b: 1
+                } ) ).to.have.all.keys( 'a', 'b' );
+                assert.equal( utils.assignObject( {
+                    a: 1,
+                    b: 2
+                }, {
+                    b: 1
+                } ).b, 1 );
             } );
         } );
 
     } );
 
-}
+};
