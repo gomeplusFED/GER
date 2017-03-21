@@ -46,15 +46,16 @@ let storage = {
         return source;
     },
     //获取cookie/localStorage内容体
-    setInfo: function ( key, errorObj, validTime, number ) {
-        let source = storage.getItem( key );
-        if ( errorObj ) {
+    setInfo: function ( args ) {
+        var arg = typeof args === 'string' ? [args] : args;
+        let source = storage.getItem( arg[0] );
+        if ( arg[1] ) {
             let errorItem = {
-                expiresTime: storage.getEpires( validTime ),
-                value: errorObj.msg,
+                expiresTime: storage.getEpires( arg[2] ),
+                value: arg[1].msg,
             };
-            let key = storage.getKey( errorObj );
-            source = this.limitError( source, number );
+            let key = storage.getKey( arg[1] );
+            source = this.limitError( source, arg[3] );
             source[ key ] = utils.stringify( errorItem );
         }
         return utils.stringify( source );
@@ -63,11 +64,11 @@ let storage = {
     setItem: InertLocalFunc( ( key, errorObj, validTime, maxErrorCookieNo ) => {
         localStorage.setItem( key, callByArgs( storage.setInfo, [ key, errorObj, validTime, maxErrorCookieNo ], storage ) );
     }, ( key ) => {
-        utils.addCookie( key, callByArgs( storage.setInfo, arguments, storage ) );
+        utils.addCookie( key, callByArgs( storage.setInfo, [ key, errorObj, validTime, maxErrorCookieNo ], storage ) );
     } ),
     //获取cookie/localStorage
     getItem: InertLocalFunc( ( key ) => {
-        return storage.deleteExpiresItem( localStorage.getItem( key ) || '' );
+        return storage.deleteExpiresItem( localStorage.getItem( key ));
     }, ( key ) => {
         return storage.deleteExpiresItem( utils.getCookie( key ) );
     } ),
