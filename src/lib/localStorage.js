@@ -46,25 +46,23 @@ let storage = {
         return source;
     },
     //获取cookie/localStorage内容体
-    setInfo: function ( args ) {
-        var arg = typeof args === 'string' ? [args] : args;
-        let source = storage.getItem( arg[0] );
-        if ( arg[1] ) {
-            let errorItem = {
-                expiresTime: storage.getEpires( arg[2] ),
-                value: arg[1].msg,
+    setInfo: function ( key, errorObj, validTime, max ) {
+        let source = storage.getItem( key );
+        if ( errorObj ) {
+            let name = storage.getKey( errorObj );
+            source = this.limitError( source, max );
+            source[name] = {
+                expiresTime: storage.getEpires( validTime ),
+                value: errorObj.msg,
             };
-            let key = storage.getKey( arg[1] );
-            source = this.limitError( source, arg[3] );
-            source[ key ] = utils.stringify( errorItem );
         }
         return utils.stringify( source );
     },
     //设置cookie/localStorage
-    setItem: InertLocalFunc( ( key, errorObj, validTime, maxErrorCookieNo ) => {
-        localStorage.setItem( key, callByArgs( storage.setInfo, [ key, errorObj, validTime, maxErrorCookieNo ], storage ) );
-    }, ( key ) => {
-        utils.addCookie( key, callByArgs( storage.setInfo, [ key, errorObj, validTime, maxErrorCookieNo ], storage ) );
+    setItem: InertLocalFunc( ( ...args ) => {
+        localStorage.setItem( args[0], callByArgs( storage.setInfo, args, storage ) );
+    }, ( ...args ) => {
+        utils.addCookie( args[0], callByArgs( storage.setInfo, args, storage ) );
     } ),
     //获取cookie/localStorage
     getItem: InertLocalFunc( ( key ) => {
