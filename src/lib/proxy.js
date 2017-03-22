@@ -19,7 +19,7 @@ let proxy = ( supperclass ) => class extends supperclass {
     proxy() {
         let _config = this.config;
         if ( _config.proxyAll ) {
-            this.proxyJquery().proxyModules().proxyTimer(); //.proxyConsole();
+            this.proxyJquery().proxyModules().proxyTimer().proxyConsole();
         } else {
             _config.proxyJquery && this.proxyJquery();
             _config.proxyModules && this.proxyModules();
@@ -162,7 +162,7 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
 
     cat( func, args ) {
-        return function () {
+        return () => {
             try {
                 args = args || utils.toArray( arguments );
                 return func.apply( this, args );
@@ -179,10 +179,10 @@ let proxy = ( supperclass ) => class extends supperclass {
                 }
                 throw error;
             }
-        }.bind( this );
+        };
     }
     catArgs( func ) {
-        return function () {
+        return () => {
             let args = [];
             utils.toArray( arguments ).forEach( ( v ) => {
                 utils.isFunction( v ) && ( v = this.cat( v ) );
@@ -207,7 +207,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         };
     }
     makeArgsTry( func, self ) {
-        return function () {
+        return () => {
             let tmp, args = [];
             utils.toArray( arguments ).forEach( v => {
                 utils.isFunction( v ) && ( tmp = this.cat( v ) ) &&
