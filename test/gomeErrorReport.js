@@ -8,7 +8,6 @@ import GER from '../src';
 import chai from 'chai';
 const assert = chai.assert;
 const expect = chai.expect;
-const should = chai.should();
 const error_report = new GER( {
     url: 'http://127.0.0.1:8888/report/add',
     delay: 1000,
@@ -100,7 +99,7 @@ export default () => {
                 error_report.repeat( {
                     msg: 'msgmsg',
                     level: 2
-                } )
+                } );
                 error_report.set( 'repeat', 2 );
                 assert.equal( true, error_report.repeat( {
                     msg: 'msgmsg',
@@ -147,7 +146,7 @@ export default () => {
                 const spyCustomFun = function () {
                     throw "errorTest1";
                 };
-                var proxyCustomFun = error_report.proxyCustomFn( spyCustomFun )
+                var proxyCustomFun = error_report.proxyCustomFn( spyCustomFun );
                 expect( proxyCustomFun ).to.be.an( 'function' );
 
             } );
@@ -157,7 +156,7 @@ export default () => {
                 };
                 const proxyCustomFns = error_report.proxyCustomObj( {
                     proxyCustomFn: spyCustomFn1
-                } )
+                } );
                 expect( proxyCustomFns ).to.be.an( 'object' );
                 expect( proxyCustomFns.proxyCustomFn ).to.be.an( 'function' );
             } );
@@ -179,4 +178,4 @@ export default () => {
             } );
         } );
     } );
-}
+};

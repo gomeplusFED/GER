@@ -53,7 +53,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                 colNum: col,
                 targetUrl: url
             } );
-            defaultOnerror.call(null, msg, url, line, col, error);
+            defaultOnerror.call( null, msg, url, line, col, error );
         };
     }
     // 处理onerror返回的error.stack

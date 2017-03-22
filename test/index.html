@@ -1,0 +1,25 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mocha Tests</title>
+    <link href="../node_modules/mocha/mocha.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="mocha"></div>
+    <!--[if lt IE]>
+    <script type="text/javascript" src="http://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.js"></script>
+  <![endif]-->
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+
+    <script>
+        mocha.setup( 'bdd' )
+    </script>
+    <script src="./index.build.js"></script>
+    <script>
+        mocha.checkLeaks();
+        mocha.globals( [ 'chai', 'define', 'script*' ] );
+        mocha.run();
+    </script>
+</body>
+</html>

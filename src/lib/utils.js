@@ -20,7 +20,7 @@ var utils = {
         Object.keys( obj ).forEach( name => {
             parames += name + '=' + obj[ name ] + '^';
         } );
-        return encodeURIComponent(parames.substr(0, parames.length-1));
+        return encodeURIComponent( parames.substr( 0, parames.length - 1 ) );
     },
     stringify: function ( obj ) {
         if ( window.JSON && window.JSON.stringify ) {
@@ -57,7 +57,7 @@ var utils = {
         }
     },
     parse: function ( str ) {
-        return window.JSON && window.JSON.parse  ? JSON.parse( str ) : new Function( 'return ' + str )();
+        return window.JSON && window.JSON.parse ? JSON.parse( str ) : new Function( 'return ' + str )();
     },
     getServerPort: function () {
         return window.location.port === '' ? ( window.location.protocol === 'http:' ? '80' : '443' ) : window.location.port;

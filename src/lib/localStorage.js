@@ -52,7 +52,7 @@ let storage = {
         if ( errorObj ) {
             let name = storage.getKey( errorObj );
             source = this.limitError( source, max );
-            source[name] = {
+            source[ name ] = {
                 expiresTime: storage.getEpires( validTime ),
                 value: errorObj.msg,
             };
@@ -61,13 +61,13 @@ let storage = {
     },
     //设置cookie/localStorage
     setItem: InertLocalFunc( ( ...args ) => {
-        localStorage.setItem( args[0], callByArgs( storage.setInfo, args, storage ) );
+        localStorage.setItem( args[ 0 ], callByArgs( storage.setInfo, args, storage ) );
     }, ( ...args ) => {
-        utils.addCookie( args[0], callByArgs( storage.setInfo, args, storage ) );
+        utils.addCookie( args[ 0 ], callByArgs( storage.setInfo, args, storage ) );
     } ),
     //获取cookie/localStorage
     getItem: InertLocalFunc( ( key ) => {
-        return storage.deleteExpiresItem( localStorage.getItem( key ));
+        return storage.deleteExpiresItem( localStorage.getItem( key ) );
     }, ( key ) => {
         return storage.deleteExpiresItem( utils.getCookie( key ) );
     } ),
