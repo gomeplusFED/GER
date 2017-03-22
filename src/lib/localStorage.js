@@ -25,10 +25,11 @@ let storage = {
     },
     //检查是否有效
     deleteExpiresItem: function ( data ) {
-        let oData = !!data ? {} : utils.parse( data );
+        let oData = data ? utils.parse( data ) : {};
+
         let date = +new Date();
         for ( let key in oData ) {
-            if ( utils.parse( oData[ key ] ).expiresTime <= date ) {
+            if ( oData[ key ].expiresTime <= date ) {
                 delete oData[ key ];
             }
         }
@@ -46,28 +47,27 @@ let storage = {
         return source;
     },
     //获取cookie/localStorage内容体
-    setInfo: function ( key, errorObj, validTime, number ) {
+    setInfo: function ( key, errorObj, validTime, max ) {
         let source = storage.getItem( key );
         if ( errorObj ) {
-            let errorItem = {
+            let name = storage.getKey( errorObj );
+            source = this.limitError( source, max );
+            source[name] = {
                 expiresTime: storage.getEpires( validTime ),
                 value: errorObj.msg,
             };
-            let key = storage.getKey( errorObj );
-            source = this.limitError( source, number );
-            source[ key ] = utils.stringify( errorItem );
         }
         return utils.stringify( source );
     },
     //设置cookie/localStorage
-    setItem: InertLocalFunc( ( key, errorObj, validTime, maxErrorCookieNo ) => {
-        localStorage.setItem( key, callByArgs( storage.setInfo, [ key, errorObj, validTime, maxErrorCookieNo ], storage ) );
-    }, ( key ) => {
-        utils.addCookie( key, callByArgs( storage.setInfo, arguments, storage ) );
+    setItem: InertLocalFunc( ( ...args ) => {
+        localStorage.setItem( args[0], callByArgs( storage.setInfo, args, storage ) );
+    }, ( ...args ) => {
+        utils.addCookie( args[0], callByArgs( storage.setInfo, args, storage ) );
     } ),
     //获取cookie/localStorage
     getItem: InertLocalFunc( ( key ) => {
-        return storage.deleteExpiresItem( localStorage.getItem( key ) || '' );
+        return storage.deleteExpiresItem( localStorage.getItem( key ));
     }, ( key ) => {
         return storage.deleteExpiresItem( utils.getCookie( key ) );
     } ),
