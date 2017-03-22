@@ -63,6 +63,23 @@ let Report = ( supperclass ) => class extends supperclass {
         }, delay );
 
     }
+    except(error){
+        let oExcept = this.config.except;
+        let result = false;
+        let v = null;
+        if (utils.typeDecide(oExcept, "Array")) {
+            for(let i = 0, len = oExcept.length; i < len; i++){
+                v = oExcept[i];
+                if((utils.typeDecide(v, "RegExp") && v.test(error.msg)) ||
+                    (utils.typeDecide(v, "Function") && v(error, error.msg))){
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+       
+    } 
     // push错误到pool
     carryError( error ) {
         var rnd = Math.random();
@@ -72,15 +89,19 @@ let Report = ( supperclass ) => class extends supperclass {
         if ( this.repeat( error ) ) {
             return false;
         }
+        if(this.except(error)){
+            return false;
+        }
         this.errorQueue.push( error );
         return this.errorQueue;
     }
-    // 手动上报 处理方法:全部立即上报 需要延迟吗?
+    // 手动上报 
     handleMsg( msg, type, level ) {
         if ( !msg ) {
             console.warn( type + '方法内 msg 参数为空' );
             return;
         }
+        //console.log(msg.msg)
         let errorMsg = utils.typeDecide( msg, 'Object' ) ? msg : {
             msg: msg
         };
