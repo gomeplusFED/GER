@@ -27,7 +27,7 @@ export default () => {
                 assert.equal( utils.serializeObj( {
                     a: 1,
                     b: 1
-                } ), "a=1^b=1" );
+                } ), "a%3D1%5Eb%3D1" );
             } );
         } );
         describe( 'utils stringify', () => {
