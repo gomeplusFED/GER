@@ -9,8 +9,8 @@ import utils from './utils';
 class Config {
     constructor( options ) {
         this.config = {
-            proxyAll: true,
-            mergeReport: false, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+            proxyAll: false,
+            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
             delayReport: false, // delayReport 是否合并上报， false 关闭， true 启动（默认）
             delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
             url: "ewewe", // 指定错误上报地址
