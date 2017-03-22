@@ -25,10 +25,11 @@ let storage = {
     },
     //检查是否有效
     deleteExpiresItem: function ( data ) {
-        let oData = !!data ? {} : utils.parse( data );
+        let oData = data ? utils.parse( data ) : {};
+
         let date = +new Date();
         for ( let key in oData ) {
-            if ( utils.parse( oData[ key ] ).expiresTime <= date ) {
+            if ( oData[ key ].expiresTime <= date ) {
                 delete oData[ key ];
             }
         }
