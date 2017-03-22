@@ -40,7 +40,7 @@ let Report = ( supperclass ) => class extends supperclass {
             this.setItem( obj );
             return utils.serializeObj( obj );
         } ).join( '|' );
-        this.url += '?' + parames;
+        this.url += parames;
         this.request( this.url, () => {
             if ( mergeReport ) {
                 queue = [];
