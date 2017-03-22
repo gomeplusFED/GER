@@ -6,6 +6,8 @@ options is a set of key/value pairs configured with GER requests;
     url: "http://www.gome.com.cn/report",   // Specify the error to report the address
     mergeReport: true,                      // Whether to merge and report, false shut down， true start（default）
     delay: 1000,                            // if mergeReport is true, how many milliseconds was delayed, and reported in the merge buffer（default）
+
+    except: [ /^Script error\.?/,/^Javascript error: Script error\.? on line 0/ ],                              // Ignore any error
     random: 1,                              // sampling reported, 1 to 0 between the value of 1 to 100% reported（default 1）
     repeat: 5,                              // for the same error more than how many times not reported
     errorLSSign:'mx-error'                  // errors increases 0
