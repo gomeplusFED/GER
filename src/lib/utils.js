@@ -18,9 +18,9 @@ var utils = {
     serializeObj: function ( obj ) {
         let parames = '';
         Object.keys( obj ).forEach( name => {
-            parames += name + '=' + obj[ name ] + '&';
+            parames += name + '=' + obj[ name ] + '^';
         } );
-        return parames;
+        return encodeURIComponent(parames.substr(0, parames.length-1));
     },
     stringify: function ( obj ) {
         if ( window.JSON && window.JSON.stringify ) {
