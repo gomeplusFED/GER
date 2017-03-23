@@ -63,23 +63,23 @@ let Report = ( supperclass ) => class extends supperclass {
         }, delay );
 
     }
-    except(error){
+    except( error ) {
         let oExcept = this.config.except;
         let result = false;
         let v = null;
-        if (utils.typeDecide(oExcept, "Array")) {
-            for(let i = 0, len = oExcept.length; i < len; i++){
-                v = oExcept[i];
-                if((utils.typeDecide(v, "RegExp") && v.test(error.msg)) ||
-                    (utils.typeDecide(v, "Function") && v(error, error.msg))){
+        if ( utils.typeDecide( oExcept, "Array" ) ) {
+            for ( let i = 0, len = oExcept.length; i < len; i++ ) {
+                v = oExcept[ i ];
+                if ( ( utils.typeDecide( v, "RegExp" ) && v.test( error.msg ) ) ||
+                    ( utils.typeDecide( v, "Function" ) && v( error, error.msg ) ) ) {
                     result = true;
                     break;
                 }
             }
         }
         return result;
-       
-    } 
+
+    }
     // push错误到pool
     carryError( error ) {
         var rnd = Math.random();
@@ -89,7 +89,7 @@ let Report = ( supperclass ) => class extends supperclass {
         if ( this.repeat( error ) ) {
             return false;
         }
-        if(this.except(error)){
+        if ( this.except( error ) ) {
             return false;
         }
         this.errorQueue.push( error );
