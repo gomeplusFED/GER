@@ -91,7 +91,7 @@ try{
   /*...some code...*/
 }catch(error){
   var ext = {}; //额外信息
-  errorReport.error(error,ext); //更多用法参加error方法
+  errorReport.error(error); //更多用法参加error方法
   //errorReport.log/debug/info/warn/error 都可手动上报
   errorReport.delayReport(error); //只收集不上报
   setTimeout(()=>{
