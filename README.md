@@ -1,6 +1,10 @@
 # GER
 
-[![Build Status](https://travis-ci.org/gomeplusFED/GER.png?branch=master)](https://travis-ci.org/gomeplusFED/GER) [![依赖模块状态](https://david-dm.org/gomeplusFED/GER.png)](http://david-dm.org/gomeplusFED/GER)
+[![Build Status](https://travis-ci.org/gomeplusFED/GER.png?branch=master)](https://travis-ci.org/gomeplusFED/GER) [![依赖模块状态](https://david-dm.org/gomeplusFED/GER.png)](http://david-dm.org/gomeplusFED/GER) [![Sauce Test Status](https://saucelabs.com/buildstatus/gomeplusGER)]
+
+---
+
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/gomeplusGER.svg)]
 
 ---
 Gomeplus error report SDK abbreviated as GER,it very simple and light. If you need a javascript Monitor,GER is a good choice，you can with [ElasticSearch](https://www.elastic.com/) and [GER-server](https://github.com/gomeplusFED/GER-server) together to build your front end monitoring system.
