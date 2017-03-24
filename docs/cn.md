@@ -93,7 +93,7 @@ try{
   var ext = {}; //额外信息
   errorReport.error(error); //更多用法参加error方法
   //errorReport.log/debug/info/warn/error 都可手动上报
-  errorReport.delayReport(error); //只收集不上报
+  errorReport.catchError(error); //只收集不上报
   setTimeout(()=>{
     errorReport.report(); //开始上报队列
   },5000)
