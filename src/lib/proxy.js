@@ -98,7 +98,16 @@ let proxy = ( supperclass ) => class extends supperclass {
             //启用console，强制merge
             this.config.mergeReport = true;
         } );
-        let msg = args.join( ',' );
+        let msg = '';
+        args.forEach(v=>{
+            if(utils.typeDecide(v, 'string')){
+                msg += v;
+            }else if(utils.typeDecide(v, 'array')){
+                msg += ('[' + v.join(',') + ']');
+            }else{
+                msg += utils.stringify(v);
+            }
+        });
         let typeList = this.consoleList[ type ];
         typeList = typeList || [];
         typeList.push(

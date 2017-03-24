@@ -53,10 +53,10 @@ let Report = ( supperclass ) => class extends supperclass {
         return this.url;
     }
     // 发送
-    send( isNowReport, cb ) {
+    send( cb ) {
         this.trigger( 'beforeReport' );
         let callback = cb || utils.noop;
-        let delay = isNowReport ? 0 : this.config.delay;
+        let delay = this.config.mergeReport ? this.config.delay : 0;
 
         setTimeout( () => {
             this.report( callback );
@@ -81,7 +81,7 @@ let Report = ( supperclass ) => class extends supperclass {
 
     }
     // push错误到pool
-    carryError( error ) {
+    catchError( error ) {
         var rnd = Math.random();
         if ( rnd >= this.config.random ) {
             return false;
@@ -107,8 +107,8 @@ let Report = ( supperclass ) => class extends supperclass {
         };
         errorMsg.level = level;
         errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
-        if ( this.carryError( errorMsg ) ) {
-            this.send( this.config.delayReport );
+        if ( this.catchError( errorMsg ) ) {
+            this.send();
         }
         return errorMsg;
     }
