@@ -76,6 +76,7 @@ var errorReport = new GER({
 | colNum | Number | 错误列 |
 | rowNum | Number | 错误行 |
 | msg | String | 错误信息 |
+| level | level | 错误级别 |
 | targetUrl | String | 错误js文件 |
 | ext | Object | 扩展信息可自定义，手工上报时可用 |
 
@@ -94,42 +95,82 @@ try{
   errorReport.error(error); //更多用法参加error方法
   //errorReport.log/debug/info/warn/error 都可手动上报
   errorReport.catchError(error); //只收集不上报
-  setTimeout(()=>{
-    errorReport.report(); //开始上报队列
-  },5000)
+  errorReport.send(); //开始上报队列
 }
 ```
 
 当 `mergeReport` 为 `false` 时候的， 调用 report ，根据缓冲池中的数据一条条上报,当 `mergeReport` 为 `true` 时候的， 会延迟 delay 毫秒，再合并上报。
 
+### 属性
+
+| 字段 | 类型 | 含义 |
+| ------| ------ | ------ |
+| config | Object | 配置项 |
+| handlers | Object | 自定义事件存储 |
+| errorQueue | Array | 错误信息队列 |
+| repeatList | Array | 重复错误队列 |
+
 ### 方法
 
-### 广播事件
-```javascript
-var myGER = new GER();
-上报前
-myGER.on('beforeReport',function(err){
-    return false;
-});
-上报后
-myGER.on('afterReport',function(err){
-    
-});
-myGER.on('error',function(err){
-    return false;
-});
+#### set, get
+
+```js
+myGER.get('mergeReport'); //options config.mergeReport
+myGER.set('mergeReport',true);
 ```
 
-#####  设置cookie/localStorage  低版本浏览器设置cookie  高级浏览器设置localStorage
-```javascript
-errorReport.setItem( object );              // push一条错误信息到cookie/localStorage 存储的key为初始化时 errorLSSign 的值 条数限制为初始化时传入 maxErrorCookieNo 的数量,
-eg:{
+#### log, debug, info, warn, error 
+
+```js
+myGER.log("msg" || {}); //手工上报方法，根据log，debug，info，wran，error 对应上报时的 level: 0,1,2,3,4
+```
+
+#### catchError，report
+
+```js
+myGER.catchError(errorObj); //不上报，只收集
+myGER.send(); //上报
+```
+
+#### on,off,trigger
+
+```js
+var myGER = new GER();
+myGER.on('someCustomEventName',(arg1,arg2)=>{
+    
+});
+myGER.trigger('someCustomEventName',[arg1,arg2]);
+```
+
+#### setItem,getItem,clear
+
+设置cookie/localStorage  低版本浏览器设置cookie  高级浏览器设置localStorage
+
+```js
+myGER.setItem({
     msgName : {
         value: errorMsg.msg,
         expiresTime: expiresTime
     }
-}
-errorReport.getItem( 'key' );               // 返回当前key对应的一条错误信息
-errorReport.clear();                        // 清除 cookie/loacalStorage 所有错误信息
-
+});                                       //push一条错误信息到cookie/localStorage 存储的key为初始化时 errorLSSign 的值 条数限制为初始化时传入 maxErrorCookieNo 的数量
+errorReport.getItem('errorLSSign');       // 返回当前域名下的错误
+errorReport.clear();                      // 清除 cookie/loacalStorage 所有错误信息
 ```
+
+### 事件
+
+#### beforeReport
+
+上报之前拦截，如果返回值是false，则阻止上报动作。
+
+#### afterReport
+
+上报成功之后触发。
+
+#### tryError
+
+try catche后上报前触发，arg1=errorObj，可以对error再次自定义处理。
+
+#### error
+
+window.onerror时触发，如果返回false,则阻止onerror事件，可以再次监控onerror事件。
