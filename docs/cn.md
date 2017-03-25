@@ -36,25 +36,28 @@ $ ger.js  ger.min.js
 在下载并且成功构建完成GER后，你需要对他进行初始化配置，初始化方法如下：
 
 ```js
-var errorReport = new GER({
-    url: "http://localhost:8080/GER/report",  // 指定错误上报地址 （默认""）
-    mergeReport: true,                        // mergeReport 是否合并上报， false 关闭， true 启动（默认 true）
-    delay: 1000,                              // 当mergeReport 为 true 时才可用，延迟多少毫秒，合并缓冲区中的上报（默认 1000）
-    except: [ /^Script error\.?/,
-    /^Javascript error: Script error\.? on line 0/ ],  // 忽略某个错误 (默认值)
-    random: 1,                              // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
-    repeat: 5,                              // 对于同一个错误超过多少次不上报 (默认 5)
-    errorLSSign:'mx-error'                  // error本地存储KEY (默认 mx-error) 
-    maxErrorCookieNo:50,                    // error错误数自增 （默认 50）
-    validTime: 7,                           // error的cookie/localStorage 有效时长 （默认：7天）
-    proxyJquery:false,                      // 是否代理jquery或zepto的 event.add , event.remove , event.ajax
-    proxyModules:false,                     // 是否代理页面中的define , require
-    proxyTimer:false,                       // 是否代理页面中的setTimeout , setInterval
-    proxyConsole: false,                    // 是否代理页面中的console下所有方法，代理后会对服务进行对应的上报
-    proxyCustom:[ customFn1, customFn2, customFn3 ],  //可选代理一些其他自定义函数
-    proxyAll:false                          //设置所有代理选项为true
-});
+var errorReport = new GER（ options );
 ```
+#### 具体配置信息
+
+| 字段 | 类型 | 含义 | 默认值 |
+| ------| ------ | ------ | ------ |
+| url | String | 指定错误上报地址 | "" |
+| delay | Number | mergeReport 为 true 时才可用，延迟多少毫秒 | 1000ms |
+| mergeReport | Boolean | 是否合并上报 | true |
+| delayReport | Boolean | 指定错误上报地址 | false |
+| except | Array | 忽略某个错误 |  [/^Script error\.?/,/^Javascript error: Script error\.? on line 0/] |
+| random | Number | 抽样上报，1~0 之间数值，1为100%上报 | 1 |
+| repeat | Number | 对于同一个错误超过多少次不上报 | 5 |
+| errorLSSign | String | error本地存储KEY | mx-error |
+| maxErrorCookieNo | Number | error错误数自增 | 20 |
+| validTime | Number | error的cookie/localStorage 有效时长  | 7day |
+| proxyJquery | Boolean | 是否代理jquery或zepto的 event.add , event.remove , event.ajax | false |
+| proxyModules | Boolean | 是否代理页面中的define , require | false |
+| proxyTimer | Boolean | 是否代理页面中的setTimeout , setInterval | false |
+| proxyConsole | Boolean | 是否代理页面中的console下所有方法，代理后会对服务进行对应的上报 | false |
+| proxyCustom | Array | 可选代理一些其他自定义函数 | [] |
+| proxyAll | Boolean | 设置所有代理选项值 | false |
 
 当初始化成功之后，如果你开启了`proxy*`，那么它会再劫持一系列常见类库的方法，或者define等模块通用方法，用法参加配置说明，GER重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码，也不会影响页面已有的onerror事件。
 
