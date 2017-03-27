@@ -54,7 +54,7 @@ let Report = ( supperclass ) => class extends supperclass {
     }
     // 发送
     send( cb ) {
-        this.trigger( 'beforeReport' );
+        if ( !this.trigger( 'beforeReport' ) ) return;
         let callback = cb || utils.noop;
         let delay = this.config.mergeReport ? this.config.delay : 0;
 

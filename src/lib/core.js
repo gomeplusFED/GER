@@ -21,7 +21,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         window.onerror = ( msg, url, line, col, error ) => {
             //有些浏览器没有col
             col = col || ( window.event && window.event.errorCharacter ) || 0;
-            if ( this.trigger( 'error', utils.toArray( arguments ) ) ) {
+            if ( !this.trigger( 'error', utils.toArray( arguments ) ) ) {
                 return false;
             }
             var reportMsg = msg;

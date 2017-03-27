@@ -28,7 +28,7 @@ let Events = ( supperclass ) => class extends supperclass {
                 return ret === false ? false : true;
             } );
         }
-        return false;
+        return true;
     }
 
 };
