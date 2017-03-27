@@ -128,11 +128,11 @@ myGER.set('mergeReport',true);
 myGER.log("msg" || {}); //手工上报方法，根据log，debug，info，wran，error 对应上报时的 level: 0,1,2,3,4
 ```
 
-#### catchError，report
+#### catchError，send
 
 ```js
 myGER.catchError(errorObj); //不上报，只收集
-myGER.send(); //上报
+myGER.send(callback); //上报
 ```
 
 #### on,off,trigger
