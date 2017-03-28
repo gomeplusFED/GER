@@ -106,6 +106,9 @@ let Report = ( supperclass ) => class extends supperclass {
             msg: msg
         };
         errorMsg.level = level;
+        errorMsg.rolNum = '';
+        errorMsg.colNum = '';
+        errorMsg.targetUrl = '';
         errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
         if ( this.catchError( errorMsg ) ) {
             this.send();

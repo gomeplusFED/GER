@@ -113,7 +113,10 @@ let proxy = ( supperclass ) => class extends supperclass {
         typeList.push(
             utils.assignObject( utils.getSystemParams(), {
                 msg: msg,
-                level: level
+                level: level,
+                rolNum: '',
+                colNum: '',
+                targetUrl: ''
             } )
         );
         if ( typeList.length > 10 ) {
