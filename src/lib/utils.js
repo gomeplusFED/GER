@@ -136,7 +136,8 @@ var utils = {
             flashVer: utils.flashVer(),
             title: document.title,
             screenSize: scr.width + "x" + scr.height,
-            referer: document.referer ? document.referer : ''
+            referer: document.referer ? document.referer : '',
+            host: window.location.protocol + window.location.hostname
         };
     },
     toArray: function ( arr ) {
