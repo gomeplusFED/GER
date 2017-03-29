@@ -16,7 +16,7 @@
     "testbuild": "rollup -c rollup.config.js --environment entry:test/index.js,dest:test/index.build.js",
     "build": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.min.js,uglify",
     "beautify": "node ./scripts/beatufyjs.js src test",
-    "watch": "rollup -c  rollup.config.js -w",
+    "watch": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js -w",
     "start": "http-server -a 0.0.0.0 -p 8080 -s",
     "dev": "npm-run-all --parallel start watch"
   },
