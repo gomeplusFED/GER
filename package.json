@@ -1,116 +1,129 @@
 {
-    "name": "ger",
-    "version": "1.0.0",
-    "description": "gome error report js sdk",
-    "main": "dist/ger.js",
-    "directories": {
-        "doc": "docs",
-        "example": "example",
-        "test": "test"
-    },
-    "scripts": {
-        "pretest": "jshint -c .jshintrc src",
-        "test": "mocha --compilers js:babel-core/register -r jsdom-global/register",
-        "easysauce": "easy-sauce",
-        "devbuild": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js",
-        "testbuild": "rollup -c rollup.config.js --environment entry:test/index.js,dest:test/index.build.js",
-        "build": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.min.js,uglify",
-        "beautify": "node ./scripts/beatufyjs.js src test",
-        "watch": "rollup -c  rollup.config.js -w",
-        "start": "http-server -a 0.0.0.0 -p 8080 -s",
-        "dev": "npm-run-all --parallel start watch"
-    },
-    "easySauce": {
-        "username": "xiaojue",
-        "key": "dc812c08-5619-46cc-b08e-d86ca6b11d0a",
-        "port": "8080",
-        "testPath": "/test/index.html",
-        "platforms": [
-            [
-                "Windows 7",
-                "chrome",
-                "latest"
-            ],
-            [
-                "Windows 7",
-                "internet explorer",
-                "11"
-            ],
-            [
-                "Windows 7",
-                "internet explorer",
-                "10"
-            ],
-            [
-                "Windows 7",
-                "internet explorer",
-                "9"
-            ],
-            [
-                "Windows 7",
-                "internet explorer",
-                "8"
-            ],
-            [
-                "Windows XP",
-                "internet explorer",
-                "7"
-            ]
-        ],
-        "service": "sauce-connect",
-        "serviceOptions": {
-            "noAutodetect": true,
-            "noCertVerify": true,
-            "verbose": true
-        }
-    },
-    "config": {
-        "pre-git": {
-            "pre-commit": [
-                "npm run pretest",
-                "npm run beautify",
-                "git add ."
-            ]
-        }
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/gomeplusFED/GER.git"
-    },
-    "keywords": [
-        "error",
-        "report"
+  "name": "ger",
+  "version": "1.0.0",
+  "description": "gome error report js sdk",
+  "main": "dist/ger.js",
+  "directories": {
+    "doc": "docs",
+    "example": "example",
+    "test": "test"
+  },
+  "scripts": {
+    "pretest": "jshint -c .jshintrc src",
+    "test": "mocha --compilers js:babel-core/register -r jsdom-global/register",
+    "easysauce": "easy-sauce",
+    "devbuild": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js",
+    "testbuild": "rollup -c rollup.config.js --environment entry:test/index.js,dest:test/index.build.js",
+    "build": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.min.js,uglify",
+    "beautify": "node ./scripts/beatufyjs.js src test",
+    "watch": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js -w",
+    "start": "http-server -a 0.0.0.0 -p 8080 -s",
+    "dev": "npm-run-all --parallel start watch"
+  },
+  "easySauce": {
+    "username": "gomeplusGER",
+    "key": "dffe8496-de74-4225-ba9d-1fbba99daf78",
+    "port": "8080",
+    "testPath": "/test/index.html",
+    "platforms": [
+      [
+        "Windows 7",
+        "chrome",
+        "latest"
+      ],
+      [
+        "Windows 7",
+        "internet explorer",
+        "11"
+      ],
+      [
+        "Windows 7",
+        "internet explorer",
+        "9"
+      ],
+      [
+        "Windows 7",
+        "internet explorer",
+        "10"
+      ],
+      [
+        "Windows 7",
+        "firefox",
+        "latest"
+      ],
+      [
+        "Mac 10.12",
+        "iphone",
+        "10.2"
+      ],
+      [
+        "Linux",
+        "android",
+        "5.0"
+      ],
+      [
+        "Mac 10.12",
+        "safari",
+        "10"
+      ]
     ],
-    "author": "xiaojue,sucon0302,zdongh2016",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/gomeplusFED/GER/issues"
-    },
-    "homepage": "https://github.com/gomeplusFED/GER#readme",
-    "devDependencies": {
-        "babel-core": "^6.23.1",
-        "babel-plugin-transform-class-properties": "^6.18.0",
-        "babel-polyfill": "^6.22.0",
-        "babel-preset-es2015": "^6.22.0",
-        "babel-preset-es2015-rollup": "^3.0.0",
-        "babel-preset-stage-0": "^6.16.0",
-        "chai": "^3.5.0",
-        "easy-sauce": "^0.4.1",
-        "http-server": "^0.9.0",
-        "jsdom": "9.12.0",
-        "jsdom-global": "2.1.1",
-        "jshint": "^2.9.4",
-        "mocha": "^3.2.0",
-        "npm-run-all": "^4.0.1",
-        "pre-git": "^3.13.0",
-        "rollup": "^0.41.4",
-        "rollup-plugin-babel": "^2.7.1",
-        "rollup-plugin-commonjs": "^5.0.5",
-        "rollup-plugin-uglify": "^1.0.1",
-        "rollup-watch": "^2.5.0"
-    },
-    "dependencies": {
-        "mixin": "^0.2.0",
-        "raven-js": "^3.10.0"
+    "service": "sauce-connect",
+    "serviceOptions": {
+      "directDomains": "*.google.com",
+      "noSslBumpDomains": "*.google.com",
+      "noAutodetect": true,
+      "noCertVerify": true,
+      "verbose": true
     }
+  },
+  "config": {
+    "pre-git": {
+      "pre-commit": [
+        "npm run pretest",
+        "npm run beautify",
+        "git add ."
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gomeplusFED/GER.git"
+  },
+  "keywords": [
+    "error",
+    "report"
+  ],
+  "author": "xiaojue,sucon0302,zdongh2016",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gomeplusFED/GER/issues"
+  },
+  "homepage": "https://github.com/gomeplusFED/GER#readme",
+  "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-plugin-transform-class-properties": "^6.18.0",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "chai": "^3.5.0",
+    "easy-sauce": "^0.4.1",
+    "get-saucelabs-browsers": "^1.0.1",
+    "http-server": "^0.9.0",
+    "jsdom": "9.12.0",
+    "jsdom-global": "2.1.1",
+    "jshint": "^2.9.4",
+    "mocha": "^3.2.0",
+    "npm-run-all": "^4.0.1",
+    "pre-git": "^3.13.0",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^5.0.5",
+    "rollup-plugin-uglify": "^1.0.1",
+    "rollup-watch": "^2.5.0"
+  },
+  "dependencies": {
+    "mixin": "^0.2.0",
+    "raven-js": "^3.10.0"
+  }
 }
