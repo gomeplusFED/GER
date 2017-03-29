@@ -70,6 +70,7 @@ let proxy = ( supperclass ) => class extends supperclass {
             _$.event.add = this.makeArgsTry( _add );
             _$.event.remove = () => {
                 let args = [];
+
                 utils.toArray( arguments ).forEach( v => {
                     utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
@@ -129,6 +130,7 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
     // 劫持seajs
     proxyModules() {
+        console.log('zzz');
         var _require = window.require,
             _define = window.define;
         if ( _define && _define.amd && _require ) {
@@ -141,6 +143,7 @@ let proxy = ( supperclass ) => class extends supperclass {
 
         if ( window.seajs && _define ) {
             window.define = function () {
+                console.log('sss');
                 var arg, args = [];
                 utils.toArray( arguments ).forEach( ( v, i ) => {
                     if ( utils.isFunction( v ) ) {
