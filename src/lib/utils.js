@@ -131,7 +131,7 @@ var utils = {
         return {
             userAgent: utils.getUserAgent(),
             currentUrl: document.location.href,
-            timestamp: +new Date(),
+            timestamp: +new Date() + Math.random(),
             projectType: utils.getPlatType(),
             flashVer: utils.flashVer(),
             title: document.title,
