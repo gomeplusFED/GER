@@ -12,9 +12,10 @@ let proxy = ( supperclass ) => class extends supperclass {
         this.consoleList = {};
 
         this.timeoutkey = null;
-        window.onload = () => {
+        this.proxy();
+        /*window.onload = () => {
             this.proxy();
-        };
+        };*/
     }
     proxy() {
         let _config = this.config;
@@ -130,9 +131,9 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
     // 劫持seajs
     proxyModules() {
-        console.log('zzz');
         var _require = window.require,
             _define = window.define;
+
         if ( _define && _define.amd && _require ) {
             window.require = this.catArgs( _require );
             utils.assignObject( window.require, _require );
@@ -140,26 +141,25 @@ let proxy = ( supperclass ) => class extends supperclass {
             window.define = this.catArgs( _define );
             utils.assignObject( window.define, _define );
         }
-
         if ( window.seajs && _define ) {
+            var _this = this;
             window.define = function () {
-                console.log('sss');
                 var arg, args = [];
-                utils.toArray( arguments ).forEach( ( v, i ) => {
-                    if ( utils.isFunction( v ) ) {
-                        v = this.cat( v );
-                        v.toString = ( function ( orgArg ) {
-                            return function () {
+                for (var i = 0, l = arguments.length; i < l; i++) {
+                    arg = arguments[i];
+                    if (utils.isFunction(arg)) {
+                        arg = _this.cat(arg);
+                        //seajs should use toString parse dependencies , so rewrite it
+                        arg.toString = (function(orgArg) {
+                            return function() {
                                 return orgArg.toString();
                             };
-                        }( arguments[ i ] ) );
+                        }(arguments[i]));
                     }
-                    args.push( arg );
-                } );
+                    args.push(arg);
+                }
                 return _define.apply( this, args );
-
             };
-
             window.seajs.use = this.catArgs( window.seajs.use );
 
             utils.assignObject( window.define, _define );
@@ -177,9 +177,9 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
 
     cat( func, args ) {
-        return () => {
+        return (...param) => {
             try {
-                args = args || utils.toArray( arguments );
+                args = args || utils.toArray( param );
                 return func.apply( this, args );
             } catch ( error ) {
                 this.trigger( 'tryError', [ error ] );
@@ -197,13 +197,20 @@ let proxy = ( supperclass ) => class extends supperclass {
         };
     }
     catArgs( func ) {
-        return () => {
-            let args = [];
-            utils.toArray( arguments ).forEach( ( v ) => {
-                utils.isFunction( v ) && ( v = this.cat( v ) );
-                args.push( v );
+        return (...params) => {
+            /*let args = [];
+            utils.toArray( params ).forEach( ( v ) => {
+                utils.isFunction( v ) && ( args.push( this.cat(v )));
+                
             } );
-            return func.apply( this, args );
+            console.log(args[0]);
+            return func.apply( window, args );*/
+            let args = [];
+            utils.toArray( params ).forEach( ( v ) => {
+                utils.isFunction(v) && (v = this.cat(v));
+                args.push(v);
+            } );
+            return func.apply(window, args);
         };
     }
 

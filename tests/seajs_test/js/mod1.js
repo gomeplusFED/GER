@@ -1,4 +1,8 @@
+
 define(function(require, exports, module){
-    var $ = require('jquery');
-    exports.a = 'aaa';
+	module.exports ={
+        init : function (){
+            alert(1)
+        }
+    }
 });

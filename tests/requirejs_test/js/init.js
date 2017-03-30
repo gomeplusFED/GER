@@ -6,9 +6,7 @@ var error_report = new GER({
     validTime : 3,
     proxyModules: true
 });
-seajs.config({
-    base: "./",
-});
-seajs.use("./js/mod1", function(report){
-	report.init()
+
+require(['mod1'], function(mod1) {
+	console.log(mod1.color);
 });

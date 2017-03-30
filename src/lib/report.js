@@ -101,14 +101,11 @@ let Report = ( supperclass ) => class extends supperclass {
             console.warn( type + '方法内 msg 参数为空' );
             return;
         }
-        //console.log(msg.msg)
+
         let errorMsg = utils.typeDecide( msg, 'Object' ) ? msg : {
-            msg: msg
+            msg: msg,
+            level: level
         };
-        errorMsg.level = level;
-        errorMsg.rolNum = '';
-        errorMsg.colNum = '';
-        errorMsg.targetUrl = '';
         errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
         if ( this.catchError( errorMsg ) ) {
             this.send();
