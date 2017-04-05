@@ -1,12 +1,12 @@
 
-/*var error_report = new GER({
+var error_report = new GER({
     url:'https://www.gomeplus.com/ajax/log/index?err_msg=',
     // url:'https://www-pre.gomeplus.com/ajax/log/index?err_msg=',
     repeat:5,
     delay: 1000,
     validTime : 3
-});*/
-// bbbbb;
+});
+// cccc;
 //https://www-pre.gomeplus.com/ajax/log/index?err_msg=msg=evalxxxxxx
 
 //log, debug, info, warn, error 
@@ -15,9 +15,9 @@
 // error_report.debug('new new this item report from debug');
 // error_report.info('new new this item report from info');
 // error_report.warn('new new this item report from warn');
-// error_report.error('new new this item report from error');
+error_report.error('new new this item report from error');
 
-var error_report = new GER({
+/*var error_report = new GER({
     url:'https://www.gomeplus.com/ajax/log/index?err_msg=',
     repeat:5,
     delay: 1000,
@@ -26,12 +26,12 @@ var error_report = new GER({
 });
 
 $('a').on('click', function(){
-	/*setTimeout(function (){
+	setTimeout(function (){
         console.log('aaaaaa');
-    }, 1000);*/
-    // alert(1);
+    }, 1000);
+    alert(1);
     console.log(1);
-});
+});*/
 
 
 

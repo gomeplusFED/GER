@@ -123,6 +123,7 @@
     "rollup-watch": "^2.5.0"
   },
   "dependencies": {
+    "highcharts": "^5.0.10",
     "mixin": "^0.2.0",
     "raven-js": "^3.10.0"
   }
