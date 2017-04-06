@@ -1,5 +1,5 @@
 {
-  "name": "gome-error-reprot",
+  "name": "gome-error-report",
   "version": "0.1.0",
   "description": "gome error report js sdk",
   "main": "dist/ger.min.js",
