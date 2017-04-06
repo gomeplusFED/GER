@@ -10,7 +10,7 @@
   },
   "scripts": {
     "pretest": "jshint -c .jshintrc src",
-    "test": "mocha --compilers js:babel-core/register -r jsdom-global/register",
+    "test": "mocha --compilers js:babel-core/register -r jsdom-global/register test/index.js",
     "easysauce": "easy-sauce",
     "devbuild": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js",
     "testbuild": "rollup -c rollup.config.js --environment entry:test/index.js,dest:test/index.build.js",

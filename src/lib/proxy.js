@@ -145,18 +145,18 @@ let proxy = ( supperclass ) => class extends supperclass {
             var _this = this;
             window.define = function () {
                 var arg, args = [];
-                for (var i = 0, l = arguments.length; i < l; i++) {
-                    arg = arguments[i];
-                    if (utils.isFunction(arg)) {
-                        arg = _this.cat(arg);
+                for ( var i = 0, l = arguments.length; i < l; i++ ) {
+                    arg = arguments[ i ];
+                    if ( utils.isFunction( arg ) ) {
+                        arg = _this.cat( arg );
                         //seajs should use toString parse dependencies , so rewrite it
-                        arg.toString = (function(orgArg) {
-                            return function() {
+                        arg.toString = ( function ( orgArg ) {
+                            return function () {
                                 return orgArg.toString();
                             };
-                        }(arguments[i]));
+                        }( arguments[ i ] ) );
                     }
-                    args.push(arg);
+                    args.push( arg );
                 }
                 return _define.apply( this, args );
             };
@@ -177,7 +177,7 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
 
     cat( func, args ) {
-        return (...param) => {
+        return ( ...param ) => {
             try {
                 args = args || utils.toArray( param );
                 return func.apply( this, args );
@@ -197,7 +197,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         };
     }
     catArgs( func ) {
-        return (...params) => {
+        return ( ...params ) => {
             /*let args = [];
             utils.toArray( params ).forEach( ( v ) => {
                 utils.isFunction( v ) && ( args.push( this.cat(v )));
@@ -207,10 +207,10 @@ let proxy = ( supperclass ) => class extends supperclass {
             return func.apply( window, args );*/
             let args = [];
             utils.toArray( params ).forEach( ( v ) => {
-                utils.isFunction(v) && (v = this.cat(v));
-                args.push(v);
+                utils.isFunction( v ) && ( v = this.cat( v ) );
+                args.push( v );
             } );
-            return func.apply(window, args);
+            return func.apply( window, args );
         };
     }
 

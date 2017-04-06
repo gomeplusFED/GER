@@ -49,6 +49,9 @@ export default () => {
         } );
         describe( 'GER trigger', () => {
             it( 'should return the Object realy type  is  bol', () => {
+                error_report.on( 'test2', function () {
+                    return false;
+                } );
                 assert.equal( error_report.trigger( 'test' ), true );
                 assert.equal( error_report.trigger( 'test2' ), false );
             } );
@@ -114,23 +117,15 @@ export default () => {
         } );
         describe( 'GER carryError', () => {
             it( 'should return an array', () => {
-                expect( error_report.carryError( {
+                expect( error_report.catchError( {
                     msg: 'msg'
                 } ) ).to.be.an( 'array' );
             } );
             it( 'should return an array', () => {
                 var len = error_report.errorQueue.length;
-                expect( error_report.carryError( {
+                expect( error_report.catchError( {
                     msg: 'msg'
                 } ) ).to.have.length.above( len );
-            } );
-        } );
-        describe( 'GER handleMsg', () => {
-            it( 'should return an object', () => {
-                expect( error_report.handleMsg( 'sss', 'error', 4 ) ).to.be.an( 'object' );
-            } );
-            it( 'should return well have any keys', () => {
-                expect( error_report.handleMsg( 'sss', 'error', 4 ) ).to.have.any.keys( 'userAgent', 'currentUrl', 'msg' );
             } );
         } );
         describe( 'GER handleMsg', () => {
