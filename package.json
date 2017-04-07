@@ -1,8 +1,8 @@
 {
-  "name": "ger",
-  "version": "1.0.0",
+  "name": "gome-error-report",
+  "version": "0.1.0",
   "description": "gome error report js sdk",
-  "main": "dist/ger.js",
+  "main": "dist/ger.min.js",
   "directories": {
     "doc": "docs",
     "example": "example",
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "pretest": "jshint -c .jshintrc src",
-    "test": "mocha --compilers js:babel-core/register -r jsdom-global/register",
+    "test": "mocha --compilers js:babel-core/register -r jsdom-global/register test/index.js",
     "easysauce": "easy-sauce",
     "devbuild": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js",
     "testbuild": "rollup -c rollup.config.js --environment entry:test/index.js,dest:test/index.build.js",
