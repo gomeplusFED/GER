@@ -45,7 +45,7 @@ var errorReport = new GER（ options );
 | url | String | 指定错误上报地址 | "" |
 | delay | Number | mergeReport 为 true 时才可用，延迟多少毫秒 | 1000ms |
 | mergeReport | Boolean | 是否合并上报 | true |
-| delayReport | Boolean | 指定错误上报地址 | false |
+| delayReport | Boolean | 是否延迟上报 | false |
 | except | Array | 忽略某个错误 |  [/^Script error\.?/,/^Javascript error: Script error\.? on line 0/] |
 | random | Number | 抽样上报，1~0 之间数值，1为100%上报 | 1 |
 | repeat | Number | 对于同一个错误超过多少次不上报 | 5 |
