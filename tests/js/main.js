@@ -6,12 +6,12 @@ var error_report = new GER({
     delay: 1000,
     validTime : 3
 });
-// ddfghwegerthryt;
+bbb;
 //e://www-eepre.gomeplus.com/ajax/log/index?err_msg=msg=evalxxxxxx
 
 //log, debug, info, warn, error 
 
-error_report.log('attachEvent is not defined ---------- report from log');
+// error_report.log('attachEvent is not defined ---------- report from log');
 // error_report.debug('new new this item report from debug');
 // error_report.info('new new this item report from info');
 // error_report.warn('new new this item report from warn');
