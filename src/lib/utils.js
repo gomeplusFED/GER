@@ -18,7 +18,11 @@ var utils = {
     serializeObj: function ( obj ) {
         let parames = '';
         Object.keys( obj ).forEach( name => {
-            parames += name + '=' + obj[ name ] + '^';
+            if ( utils.typeDecide( obj[ name ], 'Object' ) ) {
+                parames += name + '=' + utils.stringify( obj[ name ] );
+            } else {
+                parames += name + '=' + obj[ name ] + '^';
+            }
         } );
         return encodeURIComponent( parames.substr( 0, parames.length - 1 ) );
     },
