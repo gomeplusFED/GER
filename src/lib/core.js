@@ -50,7 +50,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
             }
             this.error( {
                 msg: reportMsg,
-                rolNum: line,
+                rowNum: line,
                 colNum: col,
                 targetUrl: url
             } );

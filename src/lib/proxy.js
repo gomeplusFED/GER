@@ -116,7 +116,7 @@ let proxy = ( supperclass ) => class extends supperclass {
             utils.assignObject( utils.getSystemParams(), {
                 msg: msg,
                 level: level,
-                rolNum: '',
+                rowNum: '',
                 colNum: '',
                 targetUrl: ''
             } )
