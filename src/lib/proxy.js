@@ -31,9 +31,9 @@ let proxy = ( supperclass ) => class extends supperclass {
     proxyConsole() {
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             let _console = window.console[ type ];
-            window.console[ type ] = function () {
-                this.reportConsole( _console, type, index, utils.toArray( arguments ) );
-            }.bind( this );
+            window.console[ type ] = (...params) => {
+                this.reportConsole( _console, type, index, utils.toArray( params ) );
+            };
         } );
         return this;
     }
@@ -56,9 +56,9 @@ let proxy = ( supperclass ) => class extends supperclass {
             _add = _$.fn.on, _remove = _$.fn.off;
 
             _$.fn.on = this.makeArgsTry( _add );
-            _$.fn.off = function () {
+            _$.fn.off = (...params) => {
                 let args = [];
-                utils.toArray( arguments ).forEach( v => {
+                utils.toArray( params ).forEach( v => {
                     utils.isFunction( v ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -69,10 +69,10 @@ let proxy = ( supperclass ) => class extends supperclass {
             _add = _$.event.add, _remove = _$.event.remove;
 
             _$.event.add = this.makeArgsTry( _add );
-            _$.event.remove = () => {
+            _$.event.remove = (...params) => {
                 let args = [];
 
-                utils.toArray( arguments ).forEach( v => {
+                utils.toArray( params ).forEach( v => {
                     utils.typeDecide( v, 'Function' ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -215,7 +215,10 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
 
     catTimeout( func ) {
-        return ( cb, timeout ) => {
+        return ( ...params ) => {
+            let timeArgs = utils.toArray(params);
+            let cb = timeArgs[0];
+            let timeout = timeArgs[1];
             if ( utils.isString( cb ) ) {
                 try {
                     cb = new Function( cb );
@@ -223,15 +226,18 @@ let proxy = ( supperclass ) => class extends supperclass {
                     throw err;
                 }
             }
-            let args = utils.toArray( arguments );
+            // for setTimeout(function, delay, param1, ...)
+            let args = timeArgs.splice(2);
+
             cb = this.cat( cb, args.length && args );
+
             return func( cb, timeout );
         };
     }
     makeArgsTry( func, self ) {
-        return () => {
+        return (...params) => {
             let tmp, args = [];
-            utils.toArray( arguments ).forEach( v => {
+            utils.toArray( params ).forEach( v => {
                 utils.isFunction( v ) && ( tmp = this.cat( v ) ) &&
                     ( v.tryWrap = tmp ) && ( v = tmp );
                 args.push( v );
