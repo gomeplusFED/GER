@@ -18,28 +18,31 @@ $(function (){
 	    repeat:5,
 	    delay: 1000,
 	    validTime : 3,
-	    proxyJquery: true
+	    proxyAll: true
 	});
 
 	$('.aaa').on('click', function (){
+		abc;
 		alert('aaa');
 	});
-	// $('.bbb').off('click').on('click', function (){
-	// 	alert('bbb');
-	// });
-	// $('.ccc').off('click').on('click', function (){
-	// 	$.ajax({
-	// 		url: 'http://10.69.13.31/report/list',
-	// 		type: 'post',
-	// 		dataType : 'json',
-	// 		data: {
-	// 			'local' : 'meixincdn.com'
-	// 		},
-	// 		success : function (data){
-	// 			console.log(data);
-	// 		}
-	// 	});
-	// });
+	$('.bbb').off('click').on('click', function (){
+		bcd;
+		alert('bbb');
+	});
+	$('.ccc').off('click').on('click', function (){
+		cde;
+		$.ajax({
+			url: 'http://10.69.13.31/report/list',
+			type: 'post',
+			dataType : 'json',
+			data: {
+				'local' : 'meixincdn.com'
+			},
+			success : function (data){
+				// console.log(data);
+			}
+		});
+	});
 	/*var a = 1;
 	setTimeout(function(){
 		console.log(a);

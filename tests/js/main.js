@@ -1,69 +1,48 @@
-
+/*window.onerror = function (){
+    console.log(arguments);
+    return true;
+};*/
 var error_report = new GER({
     url:'https://www.pre.gomeplus.com/ajax/log/index?err_msg=',
-    // url:'https://www-pre.gomeplus.com/ajax/log/index?err_msg=',
     repeat:5,
     delay: 1000,
-    validTime : 3
+    validTime : 3,
+    proxyConsole: true
 });
-// bbb;
+error_report.on('beforeReport', function(){
+    // return false;
+});
+// setTimeout(function (){
+//     console.log(aa);
+// }, 1000);
+console.log(asdfghjkl);
 
-function fn1 (){
+//自定义方法的劫持
+/*var fn2 = error_report.proxyCustomFn(fn1);
+function fn1(){
+    aaa;
+    console.log('asdgf');
+
+}
+fn2();*/
+
+//多个自定义方法的劫持
+/*function fn1 (){
+    aa;  //error
     console.log('111');
 }
-// ccc
 function fn2 (){
     console.log('222');
 }
-// ddd
 function fn3 (){
     console.log('333');
 }
-// eee
-function fn4 (){
-    console.log('444');
-}
-
-// tyuioiuytre
-
-// bbb;
-
-function fn1 (){
-    console.log('111');
-}
-// ccc
-function fn2 (){
-    console.log('222');
-}
-// ddd
-function fn3 (){
-    console.log('333');
-}
-// eee
-function fn4 (){
-    console.log('444');
-}
-// sdfguhiljo
-// bbb;
-
-function fn1 (){
-    console.log('111');
-}
-// ccc
-function fn2 (){
-    console.log('222');
-}
-// ddd
-function fn3 (){
-    console.log('333');
-}
-// aestrdyughio
-// eee
-function fn4 (){
-    console.log('444');
-}
-
-dftgkuiuytds
+var obj = error_report.proxyCustomObj({
+    a: fn1,
+    b: fn2,
+    c: fn3
+});
+obj.a();*/
 
 
 //e://www-eepre.gomeplus.com/ajax/log/index?err_msg=msg=evalxxxxxx

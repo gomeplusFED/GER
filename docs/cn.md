@@ -56,7 +56,7 @@ var errorReport = new GER（ options );
 | proxyModules | Boolean | 是否代理页面中的define , require | false |
 | proxyTimer | Boolean | 是否代理页面中的setTimeout , setInterval | false |
 | proxyConsole | Boolean | 是否代理页面中的console下所有方法，代理后会对服务进行对应的上报 | false |
-| proxyCustom | Array | 可选代理一些其他自定义函数 | [] |
+| proxyCustomFn | Function | 可选代理一些其他自定义函数 | [] |
 | proxyAll | Boolean | 设置所有代理选项值 | false |
 
 当初始化成功之后，如果你开启了`proxy*`，那么它会再劫持一系列常见类库的方法，或者define等模块通用方法，用法参加配置说明，GER重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码，也不会影响页面已有的onerror事件。

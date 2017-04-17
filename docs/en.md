@@ -56,7 +56,7 @@ var errorReport = new GER（ options );
 | proxyModules | Boolean | Whether the proxy page in the define, require | false |
 | proxyTimer | Boolean | Whether the proxy page in the setTimeout, setInterval | false |
 | proxyConsole | Boolean | Whether the proxy page in the console under all the methods, the agent will report the corresponding service | false |
-| proxyCustom | Array | Optional proxy for some other custom functions | [] |
+| proxyCustomFn | Function | Optional proxy for some other custom functions | [] |
 | proxyAll | Boolean | Set all proxy options | false |
 
 After the initialization of success, if you turn on the `proxy*`, then it will then hijack a series of common class methods, or define modules and general methods, usage in configuration instructions, to rewrite the GER window.onerror report, without writing any capture error code, it will not affect the existing onerror page events.

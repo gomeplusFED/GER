@@ -1,5 +1,5 @@
 define(function () {
-	console.log('mod1');
+	alert('mod1');
     return {
         color: 'red'
     }

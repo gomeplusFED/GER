@@ -57,9 +57,9 @@ let proxy = ( supperclass ) => class extends supperclass {
 
             _$.fn.on = this.makeArgsTry( _add );
             
-            _$.fn.off = (...params) => {
+            _$.fn.off = function(){
                 let args = [];
-                utils.toArray( params ).forEach( v => {
+                utils.toArray( arguments ).forEach( v => {
                     utils.isFunction( v ) && v.tryWrap && ( v = v.tryWrap );
                     args.push( v );
                 } );
@@ -199,13 +199,6 @@ let proxy = ( supperclass ) => class extends supperclass {
     }
     catArgs( func ) {
         return ( ...params ) => {
-            /*let args = [];
-            utils.toArray( params ).forEach( ( v ) => {
-                utils.isFunction( v ) && ( args.push( this.cat(v )));
-                
-            } );
-            console.log(args[0]);
-            return func.apply( window, args );*/
             let args = [];
             utils.toArray( params ).forEach( ( v ) => {
                 utils.isFunction( v ) && ( v = this.cat( v ) );

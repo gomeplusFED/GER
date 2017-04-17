@@ -24,6 +24,7 @@ var utils = {
                 parames += name + '=' + obj[ name ] + '^';
             }
         } );
+        console.log(parames);
         return encodeURIComponent( parames.substr( 0, parames.length - 1 ) );
     },
     stringify: function ( obj ) {

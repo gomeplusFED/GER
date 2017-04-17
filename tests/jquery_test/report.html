@@ -18,17 +18,20 @@ $(function (){
 	    repeat:5,
 	    delay: 1000,
 	    validTime : 3,
-	    proxyTimer: true,
-	    proxyJquery: true
+	    // proxyAll: true,
+	    proxyAll: true
 	});
 
 	$('.aaa').on('click', function (){
+		// aaa;
 		alert('aaa');
 	});
 	$('.bbb').off('click').on('click', function (){
+		// bbb;
 		alert('bbb');
 	});
 	$('.ccc').off('click').on('click', function (){
+		// ccc;
 		$.ajax({
 			url: 'http://10.69.13.31/report/list',
 			type: 'post',
@@ -37,7 +40,7 @@ $(function (){
 				'local' : 'meixincdn.com'
 			},
 			success : function (data){
-				console.log(data);
+				alert(JSON.stringify(data));
 			}
 		});
 	});
@@ -48,11 +51,8 @@ $(function (){
 	        expiresTime: 20
 	    }
 	}]);*/
-	error_report.info('aaa');
-	error_report.info('bbb');
-	error_report.info('ccc');
 	setTimeout(function(){
-		console.log(error_report.getItem('mx-error'));
+		alert(JSON.stringify(error_report.getItem('mx-error')));
 		// console.log(a); 
 	},1000);
 });
