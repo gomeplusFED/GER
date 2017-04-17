@@ -14,6 +14,9 @@
         <script>
         window.onerror = function (a, b, c, d, e){
             console.log(a, '\n', b, '\n', c, '\n', d, '\n', e);
+            console.log(e.stack);
+            // console.log(typeof e);
+            // console.log(e.ReferenceError);
             return true;
         };
         bbb;

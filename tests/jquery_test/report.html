@@ -10,10 +10,10 @@
 	<div class="ddd">ddd</div>
 </div>
 <script src="../../dist/ger.js"></script>
-<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="jquery.js"></script>
 <script>
 $(function (){
-	var error_report = new GER({
+	window.error_report = new GER({
 	    url:'https://www.gomeplus.com/ajax/log/index?err_msg=',
 	    repeat:5,
 	    delay: 1000,
@@ -28,10 +28,33 @@ $(function (){
 	$('.bbb').off('click').on('click', function (){
 		alert('bbb');
 	});
+	$('.ccc').off('click').on('click', function (){
+		$.ajax({
+			url: 'http://10.69.13.31/report/list',
+			type: 'post',
+			dataType : 'json',
+			data: {
+				'local' : 'meixincdn.com'
+			},
+			success : function (data){
+				console.log(data);
+			}
+		});
+	});
 	var a = 1;
+	/*error_report.setItem([{
+	    'sd' : {
+	        value: 'abnm',
+	        expiresTime: 20
+	    }
+	}]);*/
+	error_report.info('aaa');
+	error_report.info('bbb');
+	error_report.info('ccc');
 	setTimeout(function(){
-		console.log(a);
-	},1000)
+		console.log(error_report.getItem('mx-error'));
+		// console.log(a); 
+	},1000);
 });
 </script>
 </body>

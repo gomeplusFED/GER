@@ -111,12 +111,10 @@ let Report = ( supperclass ) => class extends supperclass {
             };
         }
 
-        console.log( msg );
         let errorMsg = utils.typeDecide( msg, 'Object' ) ? msg : {
             msg: msg,
             level: level
         };
-        console.log( errorMsg );
         errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
         if ( this.catchError( errorMsg ) ) {
             this.send();

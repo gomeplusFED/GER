@@ -56,6 +56,7 @@ let proxy = ( supperclass ) => class extends supperclass {
             _add = _$.fn.on, _remove = _$.fn.off;
 
             _$.fn.on = this.makeArgsTry( _add );
+            
             _$.fn.off = (...params) => {
                 let args = [];
                 utils.toArray( params ).forEach( v => {
@@ -235,15 +236,17 @@ let proxy = ( supperclass ) => class extends supperclass {
         };
     }
     makeArgsTry( func, self ) {
-        return (...params) => {
-            let tmp, args = [];
-            utils.toArray( params ).forEach( v => {
-                utils.isFunction( v ) && ( tmp = this.cat( v ) ) &&
-                    ( v.tryWrap = tmp ) && ( v = tmp );
-                args.push( v );
-            } );
-            return func.apply( self || this, args );
+        var _this = this;
+        return function() {  //this指向 故：不能使用箭头函数   
+            var tmp, args = [];
+            utils.toArray(arguments).forEach(v => {
+                utils.isFunction(v) && (tmp = _this.cat(v)) &&
+                    (v.tryWrap = tmp) && (v = tmp);
+                args.push(v);
+            });
+            return func.apply(self || this, args);
         };
+
     }
     makeObjTry( obj ) {
         let key;

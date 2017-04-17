@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head></head>
+<body>
+<div style="background-color:#ccc;">
+	<a href="javascript:;">测试数据</a>
+	<div class="aaa">aaa</div>
+	<div class="bbb">bbb</div>
+	<div class="ccc">ccc</div>
+	<div class="ddd">ddd</div>
+</div>
+<script src="../../dist/ger.js"></script>
+<script src="http://apps.bdimg.com/libs/zepto/1.1.4/zepto.js"></script>
+<script>
+$(function (){
+	var error_report = new GER({
+	    url:'https://www.gomeplus.com/ajax/log/index?err_msg=',
+	    repeat:5,
+	    delay: 1000,
+	    validTime : 3,
+	    proxyJquery: true
+	});
+
+	$('.aaa').on('click', function (){
+		alert('aaa');
+	});
+	// $('.bbb').off('click').on('click', function (){
+	// 	alert('bbb');
+	// });
+	// $('.ccc').off('click').on('click', function (){
+	// 	$.ajax({
+	// 		url: 'http://10.69.13.31/report/list',
+	// 		type: 'post',
+	// 		dataType : 'json',
+	// 		data: {
+	// 			'local' : 'meixincdn.com'
+	// 		},
+	// 		success : function (data){
+	// 			console.log(data);
+	// 		}
+	// 	});
+	// });
+	/*var a = 1;
+	setTimeout(function(){
+		console.log(a);
+	},1000);*/
+});
+</script>
+</body>
+</html>
