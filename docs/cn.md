@@ -45,7 +45,6 @@ var errorReport = new GER（ options );
 | url | String | 指定错误上报地址 | "" |
 | delay | Number | mergeReport 为 true 时才可用，延迟多少毫秒 | 1000ms |
 | mergeReport | Boolean | 是否合并上报 | true |
-| delayReport | Boolean | 是否延迟上报 | false |
 | except | Array | 忽略某个错误 |  [/^Script error\.?/,/^Javascript error: Script error\.? on line 0/] |
 | random | Number | 抽样上报，1~0 之间数值，1为100%上报 | 1 |
 | repeat | Number | 对于同一个错误超过多少次不上报 | 5 |
@@ -56,7 +55,6 @@ var errorReport = new GER（ options );
 | proxyModules | Boolean | 是否代理页面中的define , require | false |
 | proxyTimer | Boolean | 是否代理页面中的setTimeout , setInterval | false |
 | proxyConsole | Boolean | 是否代理页面中的console下所有方法，代理后会对服务进行对应的上报 | false |
-| proxyCustomFn | Function | 可选代理一些其他自定义函数 | [] |
 | proxyAll | Boolean | 设置所有代理选项值 | false |
 
 当初始化成功之后，如果你开启了`proxy*`，那么它会再劫持一系列常见类库的方法，或者define等模块通用方法，用法参加配置说明，GER重写了 window.onerror 进行上报的，无需编写任何捕获错误的代码，也不会影响页面已有的onerror事件。
@@ -67,20 +65,20 @@ var errorReport = new GER（ options );
 
 | 字段 | 类型 | 含义 |
 | ------| ------ | ------ |
-| userAgent | String | 浏览器信息 |
+| msg | String | 错误信息 |
+| level | level | 错误级别 |
+| colNum | Number | 错误列 |
+| rowNum | Number | 错误行 |
+| targetUrl | String | 错误js文件 |
+| title | String | 错误页面标题 |
+| referer | String | 页面来源 |
 | currentUrl | String | 错误发生页面URL |
 | host | String | 错误发生页面host |
+| userAgent | String | 浏览器信息 |
 | timestamp | Date | 发生错误时间戳 |
 | projectType | String | 客户端类型PC/Mobile |
 | flashVer | Number | flash版本 |
-| title | String | 错误页面标题 |
 | screenSize | String | 分辨率 |
-| referer | String | 页面来源 |
-| colNum | Number | 错误列 |
-| rowNum | Number | 错误行 |
-| msg | String | 错误信息 |
-| level | level | 错误级别 |
-| targetUrl | String | 错误js文件 |
 | ext | Object | 扩展信息可自定义，手工上报时可用 |
 
 
@@ -177,3 +175,29 @@ try catche后上报前触发，arg1=errorObj，可以对error再次自定义处�
 #### error
 
 window.onerror时触发，如果返回false,则阻止onerror事件，可以再次监控onerror事件。
+
+### 自定义函数劫持
+
+#### proxyCustomFn
+
+```js
+let fn1 = () => {
+  //do something....
+}
+let fn2 = myGER.proxyCustomFn(fn1); //return a new function
+fn2();
+```
+#### proxyCustomObj
+
+```js
+let funObj = {
+  fn1: () => {
+    //do something....
+  },
+  fn2: () => {
+    //do something....
+  }
+}
+let newFuncObj = myGER.proxyCustomObj(fn1); //return a new object
+newFuncObj.fn1();
+```
