@@ -45,7 +45,6 @@ var errorReport = new GER（ options );
 | url | String | Error reporting address | "" |
 | delay | Number | MergeReport is only available when true, the number of milliseconds delay | 1000ms |
 | mergeReport | Boolean | Whether merge report | true |
-| delayReport | Boolean | Whether delayed report | false |
 | except | Array | Ignore an error |  [/^Script error\.?/, /^Javascript error: Script error\.? on line 0/] |
 | random | Number | Sampling report, 1~0 between the values, 1 for the report of 100% | 1 |
 | repeat | Number | How many times do not report to the same error | 5 |
@@ -56,7 +55,6 @@ var errorReport = new GER（ options );
 | proxyModules | Boolean | Whether the proxy page in the define, require | false |
 | proxyTimer | Boolean | Whether the proxy page in the setTimeout, setInterval | false |
 | proxyConsole | Boolean | Whether the proxy page in the console under all the methods, the agent will report the corresponding service | false |
-| proxyCustomFn | Function | Optional proxy for some other custom functions | [] |
 | proxyAll | Boolean | Set all proxy options | false |
 
 After the initialization of success, if you turn on the `proxy*`, then it will then hijack a series of common class methods, or define modules and general methods, usage in configuration instructions, to rewrite the GER window.onerror report, without writing any capture error code, it will not affect the existing onerror page events.
@@ -67,20 +65,20 @@ When the configuration is completed, the configuration of the `{url: "http://loc
 
 | field | type | meaning |
 | ------| ------ | ------ |
-| userAgent | String | Browser information |
+| msg | String | error message |
+| level | level | error level |
+| colNum | Number | Error column |
+| rowNum | Number | Error line |
+| targetUrl | String | Error JS file |
+| title | String | Error page title |
+| referer | String | Page source |
 | currentUrl | String | Error page URL |
 | host | String | Error page host |
+| userAgent | String | Browser information |
 | timestamp | Date | Error time stamp |
 | projectType | String | Client type PC/Mobile |
 | flashVer | Number | flash version |
-| title | String | Error page title |
 | screenSize | String | Resolving power |
-| referer | String | Page source |
-| colNum | Number | Error column |
-| rowNum | Number | Error line |
-| msg | String | error message |
-| level | level | error level |
-| targetUrl | String | Error JS file |
 | ext | Object | Extended information can be customized, manual timekeeping available |
 
 
@@ -177,3 +175,30 @@ Try catche after the report before the trigger, arg1=errorObj, you can customize
 #### error
 
 When `window.onerror` is triggered, if returned false, the onerror event is prevented, and the onerror event can be monitored again.
+
+
+### custom Function
+
+#### proxyCustomFn
+
+```js
+let fn1 = () => {
+  //do something....
+}
+let fn2 = myGER.proxyCustomFn(fn1); //return a new function
+fn2();
+```
+#### proxyCustomObj
+
+```js
+let funObj = {
+  fn1: () => {
+    //do something....
+  },
+  fn2: () => {
+    //do something....
+  }
+}
+let newFuncObj = myGER.proxyCustomObj(fn1); //return a new object
+newFuncObj.fn1();
+```
