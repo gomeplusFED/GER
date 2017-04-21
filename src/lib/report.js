@@ -98,8 +98,10 @@ let Report = ( supperclass ) => class extends supperclass {
     // 手动上报 
     handleMsg( msg, type, level ) {
         if ( !msg ) {
-            console.warn( type + '方法内 msg 参数为空' );
-            return;
+            return false;
+        }
+        if( utils.typeDecide( msg, 'Object' ) && !msg.msg ){
+            return false;
         }
 
         if ( utils.typeDecide( msg, 'Error' ) ) {

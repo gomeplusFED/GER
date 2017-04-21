@@ -20,7 +20,6 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         let defaultOnerror = window.onerror || utils.noop;
         window.onerror = ( msg, url, line, col, error ) => {
             //有些浏览器没有col
-            console.log( msg );
             col = col || ( window.event && window.event.errorCharacter ) || 0;
             if ( !this.trigger( 'error', utils.toArray( arguments ) ) ) {
                 return false;
@@ -41,19 +40,23 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                     }
                     f = f.caller;
                 }
-                reportMsg += '@' + ext.join( ',' );
+                if( ext.length > 0 ){
+                    reportMsg += '@' + ext.join( ',' );
+                }
             }
             if ( utils.typeDecide( reportMsg, "Event" ) ) {
                 reportMsg += reportMsg.type ?
                     ( "--" + reportMsg.type + "--" + ( reportMsg.target ?
                         ( reportMsg.target.tagName + "::" + reportMsg.target.src ) : "" ) ) : "";
             }
-            this.error( {
-                msg: reportMsg,
-                rowNum: line,
-                colNum: col,
-                targetUrl: url
-            } );
+            if( reportMsg ){
+                this.error( {
+                    msg: reportMsg,
+                    rowNum: line,
+                    colNum: col,
+                    targetUrl: url
+                } );
+            }
             defaultOnerror.call( null, msg, url, line, col, error );
         };
     }
@@ -61,8 +64,12 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
     handleErrorStack( error ) {
         let stackMsg = error.stack;
         let errorMsg = error.toString();
-        if ( stackMsg.indexOf( errorMsg ) === -1 ) {
-            stackMsg += '@' + errorMsg;
+        if( errorMsg ){
+            if ( stackMsg.indexOf( errorMsg ) === -1 ) {
+                stackMsg += '@' + errorMsg;
+            }
+        }else{
+            stackMsg = '';
         }
         return stackMsg;
     }
