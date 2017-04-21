@@ -1,25 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>test test</title>
-    </head>
-    <body>
-    	<div style="background-color:#ccc;">
-    		<a href="javascript:;">测试数据</a>
-    	</div>
-    	<!-- <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.8.1/jquery.min.js"></script>
-    	<script type="text/javascript" src="http://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.js"></script>
-        <script src="../dist/ger.js"></script>
-        <script src="./js/main.js"></script> -->
-        <script>
-        window.onerror = function (a, b, c, d, e){
-            console.log(a, '\n', b, '\n', c, '\n', d, '\n', e);
-            console.log(e.stack);
-            // console.log(typeof e);
-            // console.log(e.ReferenceError);
-            return true;
-        };
-        bbb;
-        </script>
-    </body>
+<head>
+<meta charset="utf-8">
+<title>test test</title>
+</head>
+<body>
+<div style="background-color:#ccc;">
+	<a href="javascript:;">测试数据</a>
+</div>
+
+<script>
+window.onerror = function (message, targetUrl, col, row, errObj){
+    // console.log('\n错误信息  :  ', message, '\n出错文件  :  ', targetUrl, '\n代码行号  :  ', col, '\n代码列号  :  ', row, '\n详细信息  :  ', errObj);
+    return true;
+};
+
+bbb;
+
+</script>
+
+</body>
 </html>

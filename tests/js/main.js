@@ -1,8 +1,8 @@
-/*window.onerror = function (){
-    console.log(arguments);
+window.onerror = function (){
+    // console.log(arguments);
     return true;
-};*/
-var error_report = new GER({
+};
+/*var error_report = new GER({
     url:'https://www.pre.gomeplus.com/ajax/log/index?err_msg=',
     repeat:5,
     delay: 1000,
@@ -10,12 +10,15 @@ var error_report = new GER({
     proxyConsole: true
 });
 error_report.on('beforeReport', function(){
-    // return false;
-});
+    return false;
+});*/
 // setTimeout(function (){
 //     console.log(aa);
 // }, 1000);
-console.log(asdfghjkl);
+// console.log(asdfghjkl);
+ccc;
+
+
 
 //自定义方法的劫持
 /*var fn2 = error_report.proxyCustomFn(fn1);
