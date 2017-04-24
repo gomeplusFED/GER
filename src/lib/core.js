@@ -54,7 +54,8 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                     msg: reportMsg,
                     rowNum: line,
                     colNum: col,
-                    targetUrl: url
+                    targetUrl: url,
+                    level: 4
                 } );
             }
             defaultOnerror.call( null, msg, url, line, col, error );
