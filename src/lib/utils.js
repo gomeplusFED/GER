@@ -135,7 +135,7 @@ var utils = {
         let scr = window.screen;
         return {
             userAgent: utils.getUserAgent(),
-            currentUrl: document.location.href,
+            currentUrl: window.location.href,
             timestamp: +new Date() + Math.random(),
             projectType: utils.getPlatType(),
             flashVer: utils.flashVer(),
