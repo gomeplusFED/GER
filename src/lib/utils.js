@@ -68,7 +68,7 @@ var utils = {
         return window.location.port === '' ? ( window.location.protocol === 'http:' ? '80' : '443' ) : window.location.port;
     },
     getUserAgent: function () {
-        return navigator.userAgent;
+        return window.navigator.userAgent;
     },
     getPlatType: function () {
         try {
