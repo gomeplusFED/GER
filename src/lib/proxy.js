@@ -183,8 +183,9 @@ let proxy = ( supperclass ) => class extends supperclass {
                 args = args || utils.toArray( param );
                 return func.apply( this, args );
             } catch ( error ) {
-                this.trigger( 'tryError', [ error ] );
-                this.error( error );
+                var err = utils.getErrorInfo(error);
+                this.trigger( 'tryError', [ err ] );
+                this.error( err );
                 if ( !this.timeoutkey ) {
                     let orgOnerror = window.onerror;
                     window.onerror = utils.noop;

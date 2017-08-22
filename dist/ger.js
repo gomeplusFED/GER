@@ -267,6 +267,78 @@ var utils = {
             }
         }
         return obj1;
+    },
+    getErrorInfo: function getErrorInfo(ex) {
+        if (typeof ex.stack === 'undefined' || !ex.stack) {
+            return {
+
+                'msg': ex.name + ':' + ex.message,
+                'level': 4
+            };
+        } else {
+            var chrome = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i,
+                gecko = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i,
+                winjs = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i,
+
+
+            // Used to additionally parse URL/line/column from eval frames
+            geckoEval = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i,
+                chromeEval = /\((\S*)(?::(\d+))(?::(\d+))\)/,
+                lines = ex.stack.split('\n'),
+                stack = [],
+                submatch,
+                parts,
+                element,
+                reference = /^(.*) is undefined$/.exec(ex.message);
+            if (parts = chrome.exec(lines[1])) {
+                var isNative = parts[2] && parts[2].indexOf('native') === 0; // start of line
+                var isEval = parts[2] && parts[2].indexOf('eval') === 0; // start of line
+                if (isEval && (submatch = chromeEval.exec(parts[2]))) {
+                    // throw out eval line/column and use top-most line/column number
+                    parts[2] = submatch[1]; // url
+                    parts[3] = submatch[2]; // line
+                    parts[4] = submatch[3]; // column
+                }
+                element = {
+                    'url': !isNative ? parts[2] : null,
+                    'line': parts[3] ? +parts[3] : null,
+                    'column': parts[4] ? +parts[4] : null
+                };
+            } else if (parts = winjs.exec(lines[1])) {
+                element = {
+                    'url': parts[2],
+                    'line': +parts[3],
+                    'column': parts[4] ? +parts[4] : null
+                };
+            } else if (parts = gecko.exec(lines[1])) {
+                var isEval = parts[3] && parts[3].indexOf(' > eval') > -1;
+                if (isEval && (submatch = geckoEval.exec(parts[3]))) {
+                    // throw out eval line/column and use top-most line number
+                    parts[3] = submatch[1];
+                    parts[4] = submatch[2];
+                    parts[5] = null; // no column when eval
+                } else if (i === 0 && !parts[5] && typeof ex.columnNumber !== 'undefined') {
+                    // FireFox uses this awesome columnNumber property for its top frame
+                    // Also note, Firefox's column number is 0-based and everything else expects 1-based,
+                    // so adding 1
+                    // NOTE: this hack doesn't work if top-most frame is eval
+                    stack[0].column = ex.columnNumber + 1;
+                }
+                element = {
+                    'url': parts[3],
+                    'line': parts[4] ? +parts[4] : null,
+                    'column': parts[5] ? +parts[5] : null
+                };
+            }
+
+            return {
+                'msg': ex.name + ':' + ex.message,
+                'rowNum': element.line,
+                'colNum': element.column,
+                'targetUrl': element.url,
+                'level': 4
+            };
+        }
     }
 };
 
@@ -875,8 +947,9 @@ var proxy = function proxy(supperclass) {
                         args = args || utils.toArray(param);
                         return func.apply(_this6, args);
                     } catch (error) {
-                        _this6.trigger('tryError', [error]);
-                        _this6.error(error);
+                        var err = utils.getErrorInfo(error);
+                        _this6.trigger('tryError', [err]);
+                        _this6.error(err);
                         if (!_this6.timeoutkey) {
                             var orgOnerror = window.onerror;
                             window.onerror = utils.noop;
@@ -976,8 +1049,6 @@ var proxy = function proxy(supperclass) {
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
-// utils.fixedObjDefined();
-
 var GER = function (_events) {
     inherits(GER, _events);
 
