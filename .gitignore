@@ -5,4 +5,4 @@
 *.svn
 node_modules/*
 test/tests.js
-
+.DS_Store

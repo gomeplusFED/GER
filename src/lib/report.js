@@ -11,7 +11,7 @@ let Report = ( supperclass ) => class extends supperclass {
         super( options );
         this.errorQueue = [];
         this.repeatList = {};
-        this.url = this.config.url;
+        this.url = this.config.url + '?';
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
                 return this.handleMsg( msg, type, index );
@@ -33,24 +33,22 @@ let Report = ( supperclass ) => class extends supperclass {
     }
     report( cb ) {
         let mergeReport = this.config.mergeReport;
-        let queue = this.errorQueue;
-        let curQueue = mergeReport ? queue : [ queue.shift() ];
+				if(this.errorQueue.length === 0) return this.url;
+        let curQueue = mergeReport ? this.errorQueue : [ this.errorQueue.shift() ];
+        if(mergeReport) this.errorQueue = [];
         // 合并上报
         let parames = curQueue.map( obj => {
             this.setItem( obj );
             return utils.serializeObj( obj );
         } ).join( '|' );
-        this.url += parames;
-        this.request( this.url, () => {
-            if ( mergeReport ) {
-                queue = [];
-            }
+        let url = this.url + parames;
+        this.request( url, () => {
             if ( cb ) {
                 cb.call( this );
             }
             this.trigger( 'afterReport' );
         } );
-        return this.url;
+        return url;
     }
     // 发送
     send( cb ) {

@@ -581,7 +581,7 @@ var Report$1 = function Report(supperclass) {
 
             _this.errorQueue = [];
             _this.repeatList = {};
-            _this.url = _this.config.url;
+            _this.url = _this.config.url + '?';
             ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
                 _this[type] = function (msg) {
                     return _this.handleMsg(msg, type, index);
@@ -613,24 +613,22 @@ var Report$1 = function Report(supperclass) {
                 var _this2 = this;
 
                 var mergeReport = this.config.mergeReport;
-                var queue = this.errorQueue;
-                var curQueue = mergeReport ? queue : [queue.shift()];
+                if (this.errorQueue.length === 0) return this.url;
+                var curQueue = mergeReport ? this.errorQueue : [this.errorQueue.shift()];
+                if (mergeReport) this.errorQueue = [];
                 // 合并上报
                 var parames = curQueue.map(function (obj) {
                     _this2.setItem(obj);
                     return utils.serializeObj(obj);
                 }).join('|');
-                this.url += parames;
-                this.request(this.url, function () {
-                    if (mergeReport) {
-                        queue = [];
-                    }
+                var url = this.url + parames;
+                this.request(url, function () {
                     if (cb) {
                         cb.call(_this2);
                     }
                     _this2.trigger('afterReport');
                 });
-                return this.url;
+                return url;
             }
             // 发送
 

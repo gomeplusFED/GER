@@ -1,6 +1,5 @@
-
 var error_report = new GER({
-    url:'http://127.0.0.1:8888/report/add',
+    url:'http://localhost:8085/read.gif',
     repeat:5,
     delay: 1000,
     validTime : 3
@@ -9,17 +8,18 @@ var error_report = new GER({
 error_report.on('beforeReport',function(){
     console.log(1111111);
 })
+
 error_report.on('afterReport',function(){
-    //console.log(this.url.indexOf('aa'));
+    console.log(this.url.indexOf('aa'));
 })
 
 setTimeout(function(){
     aaaa
 },1000);
 
-/*test(function(){
+test(function(){
     throw new Error('test error');
-});*/
+});
 
 //error_report.info('111111111');
 //dfsfsd

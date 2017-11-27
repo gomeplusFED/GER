@@ -17,7 +17,7 @@
     "build": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.min.js,uglify",
     "beautify": "node ./scripts/beatufyjs.js src test",
     "watch": "rollup -c rollup.config.js --environment entry:src/index.js,dest:dist/ger.js -w",
-    "start": "http-server -a 0.0.0.0 -p 8080 -s",
+    "start": "http-server -a 0.0.0.0 -p 8081 -s",
     "dev": "npm-run-all --parallel start watch"
   },
   "easySauce": {
