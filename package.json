@@ -1,5 +1,5 @@
 {
-  "name": "gome-error-report",
+  "name": "GER",
   "version": "0.1.5",
   "description": "gome error report js sdk",
   "main": "dist/ger.min.js",
@@ -126,5 +126,8 @@
     "highcharts": "^5.0.10",
     "mixin": "^0.2.0",
     "raven-js": "^3.10.0"
+  },
+  "release": {
+    "analyzeCommits": "simple-commit-message"
   }
 }
