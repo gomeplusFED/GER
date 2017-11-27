@@ -1,7 +1,7 @@
 {
   "name": "GER",
-  "version": "0.1.5",
-  "description": "gome error report js sdk",
+  "version": "0.1.6",
+  "description": "error report js sdk",
   "main": "dist/ger.min.js",
   "directories": {
     "doc": "docs",
