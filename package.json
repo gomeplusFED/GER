@@ -1,5 +1,5 @@
 {
-  "name": "GER",
+  "name": "@mfelibs/GER",
   "version": "0.1.6",
   "description": "error report js sdk",
   "main": "dist/ger.min.js",
