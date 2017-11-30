@@ -581,7 +581,7 @@ var Report$1 = function Report(supperclass) {
 
             _this.errorQueue = [];
             _this.repeatList = {};
-            _this.url = _this.config.url + '?';
+            _this.url = _this.config.url + '?err_msg=';
             ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
                 _this[type] = function (msg) {
                     return _this.handleMsg(msg, type, index);

@@ -11,7 +11,7 @@ let Report = ( supperclass ) => class extends supperclass {
         super( options );
         this.errorQueue = [];
         this.repeatList = {};
-        this.url = this.config.url + '?';
+        this.url = this.config.url + '?err_msg=';
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
                 return this.handleMsg( msg, type, index );
