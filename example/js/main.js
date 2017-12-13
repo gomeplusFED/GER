@@ -1,24 +1,25 @@
 var error_report = new GER({
-    url:'http://localhost:8085/read.gif',
-    repeat:5,
-    delay: 1000,
-    validTime : 3
+  url: 'https://beacon.sinajs.cn/read.gif',
+  repeat: 2,
+  delay: 2000,
+  validTime: 3,
+  maxErrorCookieNo: 5
 });
 
-error_report.on('beforeReport',function(){
-    console.log(1111111);
+error_report.on('beforeReport', function() {
+  console.log(1111111);
 })
 
-error_report.on('afterReport',function(){
-    console.log(this.url.indexOf('aa'));
+error_report.on('afterReport', function() {
+  console.log(this.url.indexOf('aa'));
 })
 
-setTimeout(function(){
-    aaaa
-},1000);
+setTimeout(function() {
+  aaaa
+}, 1000);
 
-test(function(){
-    throw new Error('test error');
+test(function() {
+  throw new Error('test error');
 });
 
 //error_report.info('111111111');
@@ -36,7 +37,8 @@ console.log(22222222);*/
 /*setTimeout(function(){
     console.log(1111)
 },1000);
-*//*
+*/
+/*
 console.log(1);
 
 console.log(1)
