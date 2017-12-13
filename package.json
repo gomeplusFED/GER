@@ -1,6 +1,6 @@
 {
   "name": "@mfelibs/GER",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "error report js sdk",
   "main": "dist/ger.min.js",
   "directories": {
