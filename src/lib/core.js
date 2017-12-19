@@ -33,7 +33,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                 var f = arguments.callee.caller, // jshint ignore:line
                     c = 3;
                 //这里只拿三层堆栈信息
-                while ( f && ( --c > 0 ) ) {
+                while ( f && ( c-- > 0 ) ) {
                     ext.push( f.toString() );
                     if ( f === f.caller ) {
                         break; //如果有环
