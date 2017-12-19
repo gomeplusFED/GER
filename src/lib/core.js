@@ -14,7 +14,9 @@ import proxy from './proxy';
 class GER extends events( localStorage( report( proxy( config ) ) ) ) {
     constructor( options ) {
         super( options );
+        this.breadcrumbs = [];
         this.rewriteError();
+        this.catchClickError();
     }
     rewriteError() {
         let defaultOnerror = window.onerror || utils.noop;
@@ -55,7 +57,8 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
                     rowNum: line,
                     colNum: col,
                     targetUrl: url,
-                    level: 4
+                    level: 4,
+                    breadcrumbs: JSON.stringify(this.breadcrumbs)
                 } );
             }
             defaultOnerror.call( null, msg, url, line, col, error );
@@ -74,7 +77,35 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         }
         return stackMsg;
     }
-
+    catchClickError(){
+      if(window.addEventListener){
+        if('ontouchstart' in document.documentElement){
+          window.addEventListener('touchstart', this._storeClcikedDom, !0)
+        } else {
+          window.addEventListener('click', this._storeClcikedDom, !0)
+        }
+      } else {
+        document.attachEvent("onclick", this._storeClcikedDom);
+      }
+    }
+    _storeClcikedDom = (ele) =>{
+      const target = ele.target ? ele.target : ele.srcElement;
+      let info = {
+        time: new Date().getTime()
+      };
+      if(target){
+        var outerHTML = target.outerHTML;
+        outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
+        // 只保存不为空的属性
+        outerHTML !== '' && (info.outerHTML = outerHTML);
+        target.tagName !== '' && (info.tagName = target.tagName);
+        target.id !== '' && (info.id = target.id);
+        target.className !== '' && (info.className = target.className);
+        target.name !== '' && (info.name = target.name);
+      }
+      this.breadcrumbs.push(info);
+      this.breadcrumbs.length > 10 && this.breadcrumbs.shift();
+    }
 }
 
 export default GER;

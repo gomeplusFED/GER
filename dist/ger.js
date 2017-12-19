@@ -1047,6 +1047,8 @@ var proxy = function proxy(supperclass) {
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
+// utils.fixedObjDefined();
+
 var GER = function (_events) {
     inherits(GER, _events);
 
@@ -1055,7 +1057,28 @@ var GER = function (_events) {
 
         var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
 
+        _this._storeClcikedDom = function (ele) {
+            var target = ele.target ? ele.target : ele.srcElement;
+            var info = {
+                time: new Date().getTime()
+            };
+            if (target) {
+                var outerHTML = target.outerHTML;
+                outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
+                // 只保存不为空的属性
+                outerHTML !== '' && (info.outerHTML = outerHTML);
+                target.tagName !== '' && (info.tagName = target.tagName);
+                target.id !== '' && (info.id = target.id);
+                target.className !== '' && (info.className = target.className);
+                target.name !== '' && (info.name = target.name);
+            }
+            _this.breadcrumbs.push(info);
+            _this.breadcrumbs.length > 10 && _this.breadcrumbs.shift();
+        };
+
+        _this.breadcrumbs = [];
         _this.rewriteError();
+        _this.catchClickError();
         return _this;
     }
 
@@ -1082,7 +1105,7 @@ var GER = function (_events) {
                         // jshint ignore:line
                     c = 3;
                     //这里只拿三层堆栈信息
-                    while (f && --c > 0) {
+                    while (f && c-- > 0) {
                         ext.push(f.toString());
                         if (f === f.caller) {
                             break; //如果有环
@@ -1102,7 +1125,8 @@ var GER = function (_events) {
                         rowNum: line,
                         colNum: col,
                         targetUrl: url,
-                        level: 4
+                        level: 4,
+                        breadcrumbs: JSON.stringify(_this2.breadcrumbs)
                     });
                 }
                 defaultOnerror.call(null, msg, url, line, col, error);
@@ -1123,6 +1147,19 @@ var GER = function (_events) {
                 stackMsg = '';
             }
             return stackMsg;
+        }
+    }, {
+        key: 'catchClickError',
+        value: function catchClickError() {
+            if (window.addEventListener) {
+                if ('ontouchstart' in document.documentElement) {
+                    window.addEventListener('touchstart', this._storeClcikedDom, !0);
+                } else {
+                    window.addEventListener('click', this._storeClcikedDom, !0);
+                }
+            } else {
+                document.attachEvent("onclick", this._storeClcikedDom);
+            }
         }
     }]);
     return GER;
