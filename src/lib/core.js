@@ -16,7 +16,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         super( options );
         this.breadcrumbs = [];
         this.rewriteError();
-        this.catchClickError();
+        this.catchClickQueue();
     }
     rewriteError() {
         let defaultOnerror = window.onerror || utils.noop;
@@ -77,7 +77,7 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         }
         return stackMsg;
     }
-    catchClickError(){
+    catchClickQueue(){
       if(window.addEventListener){
         if('ontouchstart' in document.documentElement){
           window.addEventListener('touchstart', this._storeClcikedDom, !0)
