@@ -144,14 +144,29 @@ class GER extends events( localStorage( report( proxy( config ) ) ) ) {
         time: new Date().getTime()
       };
       if(target){
-        var outerHTML = target.outerHTML;
-        outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
-        // 只保存不为空的属性
-        outerHTML !== '' && (info.outerHTML = outerHTML);
-        target.tagName !== '' && (info.tagName = target.tagName);
-        target.id !== '' && (info.id = target.id);
-        target.className !== '' && (info.className = target.className);
-        target.name !== '' && (info.name = target.name);
+        // 只保存存在的属性
+        target.tagName && (info.tagName = target.tagName);
+        target.id && (info.id = target.id);
+        target.className && (info.className = target.className);
+        target.name && (info.name = target.name);
+        // 不存在id时，遍历父元素
+        if(!target.id){
+          // 遍历三层父元素
+          let i = 0, parent = target;
+          while (i++ < 3 && parent.parentNode){
+            parent = parent.parentNode;
+            if(parent.id) break;
+          }
+          // 如果父元素中有id，则只保存id，保存规则为 父元素层级:id
+          if(parent.id){
+            info.parentId = i + ':' + parent.id;
+          } else {
+            // 父元素没有id，则保存outerHTML
+            let outerHTML = parent.outerHTML.replace(/>\s+</g, '><'); // 去除空白字符
+            outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
+            info.outerHTML = outerHTML;
+          }
+        }
       }
       this.breadcrumbs.push(info);
       this.breadcrumbs.length > 10 && this.breadcrumbs.shift();
