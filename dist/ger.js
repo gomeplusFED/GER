@@ -1047,122 +1047,197 @@ var proxy = function proxy(supperclass) {
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
-// utils.fixedObjDefined();
-
 var GER = function (_events) {
-    inherits(GER, _events);
+  inherits(GER, _events);
 
-    function GER(options) {
-        classCallCheck(this, GER);
+  function GER(options) {
+    classCallCheck(this, GER);
 
-        var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
+    var _this = possibleConstructorReturn(this, (GER.__proto__ || Object.getPrototypeOf(GER)).call(this, options));
 
-        _this._storeClcikedDom = function (ele) {
-            var target = ele.target ? ele.target : ele.srcElement;
-            var info = {
-                time: new Date().getTime()
-            };
-            if (target) {
-                var outerHTML = target.outerHTML;
-                outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
-                // 只保存不为空的属性
-                outerHTML !== '' && (info.outerHTML = outerHTML);
-                target.tagName !== '' && (info.tagName = target.tagName);
-                target.id !== '' && (info.id = target.id);
-                target.className !== '' && (info.className = target.className);
-                target.name !== '' && (info.name = target.name);
-            }
-            _this.breadcrumbs.push(info);
-            _this.breadcrumbs.length > 10 && _this.breadcrumbs.shift();
-        };
+    _this._storeClcikedDom = function (ele) {
+      var target = ele.target ? ele.target : ele.srcElement;
+      var info = {
+        time: new Date().getTime()
+      };
+      if (target) {
+        // 只保存存在的属性
+        target.tagName && (info.tagName = target.tagName);
+        target.id && (info.id = target.id);
+        target.className && (info.className = target.className);
+        target.name && (info.name = target.name);
+        // 不存在id时，遍历父元素
+        if (!target.id) {
+          // 遍历三层父元素
+          var i = 0,
+              parent = target;
+          while (i++ < 3 && parent.parentNode) {
+            if (!parent.parentNode.outerHTML) break;
+            parent = parent.parentNode;
+            if (parent.id) break;
+          }
+          // 如果父元素中有id，则只保存id，保存规则为 父元素层级:id
+          if (parent.id) {
+            info.parentId = i + ':' + parent.id;
+          } else {
+            // 父元素没有id，则保存outerHTML
+            var outerHTML = parent.outerHTML.replace(/>\s+</g, '><'); // 去除空白字符
+            outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
+            info.outerHTML = outerHTML;
+          }
+        }
+      }
+      _this.breadcrumbs.push(info);
+      _this.breadcrumbs.length > 10 && _this.breadcrumbs.shift();
+    };
 
-        _this.breadcrumbs = [];
-        _this.rewriteError();
-        _this.catchClickError();
-        return _this;
+    _this.breadcrumbs = [];
+    _this.rewriteError();
+    _this.rewritePromiseError();
+    _this.catchClickQueue();
+    return _this;
+  }
+
+  createClass(GER, [{
+    key: 'rewriteError',
+    value: function rewriteError() {
+      var _this2 = this,
+          _arguments = arguments;
+
+      var defaultOnerror = window.onerror || utils.noop;
+      window.onerror = function (msg, url, line, col, error) {
+        //有些浏览器没有col
+        col = col || window.event && window.event.errorCharacter || 0;
+        if (!_this2.trigger('error', utils.toArray(_arguments))) {
+          return false;
+        }
+        var reportMsg = msg;
+        if (error && error.stack) {
+          reportMsg = _this2.handleErrorStack(error);
+        } else {
+          reportMsg = _this2._fixMsgByCaller(reportMsg, _arguments.callee.caller); // jshint ignore:line
+        }
+        if (utils.typeDecide(reportMsg, "Event")) {
+          reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
+        }
+        if (reportMsg) {
+          _this2.error({
+            msg: reportMsg,
+            rowNum: line,
+            colNum: col,
+            targetUrl: url,
+            level: 4,
+            breadcrumbs: JSON.stringify(_this2.breadcrumbs)
+          });
+        }
+        defaultOnerror.call(null, msg, url, line, col, error);
+      };
     }
+  }, {
+    key: 'rewritePromiseError',
+    value: function rewritePromiseError() {
+      var _this3 = this,
+          _arguments2 = arguments;
 
-    createClass(GER, [{
-        key: 'rewriteError',
-        value: function rewriteError() {
-            var _this2 = this,
-                _arguments = arguments;
+      var defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
+      window.onunhandledrejection = function (error) {
+        if (!_this3.trigger('error', utils.toArray(_arguments2))) {
+          return false;
+        }
 
-            var defaultOnerror = window.onerror || utils.noop;
-            window.onerror = function (msg, url, line, col, error) {
-                //有些浏览器没有col
-                col = col || window.event && window.event.errorCharacter || 0;
-                if (!_this2.trigger('error', utils.toArray(_arguments))) {
-                    return false;
-                }
-                var reportMsg = msg;
-                if (error && error.stack) {
-                    reportMsg = _this2.handleErrorStack(error);
-                } else {
-                    //不存stack的话，对reportMsg做下处理 
-                    var ext = [];
-                    var f = _arguments.callee.caller,
-                        // jshint ignore:line
-                    c = 3;
-                    //这里只拿三层堆栈信息
-                    while (f && c-- > 0) {
-                        ext.push(f.toString());
-                        if (f === f.caller) {
-                            break; //如果有环
-                        }
-                        f = f.caller;
-                    }
-                    if (ext.length > 0) {
-                        reportMsg += '@' + ext.join(',');
-                    }
-                }
-                if (utils.typeDecide(reportMsg, "Event")) {
-                    reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
-                }
-                if (reportMsg) {
-                    _this2.error({
-                        msg: reportMsg,
-                        rowNum: line,
-                        colNum: col,
-                        targetUrl: url,
-                        level: 4,
-                        breadcrumbs: JSON.stringify(_this2.breadcrumbs)
-                    });
-                }
-                defaultOnerror.call(null, msg, url, line, col, error);
-            };
+        var msg = error.reason && error.reason.message || '';
+        var stackObj = {};
+        if (error.reason && error.reason.stack) {
+          msg = _this3.handleErrorStack(error.reason);
+          stackObj = _this3._parseErrorStack(error.reason.stack);
+        } else {
+          msg = _this3._fixMsgByCaller(msg, _arguments2.callee.caller); // jshint ignore:line
         }
-        // 处理onerror返回的error.stack
+        if (msg) {
+          _this3.error({
+            msg: msg,
+            rowNum: stackObj.line || 0,
+            colNum: stackObj.col || 0,
+            targetUrl: stackObj.targetUrl || '',
+            level: 4,
+            breadcrumbs: JSON.stringify(_this3.breadcrumbs)
+          });
+        }
+        defaultUnhandledRejection.call(null, error);
+      };
+    }
+    //不存在stack的话，取调用栈信息
 
-    }, {
-        key: 'handleErrorStack',
-        value: function handleErrorStack(error) {
-            var stackMsg = error.stack;
-            var errorMsg = error.toString();
-            if (errorMsg) {
-                if (stackMsg.indexOf(errorMsg) === -1) {
-                    stackMsg += '@' + errorMsg;
-                }
-            } else {
-                stackMsg = '';
-            }
-            return stackMsg;
+  }, {
+    key: '_fixMsgByCaller',
+    value: function _fixMsgByCaller(msg, caller) {
+      var ext = [];
+      var f = caller,
+          c = 3;
+      //这里只拿三层堆栈信息
+      while (f && c-- > 0) {
+        ext.push(f.toString());
+        if (f === f.caller) {
+          break; //如果有环
         }
-    }, {
-        key: 'catchClickError',
-        value: function catchClickError() {
-            if (window.addEventListener) {
-                if ('ontouchstart' in document.documentElement) {
-                    window.addEventListener('touchstart', this._storeClcikedDom, !0);
-                } else {
-                    window.addEventListener('click', this._storeClcikedDom, !0);
-                }
-            } else {
-                document.attachEvent("onclick", this._storeClcikedDom);
-            }
+        f = f.caller;
+      }
+      if (ext.length > 0) {
+        msg += '@' + ext.join(',');
+      }
+      return msg;
+    }
+    // 从报错信息中获取行号、列号、url
+
+  }, {
+    key: '_parseErrorStack',
+    value: function _parseErrorStack(stack) {
+      var stackObj = {};
+      var stackArr = stack.split('at');
+      // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
+      var info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
+      // 以冒号拆分
+      var errorInfoArr = info.split(':');
+      var len = errorInfoArr.length;
+      // 行号、列号在最后位置
+      stackObj.col = errorInfoArr[len - 1];
+      stackObj.line = errorInfoArr[len - 2];
+      // 删除最后两个（行号、列号）
+      errorInfoArr.splice(len - 2, 2);
+      stackObj.targetUrl = errorInfoArr.join(':');
+      return stackObj;
+    }
+    // 处理onerror返回的error.stack
+
+  }, {
+    key: 'handleErrorStack',
+    value: function handleErrorStack(error) {
+      var stackMsg = error.stack;
+      var errorMsg = error.toString();
+      if (errorMsg) {
+        if (stackMsg.indexOf(errorMsg) === -1) {
+          stackMsg += '@' + errorMsg;
         }
-    }]);
-    return GER;
+      } else {
+        stackMsg = '';
+      }
+      return stackMsg;
+    }
+  }, {
+    key: 'catchClickQueue',
+    value: function catchClickQueue() {
+      if (window.addEventListener) {
+        if ('ontouchstart' in document.documentElement) {
+          window.addEventListener('touchstart', this._storeClcikedDom, !0);
+        } else {
+          window.addEventListener('click', this._storeClcikedDom, !0);
+        }
+      } else {
+        document.attachEvent("onclick", this._storeClcikedDom);
+      }
+    }
+  }]);
+  return GER;
 }(Events$1(Localstroage$1(Report$1(proxy(Config)))));
 
 /**
