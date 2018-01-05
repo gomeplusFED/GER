@@ -12,5 +12,26 @@
     	<script type="text/javascript" src="http://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.js"></script>
         <script src="../dist/ger.js"></script>
         <script src="./js/main.js"></script>
+        <script>
+          var ger = new GER({
+              url: 'http://localhost:80'
+          });
+
+          ger.on('beforeReport', function () {
+            console.log('beforeReport');
+          });
+          ger.on('beforeSend', function () {
+            console.log('beforeSend');
+          });
+          ger.on('afterReport', function () {
+            console.log('afterReport');
+          });
+
+//          ger.set('url', 'http://localhost:81');
+          ger.error('hhhh');
+//          ger.send(function (url) {
+//            console.log(url);
+//          });
+        </script>
     </body>
 </html>

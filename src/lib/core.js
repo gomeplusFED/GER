@@ -4,14 +4,15 @@
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
+import Report from 'fe-report';
 import utils from './utils';
-import events from './events';
+// import events from './events';
 import config from './config';
 import localStorage from './localStorage';
 import report from './report';
 import proxy from './proxy';
 // utils.fixedObjDefined();
-class GER extends events(localStorage(report(proxy(config)))) {
+class GER extends localStorage(report(proxy(config(Report)))) {
   constructor(options) {
     super(options);
     this.breadcrumbs = [];

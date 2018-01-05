@@ -9,15 +9,21 @@ import utils from "./utils";
 let Report = ( supperclass ) => class extends supperclass {
     constructor( options ) {
         super( options );
-        this.errorQueue = [];
         this.repeatList = {};
-        this.url = this.config.url + '?err_msg=';
         [ 'log', 'debug', 'info', 'warn', 'error' ].forEach( ( type, index ) => {
             this[ type ] = ( msg ) => {
                 return this.handleMsg( msg, type, index );
             };
         } );
-
+        // 发从之前存储数据
+        this.on('beforeSend', ()=>{
+          this.queue.get.map( obj => {
+            this.setItem( obj );
+          });
+          this.queue.post.map( obj => {
+            this.setItem( obj );
+          });
+        });
     }
     repeat( error ) {
         let rowNum = error.rowNum || '';
@@ -26,40 +32,9 @@ let Report = ( supperclass ) => class extends supperclass {
         this.repeatList[ repeatName ] = this.repeatList[ repeatName ] ? this.repeatList[ repeatName ] + 1 : 1;
         return this.repeatList[ repeatName ] > this.config.repeat;
     }
-    request( url, cb ) {
-        let img = new window.Image();
-        img.onload = cb;
-        img.src = url;
-    }
-    report( cb ) {
-        let mergeReport = this.config.mergeReport;
-				if(this.errorQueue.length === 0) return this.url;
-        let curQueue = mergeReport ? this.errorQueue : [ this.errorQueue.shift() ];
-        if(mergeReport) this.errorQueue = [];
-        // 合并上报
-        let parames = curQueue.map( obj => {
-            this.setItem( obj );
-            return utils.serializeObj( obj );
-        } ).join( '|' );
-        let url = this.url + parames;
-        this.request( url, () => {
-            if ( cb ) {
-                cb.call( this );
-            }
-            this.trigger( 'afterReport' );
-        } );
-        return url;
-    }
     // 发送
     send( cb ) {
-        if ( !this.trigger( 'beforeReport' ) ) return;
-        let callback = cb || utils.noop;
-        let delay = this.config.mergeReport ? this.config.delay : 0;
-
-        setTimeout( () => {
-            this.report( callback );
-        }, delay );
-
+       this.delayReport(cb);
     }
     except( error ) {
         let oExcept = this.config.except;
@@ -79,19 +54,10 @@ let Report = ( supperclass ) => class extends supperclass {
 
     }
     // push错误到pool
-    catchError( error ) {
-        var rnd = Math.random();
-        if ( rnd >= this.config.random ) {
-            return false;
-        }
-        if ( this.repeat( error ) ) {
-            return false;
-        }
-        if ( this.except( error ) ) {
-            return false;
-        }
-        this.errorQueue.push( error );
-        return this.errorQueue;
+    catchError( error, type ) {
+        type = type || 'get';
+        this.catchData(type, error);
+        return this.queue[type];
     }
     // 手动上报 
     handleMsg( msg, type, level ) {
@@ -116,9 +82,10 @@ let Report = ( supperclass ) => class extends supperclass {
             level: level
         };
         errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
-        if ( this.catchError( errorMsg ) ) {
-            this.send();
-        }
+
+         if ( !this.repeat( errorMsg ) && !this.except( errorMsg )) {
+            this.reportByGet(errorMsg);
+         }
         return errorMsg;
     }
 };
