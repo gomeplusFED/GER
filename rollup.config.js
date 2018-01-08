@@ -1,6 +1,7 @@
 import babel from 'rollup-plugin-babel';
 import uglify from 'rollup-plugin-uglify';
 import commonjs from "rollup-plugin-commonjs";
+import resolve from 'rollup-plugin-node-resolve';
 var config = {
     entry: process.env.entry,
     format: 'umd',
@@ -18,6 +19,10 @@ var config = {
             presets: ['es2015-rollup', 'stage-0'],
             plugins: ['transform-class-properties']
         }),
+          resolve({
+            jsnext: true,
+            main: true
+          })
     ],
     dest: process.env.dest
 };
