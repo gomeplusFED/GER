@@ -1047,6 +1047,8 @@ var proxy = function proxy(supperclass) {
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
+// utils.fixedObjDefined();
+
 var GER = function (_events) {
   inherits(GER, _events);
 
