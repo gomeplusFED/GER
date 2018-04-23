@@ -4,6 +4,28 @@
 	(global.GER = factory());
 }(this, (function () {
 
+var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+
+
+function unwrapExports (x) {
+	return x && x.__esModule ? x['default'] : x;
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var index_min = createCommonjsModule(function (module, exports) {
+/*!
+ * @version 0.1.0
+ * @date 2018-01-10
+ */
+!function(e,t){"object"===typeof exports&&"object"===typeof module?module.exports=t():"function"===typeof define&&define.amd?define([],t):"object"===typeof exports?exports["fe-report"]=t():e["fe-report"]=t();}("undefined"!==typeof self?self:commonjsGlobal,function(){return function(e){function t(r){if(n[r])return n[r].exports;var o=n[r]={i:r,l:!1,exports:{}};return e[r].call(o.exports,o,o.exports,t),o.l=!0,o.exports}var n={};return t.m=e,t.c=n,t.d=function(e,n,r){t.o(e,n)||Object.defineProperty(e,n,{configurable:!1,enumerable:!0,get:r});},t.n=function(e){var n=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(n,"a",n),n},t.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},t.p="",t(t.s=0)}([function(e,t,n){"use strict";function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function o(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!==typeof t&&"function"!==typeof t?e:t}function i(e,t){if("function"!==typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t);}Object.defineProperty(t,"__esModule",{value:!0});var u=n(1),a=n(2),s=function(){function e(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r);}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}(),f=function(e){function t(e){r(this,t);var n=o(this,(t.__proto__||Object.getPrototypeOf(t)).call(this)),i={dataKey:"",mergeReport:!0,delay:1e3,url:"",getPath:"",postPath:"",random:1};return n.config=a.a.assignObject(i,e),n.queue={get:[],post:[]},n.getUrl=n.config.url+n.config.getPath,n.postUrl=n.config.url+n.config.postPath,n}return i(t,e),s(t,[{key:"reportByGet",value:function(e){this.sendData("get",e);}},{key:"reportByPost",value:function(e){this.sendData("post",e);}},{key:"sendData",value:function(e,t){this.catchData(e,t)&&this.delayReport();}},{key:"delayReport",value:function(e){var t=this;if(this.trigger("beforeReport")){var n=this.config.mergeReport?this.config.delay:0;setTimeout(function(){t.trigger("beforeSend")&&t.report(e);},n);}}},{key:"catchData",value:function(e,t){return!(Math.random()>=this.config.random)&&(this.queue[e].push(t),this.queue[e])}},{key:"report",value:function(e){var t=this;Promise.all([this.getRequest(),this.postRequest()]).then(function(n){t.trigger("afterReport"),e&&e.call(t,n);});}},{key:"getRequest",value:function(){var e=this;return new Promise(function(t){if(0===e.queue.get.length)t();else{var n=e._getParames("get"),r=e.getUrl+"?"+e.config.dataKey+"="+n,o=new window.Image;o.onload=function(){t(n);},o.src=r;}})}},{key:"postRequest",value:function(){var e=this;return new Promise(function(t){if(0===e.queue.post.length)t();else{var n=e._getParames("post"),r=new XMLHttpRequest;r.onreadystatechange=function(){4==r.readyState&&200==r.status&&t(n);},r.open("POST",e.postUrl,!0),r.setRequestHeader("Content-Type","application/json");var o={};o[e.config.dataKey]=n,r.send(JSON.stringify(o));}})}},{key:"_getParames",value:function(e){var t=this.queue[e],n=this.config.mergeReport,r=n?t:[t.shift()];return n&&(this.queue[e]=[]),r.map(function(e){return a.a.serializeObj(e)}).join("|")}}]),t}(u.a);t.default=f;},function(e,t,n){"use strict";function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var o=function(){function e(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r);}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}(),i=function(){function e(){r(this,e),this.handlers={};}return o(e,[{key:"on",value:function(e,t){return this.handlers[e]=this.handlers[e]||[],this.handlers[e].push(t),this.handlers[e]}},{key:"off",value:function(e){this.handlers[e]&&delete this.handlers[e];}},{key:"trigger",value:function(e,t){var n=this,r=t||[],o=this.handlers[e];return!o||o.every(function(e){return!1!==e.apply(n,r)})}}]),e}();t.a=i;},function(e,t,n){"use strict";var r="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"===typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},o={typeDecide:function(e,t){return Object.prototype.toString.call(e)==="[object "+t+"]"},serializeObj:function(e){var t="";return Object.keys(e).forEach(function(n){o.typeDecide(e[n],"Object")?t+=n+"="+o.stringify(e[n]):t+=n+"="+e[n]+"^";}),encodeURIComponent(t.substr(0,t.length-1))},stringify:function(e){if(window.JSON&&window.JSON.stringify)return JSON.stringify(e);var t="undefined"===typeof e?"undefined":r(e);if("object"!=t||null===e)return"string"==t&&(e='"'+e+'"'),String(e);var n,o,i=[],u=e&&e.constructor==Array,a=arguments.callee;for(n in e)e.hasOwnProperty(n)&&(o=e[n],t="undefined"===typeof o?"undefined":r(o),e.hasOwnProperty(n)&&("string"==t?o='"'+o+'"':"object"==t&&null!==o&&(o=a(o)),i.push((u?"":'"'+n+'":')+String(o))));return(u?"[":"{")+String(i)+(u?"]":"}")},assignObject:function(e,t){for(var n in t)t.hasOwnProperty(n)&&(e[n]=t[n]);return e}};t.a=o;}])});
+});
+
+var Report = unwrapExports(index_min);
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -229,8 +251,7 @@ var utils = {
             flashVer: utils.flashVer(),
             title: document.title,
             screenSize: scr.width + "x" + scr.height,
-            referer: location.hostname ? location.hostname : '',
-            // referer: document.referer ? document.referer : '',
+            referer: document.referer ? document.referer : '',
             host: window.location.protocol + '//' + window.location.hostname
         };
     },
@@ -344,96 +365,56 @@ var utils = {
 
 /**
  * @author  zdongh2016
- * @fileoverview
+ * @fileoverview config
  * @date 2017/02/16
  */
 
-var Events$1 = function Events(supperclass) {
+var config = {
+    proxyAll: false,
+    mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
+    delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
+    dataKey: 'err_msg', //上报数据的属性名，用于服务器获取数据
+    url: '', // 指定错误上报地址
+    getPath: '/read.gif', // get请求路径
+    postPath: '/post/jserr', // post请求路径
+    except: [/^Script error\.?/, /^Javascript error: Script error\.? on line 0/], // 忽略某个错误
+    random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
+    repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
+    errorLSSign: 'mx-error', // error错误数自增 0
+    maxErrorCookieNo: 20, // error错误数自增 最大的错
+    validTime: 7
+};
+
+var Config$1 = function Config(supperclass) {
     return function (_supperclass) {
         inherits(_class, _supperclass);
 
         function _class(options) {
             classCallCheck(this, _class);
 
-            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
+            var assignConfig = utils.assignObject(config, options);
 
-            _this.handlers = {};
+            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, assignConfig));
+
+            _this.config = assignConfig;
             return _this;
         }
 
         createClass(_class, [{
-            key: "on",
-            value: function on(event, handler) {
-                this.handlers[event] = this.handlers[event] || [];
-                this.handlers[event].push(handler);
-                return this.handlers[event];
+            key: 'get',
+            value: function get$$1(name) {
+                return this.config[name];
             }
         }, {
-            key: "off",
-            value: function off(event) {
-                if (this.handlers[event]) {
-                    delete this.handlers[event];
-                }
-            }
-        }, {
-            key: "trigger",
-            value: function trigger(event, args) {
-                var _this2 = this;
-
-                var arg = args || [];
-                var funcs = this.handlers[event];
-                if (funcs) {
-                    return funcs.every(function (f) {
-                        var ret = f.apply(_this2, arg);
-                        return ret === false ? false : true;
-                    });
-                }
-                return true;
+            key: 'set',
+            value: function set$$1(name, value) {
+                this.config[name] = value;
+                return this.config[name];
             }
         }]);
         return _class;
     }(supperclass);
 };
-
-/**
- * @author  zdongh2016
- * @fileoverview config
- * @date 2017/02/16
- */
-
-var Config = function () {
-    function Config(options) {
-        classCallCheck(this, Config);
-
-        this.config = {
-            proxyAll: false,
-            mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
-            delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
-            url: "ewewe", // 指定错误上报地址
-            except: [/^Script error\.?/, /^Javascript error: Script error\.? on line 0/], // 忽略某个错误
-            random: 1, // 抽样上报，1~0 之间数值，1为100%上报（默认 1）
-            repeat: 5, // 重复上报次数(对于同一个错误超过多少次不上报)
-            errorLSSign: 'mx-error', // error错误数自增 0
-            maxErrorCookieNo: 20, // error错误数自增 最大的错
-            validTime: 7
-        };
-        this.config = utils.assignObject(this.config, options);
-    }
-
-    createClass(Config, [{
-        key: 'get',
-        value: function get$$1(name) {
-            return this.config[name];
-        }
-    }, {
-        key: 'set',
-        value: function set$$1(name, value) {
-            this.config[name] = value;
-            return this.config[name];
-        }
-    }]);
-    return Config;
-}();
 
 /**
  * @author suman
@@ -443,125 +424,127 @@ var Config = function () {
 var hasLocal = !!window.localStorage;
 
 function InertLocalFunc(funcA, funcB) {
-    return hasLocal ? funcA : funcB;
+  return hasLocal ? funcA : funcB;
 }
 
 function callByArgs(func, args, global) {
-    return func.apply(global, args);
+  return func.apply(global, args);
 }
 
 var storage = {
-    //设置cookie内json的key名
-    getKey: function getKey(errorObj) {
-        var isValid = function isValid(name) {
-            return errorObj[name];
-        };
-        return ['msg', 'colNum', 'rowNum'].filter(isValid).map(isValid).join('@');
-    },
-    //检查是否有效
-    deleteExpiresItem: function deleteExpiresItem(data) {
-        var oData = data ? utils.parse(data) : {};
+  //设置cookie内json的key名
+  getKey: function getKey(errorObj) {
+    var isValid = function isValid(name) {
+      return errorObj[name];
+    };
+    return ['msg', 'colNum', 'rowNum'].filter(isValid).map(isValid).join('@');
+  },
+  //检查是否有效
+  deleteExpiresItem: function deleteExpiresItem(data) {
+    var oData = data ? utils.parse(data) : {};
 
-        var date = +new Date();
-        for (var key in oData) {
-            if (oData[key].expiresTime <= date) {
-                delete oData[key];
-            }
-        }
-        return oData;
-    },
-    //设置失效时间
-    getEpires: function getEpires(validTime) {
-        return +new Date() + 1000 * 60 * 60 * 24 * validTime;
-    },
-    limitError: function limitError(source, number) {
-        var keys = Object.keys(source);
-        if (keys.length >= number) {
-            delete source[keys[0]];
-        }
-        return source;
-    },
-    //获取cookie/localStorage内容体
-    setInfo: function setInfo(key, errorObj, validTime, max) {
-        var source = storage.getItem(key);
-        if (errorObj) {
-            var name = storage.getKey(errorObj);
-            source = this.limitError(source, max);
-            source[name] = {
-                expiresTime: storage.getEpires(validTime),
-                value: errorObj.msg
-            };
-        }
-        return utils.stringify(source);
-    },
-    //设置cookie/localStorage
-    setItem: InertLocalFunc(function () {
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
+    var date = +new Date();
+    for (var key in oData) {
+      if (oData[key].expiresTime <= date) {
+        delete oData[key];
+      }
+    }
+    return oData;
+  },
+  //设置失效时间
+  getEpires: function getEpires(validTime) {
+    return +new Date() + 1000 * 60 * 60 * 24 * validTime;
+  },
+  limitError: function limitError(source, number) {
+    var keys = Object.keys(source);
+    if (keys.length >= number) {
+      delete source[keys[0]];
+    }
+    return source;
+  },
+  //获取cookie/localStorage内容体
+  setInfo: function setInfo(key, errorObj, validTime, max) {
+    var source = storage.getItem(key);
+    if (errorObj) {
+      var name = storage.getKey(errorObj);
+      source = this.limitError(source, max);
+      source[name] = {
+        expiresTime: storage.getEpires(validTime),
+        value: errorObj.msg
+      };
+    }
+    return utils.stringify(source);
+  },
+  //设置cookie/localStorage
+  setItem: InertLocalFunc(function () {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
 
-        localStorage.setItem(args[0], callByArgs(storage.setInfo, args, storage));
-    }, function () {
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
-        }
+    try {
+      localStorage.setItem(args[0], callByArgs(storage.setInfo, args, storage));
+    } catch (e) {}
+  }, function () {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
 
-        utils.addCookie(args[0], callByArgs(storage.setInfo, args, storage));
-    }),
-    //获取cookie/localStorage
-    getItem: InertLocalFunc(function (key) {
-        return storage.deleteExpiresItem(localStorage.getItem(key));
-    }, function (key) {
-        return storage.deleteExpiresItem(utils.getCookie(key));
-    }),
-    //清除cookie/localStorage
-    clear: InertLocalFunc(function (key) {
-        return key ? localStorage.removeItem(key) : localStorage.clear();
-    }, function (key) {
-        return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
-    })
+    utils.addCookie(args[0], callByArgs(storage.setInfo, args, storage));
+  }),
+  //获取cookie/localStorage
+  getItem: InertLocalFunc(function (key) {
+    return storage.deleteExpiresItem(localStorage.getItem(key));
+  }, function (key) {
+    return storage.deleteExpiresItem(utils.getCookie(key));
+  }),
+  //清除cookie/localStorage
+  clear: InertLocalFunc(function (key) {
+    return key ? localStorage.removeItem(key) : localStorage.clear();
+  }, function (key) {
+    return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
+  })
 };
 
 var Localstroage$1 = function Localstroage(supperclass) {
-    return function (_supperclass) {
-        inherits(_class, _supperclass);
+  return function (_supperclass) {
+    inherits(_class, _supperclass);
 
-        function _class(options) {
-            classCallCheck(this, _class);
+    function _class(options) {
+      classCallCheck(this, _class);
 
-            var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
+      var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
 
-            _this.setItem();
-            return _this;
-        }
-        //得到元素值 获取元素值 若不存在则返回''
+      _this.setItem();
+      return _this;
+    }
+    //得到元素值 获取元素值 若不存在则返回''
 
 
-        createClass(_class, [{
-            key: 'getItem',
-            value: function getItem(key) {
-                return storage.getItem(key);
-            }
-            // 设置一条localstorage或cookie
+    createClass(_class, [{
+      key: 'getItem',
+      value: function getItem(key) {
+        return storage.getItem(key);
+      }
+      // 设置一条localstorage或cookie
 
-        }, {
-            key: 'setItem',
-            value: function setItem(errorObj) {
-                var _config = this.config;
-                storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
-                return utils.stringify(errorObj);
-            }
+    }, {
+      key: 'setItem',
+      value: function setItem(errorObj) {
+        var _config = this.config;
+        storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
+        return utils.stringify(errorObj);
+      }
 
-            //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
+      //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
-        }, {
-            key: 'clear',
-            value: function clear(key) {
-                storage.clear(key);
-            }
-        }]);
-        return _class;
-    }(supperclass);
+    }, {
+      key: 'clear',
+      value: function clear(key) {
+        storage.clear(key);
+      }
+    }]);
+    return _class;
+  }(supperclass);
 };
 
 /**
@@ -579,15 +562,21 @@ var Report$1 = function Report(supperclass) {
 
             var _this = possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, options));
 
-            _this.errorQueue = [];
             _this.repeatList = {};
-            _this.url = _this.config.url + '?err_msg=';
             ['log', 'debug', 'info', 'warn', 'error'].forEach(function (type, index) {
                 _this[type] = function (msg) {
                     return _this.handleMsg(msg, type, index);
                 };
             });
-
+            // 发从之前存储数据
+            _this.on('beforeSend', function () {
+                _this.queue.get.map(function (obj) {
+                    _this.setItem(obj);
+                });
+                _this.queue.post.map(function (obj) {
+                    _this.setItem(obj);
+                });
+            });
             return _this;
         }
 
@@ -600,50 +589,12 @@ var Report$1 = function Report(supperclass) {
                 this.repeatList[repeatName] = this.repeatList[repeatName] ? this.repeatList[repeatName] + 1 : 1;
                 return this.repeatList[repeatName] > this.config.repeat;
             }
-        }, {
-            key: 'request',
-            value: function request(url, cb) {
-                var img = new window.Image();
-                img.onload = cb;
-                img.src = url;
-            }
-        }, {
-            key: 'report',
-            value: function report(cb) {
-                var _this2 = this;
-
-                var mergeReport = this.config.mergeReport;
-                if (this.errorQueue.length === 0) return this.url;
-                var curQueue = mergeReport ? this.errorQueue : [this.errorQueue.shift()];
-                if (mergeReport) this.errorQueue = [];
-                // 合并上报
-                var parames = curQueue.map(function (obj) {
-                    _this2.setItem(obj);
-                    return utils.serializeObj(obj);
-                }).join('|');
-                var url = this.url + parames;
-                this.request(url, function () {
-                    if (cb) {
-                        cb.call(_this2);
-                    }
-                    _this2.trigger('afterReport');
-                });
-                return url;
-            }
             // 发送
 
         }, {
             key: 'send',
             value: function send(cb) {
-                var _this3 = this;
-
-                if (!this.trigger('beforeReport')) return;
-                var callback = cb || utils.noop;
-                var delay = this.config.mergeReport ? this.config.delay : 0;
-
-                setTimeout(function () {
-                    _this3.report(callback);
-                }, delay);
+                this.delayReport(cb);
             }
         }, {
             key: 'except',
@@ -666,19 +617,10 @@ var Report$1 = function Report(supperclass) {
 
         }, {
             key: 'catchError',
-            value: function catchError(error) {
-                var rnd = Math.random();
-                if (rnd >= this.config.random) {
-                    return false;
-                }
-                if (this.repeat(error)) {
-                    return false;
-                }
-                if (this.except(error)) {
-                    return false;
-                }
-                this.errorQueue.push(error);
-                return this.errorQueue;
+            value: function catchError(error, type) {
+                type = type || 'get';
+                this.catchData(type, error);
+                return this.queue[type];
             }
             // 手动上报 
 
@@ -706,8 +648,9 @@ var Report$1 = function Report(supperclass) {
                     level: level
                 };
                 errorMsg = utils.assignObject(utils.getSystemParams(), errorMsg);
-                if (this.catchError(errorMsg)) {
-                    this.send();
+
+                if (!this.repeat(errorMsg) && !this.except(errorMsg)) {
+                    this.reportByGet(errorMsg);
                 }
                 return errorMsg;
             }
@@ -1047,10 +990,11 @@ var proxy = function proxy(supperclass) {
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
+// import events from './events';
 // utils.fixedObjDefined();
 
-var GER = function (_events) {
-  inherits(GER, _events);
+var GER = function (_localStorage) {
+  inherits(GER, _localStorage);
 
   function GER(options) {
     classCallCheck(this, GER);
@@ -1240,7 +1184,7 @@ var GER = function (_events) {
     }
   }]);
   return GER;
-}(Events$1(Localstroage$1(Report$1(proxy(Config)))));
+}(Localstroage$1(Report$1(proxy(Config$1(Report)))));
 
 /**
  * @author xiaojue
