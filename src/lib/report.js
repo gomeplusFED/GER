@@ -81,7 +81,7 @@ let Report = ( supperclass ) => class extends supperclass {
             msg: msg,
             level: level
         };
-        errorMsg = utils.assignObject( utils.getSystemParams(), errorMsg );
+        errorMsg = utils.assignObject( utils.getSystemParams(this.config), errorMsg );
 
          if ( !this.repeat( errorMsg ) && !this.except( errorMsg )) {
             this.reportByGet(errorMsg);

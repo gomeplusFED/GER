@@ -6,6 +6,11 @@
 
 import utils from './utils';
 const config = {
+	isHybrid:false,
+	hybridInfo:{
+		host:'template id', //必选，标明是什么模板
+		//其他你想传的参数，最后都会merge到SystemParams上
+	},
   proxyAll: false,
   mergeReport: true, // mergeReport 是否合并上报， false 关闭， true 启动（默认）
   delay: 1000, // 当 mergeReport 为 true 可用，延迟多少毫秒，合并缓冲区中的上报（默认）
