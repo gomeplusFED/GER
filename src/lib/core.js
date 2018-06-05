@@ -100,19 +100,27 @@ class GER extends localStorage(report(proxy(config(Report)))) {
     }
     // 从报错信息中获取行号、列号、url
   _parseErrorStack(stack) {
-      const stackObj = {};
-      const stackArr = stack.split('at');
-      // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
-      const info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
-      // 以冒号拆分
-      const errorInfoArr = info.split(':');
-      const len = errorInfoArr.length;
-      // 行号、列号在最后位置
-      stackObj.col = errorInfoArr[len - 1];
-      stackObj.line = errorInfoArr[len - 2];
-      // 删除最后两个（行号、列号）
-      errorInfoArr.splice(len - 2, 2);
-      stackObj.targetUrl = errorInfoArr.join(':');
+      let stackObj = {};
+      try {
+        // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
+        let stackArr = stack.split('at');
+        let info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
+        // 以冒号拆分
+        let errorInfoArr = info.split(':');
+        let len = errorInfoArr.length;
+        // 行号、列号在最后位置
+        stackObj.col = errorInfoArr[len - 1];
+        stackObj.line = errorInfoArr[len - 2];
+        // 删除最后两个（行号、列号）
+        errorInfoArr.splice(len - 2, 2);
+        stackObj.targetUrl = errorInfoArr.join(':');
+      } catch (e) {
+        stackObj = {
+          col: 0,
+          line: 0,
+          targetUrl: ''
+        };
+      }
       return stackObj
     }
     // 处理onerror返回的error.stack
@@ -156,7 +164,7 @@ class GER extends localStorage(report(proxy(config(Report)))) {
         let i = 0,
           parent = target;
         while (i++ < 3 && parent.parentNode) {
-					if(!parent.parentNode.outerHTML) break;
+          if (!parent.parentNode.outerHTML) break;
           parent = parent.parentNode;
           if (parent.id) break;
         }
