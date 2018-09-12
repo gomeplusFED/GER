@@ -55,7 +55,7 @@ class GER extends localStorage(report(proxy(config(Report)))) {
   rewritePromiseError() {
       const defaultUnhandledRejection = window.onunhandledrejection || utils.noop;;
       window.onunhandledrejection = (error) => {
-        if (!this.trigger('error', utils.toArray(arguments))) {
+        if (!this.trigger('error', error)) {
           return false;
         }
 

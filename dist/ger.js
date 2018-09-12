@@ -1099,7 +1099,7 @@ var GER = function (_localStorage) {
 
       var defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
       window.onunhandledrejection = function (error) {
-        if (!_this3.trigger('error', utils.toArray(_arguments2))) {
+        if (!_this3.trigger('error', error)) {
           return false;
         }
 
