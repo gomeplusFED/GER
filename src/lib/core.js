@@ -25,7 +25,7 @@ class GER extends localStorage(report(proxy(config(Report)))) {
     window.onerror = (msg, url, line, col, error) => {
       //有些浏览器没有col
       col = col || (window.event && window.event.errorCharacter) || 0;
-      if (!this.trigger('error', utils.toArray(arguments))) {
+      if (!this.trigger('error', [msg,url,line,col,error])) {
         return false;
       }
       var reportMsg = msg;

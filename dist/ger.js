@@ -1066,7 +1066,7 @@ var GER = function (_localStorage) {
       window.onerror = function (msg, url, line, col, error) {
         //有些浏览器没有col
         col = col || window.event && window.event.errorCharacter || 0;
-        if (!_this2.trigger('error', utils.toArray(_arguments))) {
+        if (!_this2.trigger('error', [msg, url, line, col, error])) {
           return false;
         }
         var reportMsg = msg;
@@ -1151,18 +1151,26 @@ var GER = function (_localStorage) {
     key: '_parseErrorStack',
     value: function _parseErrorStack(stack) {
       var stackObj = {};
-      var stackArr = stack.split('at');
-      // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
-      var info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
-      // 以冒号拆分
-      var errorInfoArr = info.split(':');
-      var len = errorInfoArr.length;
-      // 行号、列号在最后位置
-      stackObj.col = errorInfoArr[len - 1];
-      stackObj.line = errorInfoArr[len - 2];
-      // 删除最后两个（行号、列号）
-      errorInfoArr.splice(len - 2, 2);
-      stackObj.targetUrl = errorInfoArr.join(':');
+      try {
+        // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
+        var stackArr = stack.split('at');
+        var info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
+        // 以冒号拆分
+        var errorInfoArr = info.split(':');
+        var len = errorInfoArr.length;
+        // 行号、列号在最后位置
+        stackObj.col = errorInfoArr[len - 1];
+        stackObj.line = errorInfoArr[len - 2];
+        // 删除最后两个（行号、列号）
+        errorInfoArr.splice(len - 2, 2);
+        stackObj.targetUrl = errorInfoArr.join(':');
+      } catch (e) {
+        stackObj = {
+          col: 0,
+          line: 0,
+          targetUrl: ''
+        };
+      }
       return stackObj;
     }
     // 处理onerror返回的error.stack
