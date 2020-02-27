@@ -1,5 +1,5 @@
 var error_report = new GER({
-  url: 'https://beacon.sinajs.cn/read.gif',
+  url: 'http://10.198.144.143',
   repeat: 2,
   delay: 2000,
   validTime: 3,
