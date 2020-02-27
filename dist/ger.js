@@ -1036,10 +1036,10 @@ var GER = function (_localStorage) {
           }
           // 如果父元素中有id，则只保存id，保存规则为 父元素层级:id
           if (parent.id) {
-            info.parentId = i + ':' + parent.id;
+            info.parentId = i + ":" + parent.id;
           } else {
             // 父元素没有id，则保存outerHTML
-            var outerHTML = parent.outerHTML.replace(/>\s+</g, '><'); // 去除空白字符
+            var outerHTML = parent.outerHTML.replace(/>\s+</g, "><"); // 去除空白字符
             outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
             info.outerHTML = outerHTML;
           }
@@ -1057,7 +1057,7 @@ var GER = function (_localStorage) {
   }
 
   createClass(GER, [{
-    key: 'rewriteError',
+    key: "rewriteError",
     value: function rewriteError() {
       var _this2 = this,
           _arguments = arguments;
@@ -1066,7 +1066,7 @@ var GER = function (_localStorage) {
       window.onerror = function (msg, url, line, col, error) {
         //有些浏览器没有col
         col = col || window.event && window.event.errorCharacter || 0;
-        if (!_this2.trigger('error', [msg, url, line, col, error])) {
+        if (!_this2.trigger("error", [msg, url, line, col, error])) {
           return false;
         }
         var reportMsg = msg;
@@ -1092,33 +1092,30 @@ var GER = function (_localStorage) {
       };
     }
   }, {
-    key: 'rewritePromiseError',
+    key: "rewritePromiseError",
     value: function rewritePromiseError() {
-      var _this3 = this,
-          _arguments2 = arguments;
-
       var defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
       window.onunhandledrejection = function (error) {
-        if (!_this3.trigger('error', error)) {
+        if (!this.trigger("error", error)) {
           return false;
         }
 
-        var msg = error.reason && error.reason.message || '';
+        var msg = error.reason && error.reason.message || "";
         var stackObj = {};
         if (error.reason && error.reason.stack) {
-          msg = _this3.handleErrorStack(error.reason);
-          stackObj = _this3._parseErrorStack(error.reason.stack);
+          msg = this.handleErrorStack(error.reason);
+          stackObj = this._parseErrorStack(error.reason.stack);
         } else {
-          msg = _this3._fixMsgByCaller(msg, _arguments2.callee.caller); // jshint ignore:line
+          msg = this._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
         }
         if (msg) {
-          _this3.error({
+          this.error({
             msg: msg,
             rowNum: stackObj.line || 0,
             colNum: stackObj.col || 0,
-            targetUrl: stackObj.targetUrl || '',
+            targetUrl: stackObj.targetUrl || "",
             level: 4,
-            breadcrumbs: JSON.stringify(_this3.breadcrumbs)
+            breadcrumbs: JSON.stringify(this.breadcrumbs)
           });
         }
         defaultUnhandledRejection.call(null, error);
@@ -1127,7 +1124,7 @@ var GER = function (_localStorage) {
     //不存在stack的话，取调用栈信息
 
   }, {
-    key: '_fixMsgByCaller',
+    key: "_fixMsgByCaller",
     value: function _fixMsgByCaller(msg, caller) {
       var ext = [];
       var f = caller,
@@ -1141,34 +1138,34 @@ var GER = function (_localStorage) {
         f = f.caller;
       }
       if (ext.length > 0) {
-        msg += '@' + ext.join(',');
+        msg += "@" + ext.join(",");
       }
       return msg;
     }
     // 从报错信息中获取行号、列号、url
 
   }, {
-    key: '_parseErrorStack',
+    key: "_parseErrorStack",
     value: function _parseErrorStack(stack) {
       var stackObj = {};
       try {
         // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
-        var stackArr = stack.split('at');
-        var info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
+        var stackArr = stack.split("at");
+        var info = stackArr[1].match(/http.*/)[0].replace(/\)$/, "");
         // 以冒号拆分
-        var errorInfoArr = info.split(':');
+        var errorInfoArr = info.split(":");
         var len = errorInfoArr.length;
         // 行号、列号在最后位置
         stackObj.col = errorInfoArr[len - 1];
         stackObj.line = errorInfoArr[len - 2];
         // 删除最后两个（行号、列号）
         errorInfoArr.splice(len - 2, 2);
-        stackObj.targetUrl = errorInfoArr.join(':');
+        stackObj.targetUrl = errorInfoArr.join(":");
       } catch (e) {
         stackObj = {
           col: 0,
           line: 0,
-          targetUrl: ''
+          targetUrl: ""
         };
       }
       return stackObj;
@@ -1176,27 +1173,27 @@ var GER = function (_localStorage) {
     // 处理onerror返回的error.stack
 
   }, {
-    key: 'handleErrorStack',
+    key: "handleErrorStack",
     value: function handleErrorStack(error) {
       var stackMsg = error.stack;
       var errorMsg = error.toString();
       if (errorMsg) {
         if (stackMsg.indexOf(errorMsg) === -1) {
-          stackMsg += '@' + errorMsg;
+          stackMsg += "@" + errorMsg;
         }
       } else {
-        stackMsg = '';
+        stackMsg = "";
       }
       return stackMsg;
     }
   }, {
-    key: 'catchClickQueue',
+    key: "catchClickQueue",
     value: function catchClickQueue() {
       if (window.addEventListener) {
-        if ('ontouchstart' in document.documentElement) {
-          window.addEventListener('touchstart', this._storeClcikedDom, !0);
+        if ("ontouchstart" in document.documentElement) {
+          window.addEventListener("touchstart", this._storeClcikedDom, !0);
         } else {
-          window.addEventListener('click', this._storeClcikedDom, !0);
+          window.addEventListener("click", this._storeClcikedDom, !0);
         }
       } else {
         document.attachEvent("onclick", this._storeClcikedDom);
