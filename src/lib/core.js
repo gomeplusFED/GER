@@ -59,27 +59,28 @@ class GER extends localStorage(report(proxy(config(Report)))) {
   }
   rewritePromiseError() {
     const defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
+    let self = this;
     window.onunhandledrejection = function(error) {
-      if (!this.trigger("error", error)) {
+      if (!self.trigger("error", error)) {
         return false;
       }
 
       let msg = (error.reason && error.reason.message) || "";
       let stackObj = {};
       if (error.reason && error.reason.stack) {
-        msg = this.handleErrorStack(error.reason);
-        stackObj = this._parseErrorStack(error.reason.stack);
+        msg = self.handleErrorStack(error.reason);
+        stackObj = self._parseErrorStack(error.reason.stack);
       } else {
-        msg = this._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
+        msg = self._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
       }
       if (msg) {
-        this.error({
+        self.error({
           msg: msg,
           rowNum: stackObj.line || 0,
           colNum: stackObj.col || 0,
           targetUrl: stackObj.targetUrl || "",
           level: 4,
-          breadcrumbs: JSON.stringify(this.breadcrumbs)
+          breadcrumbs: JSON.stringify(self.breadcrumbs)
         });
       }
       defaultUnhandledRejection.call(null, error);
