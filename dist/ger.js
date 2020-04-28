@@ -1095,27 +1095,28 @@ var GER = function (_localStorage) {
     key: "rewritePromiseError",
     value: function rewritePromiseError() {
       var defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
+      var self = this;
       window.onunhandledrejection = function (error) {
-        if (!this.trigger("error", error)) {
+        if (!self.trigger("error", error)) {
           return false;
         }
 
         var msg = error.reason && error.reason.message || "";
         var stackObj = {};
         if (error.reason && error.reason.stack) {
-          msg = this.handleErrorStack(error.reason);
-          stackObj = this._parseErrorStack(error.reason.stack);
+          msg = self.handleErrorStack(error.reason);
+          stackObj = self._parseErrorStack(error.reason.stack);
         } else {
-          msg = this._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
+          msg = self._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
         }
         if (msg) {
-          this.error({
+          self.error({
             msg: msg,
             rowNum: stackObj.line || 0,
             colNum: stackObj.col || 0,
             targetUrl: stackObj.targetUrl || "",
             level: 4,
-            breadcrumbs: JSON.stringify(this.breadcrumbs)
+            breadcrumbs: JSON.stringify(self.breadcrumbs)
           });
         }
         defaultUnhandledRejection.call(null, error);
