@@ -197,11 +197,11 @@ var utils = {
                 chromeEval = /\((\S*)(?::(\d+))(?::(\d+))\)/,
 
                 lines = ex.stack.split('\n'),
-                stack = [],
+                // stack = [],
                 submatch,
                 parts,
-                element,
-                reference = /^(.*) is undefined$/.exec(ex.message);
+                element;
+                // ,reference = /^(.*) is undefined$/.exec(ex.message);
             if ((parts = chrome.exec(lines[1]))) {
                 var isNative = parts[2] && parts[2].indexOf('native') === 0; // start of line
                 var isEval = parts[2] && parts[2].indexOf('eval') === 0; // start of line
@@ -216,26 +216,27 @@ var utils = {
                     'line': parts[3] ? +parts[3] : null,
                     'column': parts[4] ? +parts[4] : null
                 };
-            } else if ( parts = winjs.exec(lines[1]) ) {
+            } else if ((parts = winjs.exec(lines[1]))) {
                 element = {
                     'url': parts[2],
                     'line': +parts[3],
                     'column': parts[4] ? +parts[4] : null
                 };
             } else if ((parts = gecko.exec(lines[1]))) {
-                var isEval = parts[3] && parts[3].indexOf(' > eval') > -1;
+                let isEval = parts[3] && parts[3].indexOf(' > eval') > -1;
                 if (isEval && (submatch = geckoEval.exec(parts[3]))) {
                     // throw out eval line/column and use top-most line number
                     parts[3] = submatch[1];
                     parts[4] = submatch[2];
                     parts[5] = null; // no column when eval
-                } else if (i === 0 && !parts[5] && typeof ex.columnNumber !== 'undefined') {
-                    // FireFox uses this awesome columnNumber property for its top frame
-                    // Also note, Firefox's column number is 0-based and everything else expects 1-based,
-                    // so adding 1
-                    // NOTE: this hack doesn't work if top-most frame is eval
-                    stack[0].column = ex.columnNumber + 1;
-                }
+                } 
+                // else if (i === 0 && !parts[5] && typeof ex.columnNumber !== 'undefined') {
+                //     // FireFox uses this awesome columnNumber property for its top frame
+                //     // Also note, Firefox's column number is 0-based and everything else expects 1-based,
+                //     // so adding 1
+                //     // NOTE: this hack doesn't work if top-most frame is eval
+                //     stack[0].column = ex.columnNumber + 1;
+                // }
                 element = {
                     'url': parts[3],
                     'line': parts[4] ? +parts[4] : null,
