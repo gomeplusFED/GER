@@ -1,6 +1,6 @@
 {
   "name": "fe-error-report",
-  "version": "0.3.2",
+  "version": "0.3.11",
   "description": "error report js sdk",
   "main": "dist/ger.js",
   "directories": {
@@ -119,10 +119,12 @@
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^5.0.5",
+    "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-uglify": "^1.0.1",
     "rollup-watch": "^2.5.0"
   },
   "dependencies": {
+    "fe-report": "^0.1.0",
     "highcharts": "^5.0.10",
     "mixin": "^0.2.0",
     "raven-js": "^3.10.0"

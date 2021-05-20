@@ -114,7 +114,7 @@ let proxy = ( supperclass ) => class extends supperclass {
         let typeList = this.consoleList[ type ];
         typeList = typeList || [];
         typeList.push(
-            utils.assignObject( utils.getSystemParams(), {
+            utils.assignObject( utils.getSystemParams(this.config), {
                 msg: msg,
                 level: level,
                 rowNum: '',

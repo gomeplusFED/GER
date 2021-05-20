@@ -1,5 +1,5 @@
 var error_report = new GER({
-  url: 'https://beacon.sinajs.cn/read.gif',
+  url: 'http://10.198.144.143',
   repeat: 2,
   delay: 2000,
   validTime: 3,
@@ -17,10 +17,11 @@ error_report.on('afterReport', function() {
 setTimeout(function() {
   aaaa
 }, 1000);
-
+/*
 test(function() {
   throw new Error('test error');
 });
+*/
 
 //error_report.info('111111111');
 //dfsfsd
@@ -29,9 +30,9 @@ console.log(111);
 console.log(22222222);*/
 
 //error_report.on();
-/*error_report.on('error',function(){
-    console.log(234546576879)
-});*/
+error_report.on('error',function(msg){
+    console.log(msg);
+});
 
 //localStorage.setItem('a', '123245678');
 /*setTimeout(function(){

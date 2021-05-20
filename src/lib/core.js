@@ -4,14 +4,15 @@
  * @date 2017/02/15
  */
 //import 'babel-polyfill';
-import utils from './utils';
-import events from './events';
-import config from './config';
-import localStorage from './localStorage';
-import report from './report';
-import proxy from './proxy';
+import Report from "fe-report";
+import utils from "./utils";
+// import events from './events';
+import config from "./config";
+import localStorage from "./localStorage";
+import report from "./report";
+import proxy from "./proxy";
 // utils.fixedObjDefined();
-class GER extends events(localStorage(report(proxy(config)))) {
+class GER extends localStorage(report(proxy(config(Report)))) {
   constructor(options) {
     super(options);
     this.breadcrumbs = [];
@@ -28,7 +29,7 @@ class GER extends events(localStorage(report(proxy(config)))) {
       let error = e.error;
       //有些浏览器没有col
       col = col || (window.event && window.event.errorCharacter) || 0;
-      if (!this.trigger('error', utils.toArray(arguments))) {
+      if (!this.trigger("error", [msg, url, line, col, error])) {
         return false;
       }
       var reportMsg = msg;
@@ -38,9 +39,14 @@ class GER extends events(localStorage(report(proxy(config)))) {
         reportMsg = this._fixMsgByCaller(reportMsg, arguments.callee.caller); // jshint ignore:line
       }
       if (utils.typeDecide(reportMsg, "Event")) {
-        reportMsg += reportMsg.type ?
-          ("--" + reportMsg.type + "--" + (reportMsg.target ?
-            (reportMsg.target.tagName + "::" + reportMsg.target.src) : "")) : "";
+        reportMsg += reportMsg.type
+          ? "--" +
+            reportMsg.type +
+            "--" +
+            (reportMsg.target
+              ? reportMsg.target.tagName + "::" + reportMsg.target.src
+              : "")
+          : "";
       }
       if (reportMsg) {
         this.error({
@@ -86,7 +92,7 @@ class GER extends events(localStorage(report(proxy(config)))) {
     var f = caller,
       c = 3;
     //这里只拿三层堆栈信息
-    while (f && (c-- > 0)) {
+    while (f && c-- > 0) {
       ext.push(f.toString());
       if (f === f.caller) {
         break; //如果有环
@@ -94,25 +100,33 @@ class GER extends events(localStorage(report(proxy(config)))) {
       f = f.caller;
     }
     if (ext.length > 0) {
-      msg += '@' + ext.join(',');
+      msg += "@" + ext.join(",");
     }
     return msg;
   }
   // 从报错信息中获取行号、列号、url
   _parseErrorStack(stack) {
-    const stackObj = {};
-    const stackArr = stack.split('at');
-    // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
-    const info = stackArr[1].match(/http.*/)[0].replace(/\)$/, '');
-    // 以冒号拆分
-    const errorInfoArr = info.split(':');
-    const len = errorInfoArr.length;
-    // 行号、列号在最后位置
-    stackObj.col = errorInfoArr[len - 1];
-    stackObj.line = errorInfoArr[len - 2];
-    // 删除最后两个（行号、列号）
-    errorInfoArr.splice(len - 2, 2);
-    stackObj.targetUrl = errorInfoArr.join(':');
+    let stackObj = {};
+    try {
+      // 只取第一个堆栈信息，获取包含url、line、col的部分，如果有括号，去除最后的括号
+      let stackArr = stack.split("at");
+      let info = stackArr[1].match(/http.*/)[0].replace(/\)$/, "");
+      // 以冒号拆分
+      let errorInfoArr = info.split(":");
+      let len = errorInfoArr.length;
+      // 行号、列号在最后位置
+      stackObj.col = errorInfoArr[len - 1];
+      stackObj.line = errorInfoArr[len - 2];
+      // 删除最后两个（行号、列号）
+      errorInfoArr.splice(len - 2, 2);
+      stackObj.targetUrl = errorInfoArr.join(":");
+    } catch (e) {
+      stackObj = {
+        col: 0,
+        line: 0,
+        targetUrl: ""
+      };
+    }
     return stackObj;
   }
   // 处理onerror返回的error.stack
@@ -121,25 +135,25 @@ class GER extends events(localStorage(report(proxy(config)))) {
     let errorMsg = error.toString();
     if (errorMsg) {
       if (stackMsg.indexOf(errorMsg) === -1) {
-        stackMsg += '@' + errorMsg;
+        stackMsg += "@" + errorMsg;
       }
     } else {
-      stackMsg = '';
+      stackMsg = "";
     }
     return stackMsg;
   }
   catchClickQueue() {
     if (window.addEventListener) {
-      if ('ontouchstart' in document.documentElement) {
-        window.addEventListener('touchstart', this._storeClcikedDom, !0);
+      if ("ontouchstart" in document.documentElement) {
+        window.addEventListener("touchstart", this._storeClcikedDom, !0);
       } else {
-        window.addEventListener('click', this._storeClcikedDom, !0);
+        window.addEventListener("click", this._storeClcikedDom, !0);
       }
     } else {
       document.attachEvent("onclick", this._storeClcikedDom);
     }
   }
-  _storeClcikedDom(ele) {
+  _storeClcikedDom = ele => {
     const target = ele.target ? ele.target : ele.srcElement;
     let info = {
       time: new Date().getTime()
@@ -162,18 +176,20 @@ class GER extends events(localStorage(report(proxy(config)))) {
         }
         // 如果父元素中有id，则只保存id，保存规则为 父元素层级:id
         if (parent.id) {
-          info.parentId = i + ':' + parent.id;
+          info.parentId = i + ":" + parent.id;
         } else {
           // 父元素没有id，则保存outerHTML
-          let outerHTML = parent.outerHTML.replace(/>\s+</g, '><'); // 去除空白字符
-          outerHTML && outerHTML.length > 200 && (outerHTML = outerHTML.slice(0, 200));
+          let outerHTML = parent.outerHTML.replace(/>\s+</g, "><"); // 去除空白字符
+          outerHTML &&
+            outerHTML.length > 200 &&
+            (outerHTML = outerHTML.slice(0, 200));
           info.outerHTML = outerHTML;
         }
       }
     }
     this.breadcrumbs.push(info);
     this.breadcrumbs.length > 10 && this.breadcrumbs.shift();
-  }
+  };
 }
 
 export default GER;
