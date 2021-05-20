@@ -36,7 +36,7 @@ $ ger.js  ger.min.js
 在下载并且成功构建完成GER后，你需要对他进行初始化配置，初始化方法如下：
 
 ```js
-var errorReport = new GER（ options );
+var errorReport = new GER( options );
 ```
 #### 具体配置信息
 

@@ -21,8 +21,12 @@ class GER extends localStorage(report(proxy(config(Report)))) {
     this.catchClickQueue();
   }
   rewriteError() {
-    let defaultOnerror = window.onerror || utils.noop;
-    window.onerror = (msg, url, line, col, error) => {
+    window.addEventListener('error', function(e) {
+      let msg = e.message;
+      let url = e.filename;
+      let line = e.lineno;
+      let col = e.colno;
+      let error = e.error;
       //有些浏览器没有col
       col = col || (window.event && window.event.errorCharacter) || 0;
       if (!this.trigger("error", [msg, url, line, col, error])) {
@@ -54,37 +58,33 @@ class GER extends localStorage(report(proxy(config(Report)))) {
           breadcrumbs: JSON.stringify(this.breadcrumbs)
         });
       }
-      defaultOnerror.call(null, msg, url, line, col, error);
-    };
+    });
   }
   rewritePromiseError() {
-    const defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
-    let self = this;
-    window.onunhandledrejection = function(error) {
-      if (!self.trigger("error", error)) {
+    window.addEventListener('unhandledrejection', function(error) {
+      if (!this.trigger('error', utils.toArray(arguments))) {
         return false;
       }
 
-      let msg = (error.reason && error.reason.message) || "";
+      let msg = error.reason && error.reason.message || error.reason;
       let stackObj = {};
       if (error.reason && error.reason.stack) {
-        msg = self.handleErrorStack(error.reason);
-        stackObj = self._parseErrorStack(error.reason.stack);
+        msg = this.handleErrorStack(error.reason);
+        stackObj = this._parseErrorStack(error.reason.stack);
       } else {
-        msg = self._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
+        msg = this._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
       }
       if (msg) {
-        self.error({
+        this.error({
           msg: msg,
           rowNum: stackObj.line || 0,
           colNum: stackObj.col || 0,
-          targetUrl: stackObj.targetUrl || "",
+          targetUrl: stackObj.targetUrl || '',
           level: 4,
-          breadcrumbs: JSON.stringify(self.breadcrumbs)
+          breadcrumbs: JSON.stringify(this.breadcrumbs)
         });
       }
-      defaultUnhandledRejection.call(null, error);
-    };
+    });
   }
   //不存在stack的话，取调用栈信息
   _fixMsgByCaller(msg, caller) {
