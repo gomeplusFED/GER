@@ -449,17 +449,21 @@ var storage = {
     var isValid = function isValid(name) {
       return errorObj[name];
     };
-    return ['msg', 'colNum', 'rowNum'].filter(isValid).map(isValid).join('@');
+    return ["msg", "colNum", "rowNum"].filter(isValid).map(isValid).join("@");
   },
   //检查是否有效
   deleteExpiresItem: function deleteExpiresItem(data) {
-    var oData = data ? utils.parse(data) : {};
+    try {
+      var _oData = data ? utils.parse(data) : {};
 
-    var date = +new Date();
-    for (var key in oData) {
-      if (oData[key].expiresTime <= date) {
-        delete oData[key];
+      var date = +new Date();
+      for (var key in _oData) {
+        if (_oData[key].expiresTime <= date) {
+          delete _oData[key];
+        }
       }
+    } catch (e) {
+      return {};
     }
     return oData;
   },
@@ -513,7 +517,7 @@ var storage = {
   clear: InertLocalFunc(function (key) {
     return key ? localStorage.removeItem(key) : localStorage.clear();
   }, function (key) {
-    return key ? utils.clearCookie(key) : document.cookie.split('; ').forEach(utils.clearCookie);
+    return key ? utils.clearCookie(key) : document.cookie.split("; ").forEach(utils.clearCookie);
   })
 };
 
@@ -533,14 +537,14 @@ var Localstroage$1 = function Localstroage(supperclass) {
 
 
     createClass(_class, [{
-      key: 'getItem',
+      key: "getItem",
       value: function getItem(key) {
         return storage.getItem(key);
       }
       // 设置一条localstorage或cookie
 
     }, {
-      key: 'setItem',
+      key: "setItem",
       value: function setItem(errorObj) {
         var _config = this.config;
         storage.setItem(this.config.errorLSSign, errorObj, _config.validTime, _config.maxErrorCookieNo);
@@ -550,7 +554,7 @@ var Localstroage$1 = function Localstroage(supperclass) {
       //清除ls/cookie 不传参数全部清空  传参之清当前ls/cookie
 
     }, {
-      key: 'clear',
+      key: "clear",
       value: function clear(key) {
         storage.clear(key);
       }
@@ -1059,68 +1063,65 @@ var GER = function (_localStorage) {
   createClass(GER, [{
     key: "rewriteError",
     value: function rewriteError() {
-      var _this2 = this,
-          _arguments = arguments;
-
-      var defaultOnerror = window.onerror || utils.noop;
-      window.onerror = function (msg, url, line, col, error) {
+      window.addEventListener('error', function (e) {
+        var msg = e.message;
+        var url = e.filename;
+        var line = e.lineno;
+        var col = e.colno;
+        var error = e.error;
         //有些浏览器没有col
         col = col || window.event && window.event.errorCharacter || 0;
-        if (!_this2.trigger("error", [msg, url, line, col, error])) {
+        if (!this.trigger("error", [msg, url, line, col, error])) {
           return false;
         }
         var reportMsg = msg;
         if (error && error.stack) {
-          reportMsg = _this2.handleErrorStack(error);
+          reportMsg = this.handleErrorStack(error);
         } else {
-          reportMsg = _this2._fixMsgByCaller(reportMsg, _arguments.callee.caller); // jshint ignore:line
+          reportMsg = this._fixMsgByCaller(reportMsg, arguments.callee.caller); // jshint ignore:line
         }
         if (utils.typeDecide(reportMsg, "Event")) {
           reportMsg += reportMsg.type ? "--" + reportMsg.type + "--" + (reportMsg.target ? reportMsg.target.tagName + "::" + reportMsg.target.src : "") : "";
         }
         if (reportMsg) {
-          _this2.error({
+          this.error({
             msg: reportMsg,
             rowNum: line,
             colNum: col,
             targetUrl: url,
             level: 4,
-            breadcrumbs: JSON.stringify(_this2.breadcrumbs)
+            breadcrumbs: JSON.stringify(this.breadcrumbs)
           });
         }
-        defaultOnerror.call(null, msg, url, line, col, error);
-      };
+      });
     }
   }, {
     key: "rewritePromiseError",
     value: function rewritePromiseError() {
-      var defaultUnhandledRejection = window.onunhandledrejection || utils.noop;
-      var self = this;
-      window.onunhandledrejection = function (error) {
-        if (!self.trigger("error", error)) {
+      window.addEventListener('unhandledrejection', function (error) {
+        if (!this.trigger('error', utils.toArray(arguments))) {
           return false;
         }
 
-        var msg = error.reason && error.reason.message || "";
+        var msg = error.reason && error.reason.message || error.reason;
         var stackObj = {};
         if (error.reason && error.reason.stack) {
-          msg = self.handleErrorStack(error.reason);
-          stackObj = self._parseErrorStack(error.reason.stack);
+          msg = this.handleErrorStack(error.reason);
+          stackObj = this._parseErrorStack(error.reason.stack);
         } else {
-          msg = self._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
+          msg = this._fixMsgByCaller(msg, arguments.callee.caller); // jshint ignore:line
         }
         if (msg) {
-          self.error({
+          this.error({
             msg: msg,
             rowNum: stackObj.line || 0,
             colNum: stackObj.col || 0,
-            targetUrl: stackObj.targetUrl || "",
+            targetUrl: stackObj.targetUrl || '',
             level: 4,
-            breadcrumbs: JSON.stringify(self.breadcrumbs)
+            breadcrumbs: JSON.stringify(this.breadcrumbs)
           });
         }
-        defaultUnhandledRejection.call(null, error);
-      };
+      });
     }
     //不存在stack的话，取调用栈信息
 
