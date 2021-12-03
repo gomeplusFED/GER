@@ -1,6 +1,6 @@
 {
   "name": "fe-error-report",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "error report js sdk",
   "main": "dist/ger.js",
   "directories": {
